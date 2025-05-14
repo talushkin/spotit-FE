@@ -1,0 +1,31 @@
+import { useParams } from "react-router-dom";
+import HomePage from "./HomePage";
+import data from "../data/recipes.json";
+
+export default function RecipeDetail() {
+  const { category, title } = useParams();
+
+  const pages = data?.site?.pages || [];
+
+  // Normalize category (lowercase) for comparison
+  const selectedCategoryData = pages.find(
+    (page) => page?.category?.toLowerCase() === category?.toLowerCase()
+  );
+
+  const selectedRecipeData = selectedCategoryData.itemPage.find(
+    (recipe) => recipe?.title?.toLowerCase() === title?.toLowerCase()
+  );
+
+  if (selectedCategoryData) {
+    console.log("Found category:", selectedCategoryData, selectedRecipeData);
+    return (
+      <HomePage
+        selectedCategory={selectedCategoryData}
+        selectedRecipe={selectedRecipeData}
+      />
+    );
+  } else {
+    console.warn("Category not found:", category);
+    return <div>Category not found.</div>;
+  }
+}
