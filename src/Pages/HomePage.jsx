@@ -1,5 +1,5 @@
 import "../styles.css";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import HeaderBar from "../components/HeaderBar";
 import NavMenu from "../components/NavMenu";
 import MainContent from "../components/MainContent";
@@ -57,7 +57,7 @@ export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
               onSelect={setSelected}
               data={recipes}
             />
-            {selected&& (<MainContent
+            {selected && (<MainContent
               selected={selected}
               selectedRecipe={selectedRecipe}
               addRecipe={newRecipe}

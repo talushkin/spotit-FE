@@ -1,3 +1,4 @@
+import React from "react";
 import { useParams } from "react-router-dom";
 import HomePage from "./HomePage";
 import data from "../data/recipes.json";
