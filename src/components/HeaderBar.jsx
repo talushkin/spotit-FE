@@ -16,11 +16,11 @@ export default function HeaderBar({
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const allRecipes = pages.flatMap((category) => category.itemPage);
+  const allRecipes = pages?.flatMap((category) => category.itemPage);
 
   const handleSearchChange = (event, value) => {
     setSearchQuery(value);
-    const filtered = allRecipes.filter((page) => {
+    const filtered = allRecipes?.filter((page) => {
       const title = page?.title?.toLowerCase() || "";
       const ingredients = page?.ingredients?.toLowerCase() || "";
       const description = page?.description?.toLowerCase() || "";

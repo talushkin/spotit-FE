@@ -1,93 +1,146 @@
 // utils/storage.js
+import axios from "axios";
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 
-const STORAGE_KEY = "recipesData";
-
-export const loadData = (defaultData) => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : defaultData;
+// Base URL and Authorization token
+const BASE_URL = "http://localhost:5000";
+const AUTH_HEADER = {
+  Authorization: `Bearer 1234`,
 };
 
-export const saveData = (data) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  console.log("saved", STORAGE_KEY, data);
+// Load categories and recipes from the server
+export const loadData = async () => {
+  try {
+    // Fetch categories and recipes using direct axios calls
+    const categoriesRes = await axios.get(`${BASE_URL}/api/categories`, {
+      headers: AUTH_HEADER,
+    });
+    const recipesRes = await axios.get(`${BASE_URL}/api/recipes`, {
+      headers: AUTH_HEADER,
+    });
+
+    console.log("categoriesRes", categoriesRes.data);
+    console.log("recipesRes", recipesRes.data);
+
+    // Construct the site object
+    const site = {
+      success: true,
+      message: "Data loaded successfully",
+      site: {
+        pages: categoriesRes.data.map((cat) => ({
+          category: cat.category || "unknown category",
+          _id: cat._id,
+          itemPage: recipesRes.data
+            .filter((r) => r.categoryId?._id === cat._id)
+            .map((r) => ({
+              title: r.title,
+              ingredients: r.ingredients.join(","),
+              preparation: r.preparation,
+              imageUrl: r.imageUrl,
+              createdAt: r.createdAt,
+              _id: r._id,
+            })),
+        })),
+      },
+    };
+    console.log("Data loaded successfully:", site);
+    return site;
+  } catch (err) {
+    console.error("Error loading data from API:", err);
+    return { site: { pages: [] } };
+  }
 };
 
-export const addRecipe = (recipe, category) => {
-  if (!recipe || !category) {
-    console.error("Category or recipe not sent!");
+// Add a new recipe
+export const addRecipe = async (recipe, category) => {
+  console.log("addRecipe api", recipe, category);
+  if (!recipe.title || !category?._id) {
+    console.error("Missing recipe or category ID");
     return null;
   }
-  const data = loadData();
-  console.log(data);
-  const index = data.site.pages.findIndex((p) => p.category === category);
-  if (index !== -1) {
-    const exists = data.site.pages[index].itemPage?.some(
-      (p) => p.title === recipe.title
+
+  try {
+    console.log("category", category);
+    console.log("recipe", recipe);
+    const res = await axios.post(
+      `${BASE_URL}/api/recipes`,
+      {
+        title: recipe.title,
+        ingredients: recipe.ingredients,
+        preparation: recipe.preparation,
+        categoryId: category._id,
+        categoryName: category.category,
+        imageUrl: recipe.imageUrl || "https://placehold.co/100x100?text=No+Image",
+      },
+      { headers: AUTH_HEADER }
     );
-    if (exists) {
-      console.warn(
-        `recipe "${recipe.title}" already exists on category:`,
-        category
-      );
-      return;
-    }
-    data.site.pages[index].itemPage.unshift({
-      ...recipe,
-      createdAt: new Date().toISOString().split("T")[0],
+    console.log("Recipe added:", res.data);
+    return res.data;
+  } catch (err) {
+    console.error("Error adding recipe:", err.response?.data || err.message);
+    return null;
+  }
+};
+
+// Delete a recipe
+export const delRecipe = async (recipeId) => {
+  try {
+    await axios.delete(`${BASE_URL}/api/recipes/${recipeId}`, {
+      headers: AUTH_HEADER,
     });
-    console.log(
-      `recipe "${recipe.title}" added succcessfully to category: ${category}`
-    );
-    saveData(data);
-  } else {
-    console.error("Category not found:", category);
+    console.log("Recipe deleted:", recipeId);
+  } catch (err) {
+    console.error("Error deleting recipe:", err.response?.data || err.message);
   }
 };
 
-export const delRecipe = (recipe, category) => {
-  const data = loadData();
-  const index = data.site.pages.findIndex((p) => p.category === category);
-  if (index !== -1) {
-    data.site.pages[index].itemPage = data.site.pages[index].itemPage.filter(
-      (item) => item.title !== recipe.title
-    );
-    saveData(data);
-  } else {
-    console.error("Category not found:", category);
-  }
-};
-
-export const addCategory = (category) => {
-  const data = loadData();
-  const exists = data.site.pages.some((p) => p.category === category);
-  if (exists) {
-    console.warn("Category already exists:", category);
+// Add a new category
+export const addCategory = async (categoryName) => {
+  if (!categoryName?.trim()) {
+    console.warn("Category name is empty");
     return;
   }
 
-  const newCategory = {
-    category: category.trim(),
-    priority: data.site.pages.length + 1,
-    createdAt: dayjs().format("DD-MM-YYYY"),
-    itemPage: [],
-  };
-  console.log("Category added successfully:", category);
-  data.site.pages.push(newCategory);
-  saveData(data);
+  try {
+    const res = await axios.post(
+      `${BASE_URL}/api/categories`,
+      { name: categoryName.trim() },
+      { headers: AUTH_HEADER }
+    );
+    console.log("Category added:", res.data);
+    return res.data;
+  } catch (err) {
+    console.error("Error adding category:", err.response?.data || err.message);
+    return null;
+  }
 };
 
-export const delCategory = (category) => {
-  const data = loadData();
-  data.site.pages = data.site.pages.filter((p) => p.category !== category);
-  saveData(data);
+// Delete a category
+export const delCategory = async (categoryId, categoryName) => {
+  try {
+    await axios.delete(`${BASE_URL}/api/categories/${categoryId}`, {
+      headers: AUTH_HEADER,
+    });
+    console.log("Category deleted:", categoryId, categoryName);
+  } catch (err) {
+    console.error("Error deleting category:", err.response?.data || err.message);
+  }
 };
 
-export const handleItemsChangeOrder = (newOrder) => {
-  const data = loadData();
-  data.site.pages = newOrder.map((item, index) => ({
-    ...item,
-    priority: index + 1,
-  }));
-  saveData(data);
+// Handle reordering of categories
+export const handleItemsChangeOrder = async (orderedCategories) => {
+  try {
+    const updates = orderedCategories.map((cat, index) =>
+      axios.put(
+        `${BASE_URL}/api/categories/${cat._id}`,
+        { priority: index + 1 },
+        { headers: AUTH_HEADER }
+      )
+    );
+    await Promise.all(updates);
+    console.log("Categories reordered successfully");
+  } catch (err) {
+    console.error("Error updating category order:", err.response?.data || err.message);
+  }
 };

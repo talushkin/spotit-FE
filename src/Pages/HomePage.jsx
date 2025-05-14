@@ -1,5 +1,4 @@
 import "../styles.css";
-import defaultData from "../data/recipes.json";
 import { useState, useEffect } from "react";
 import HeaderBar from "../components/HeaderBar";
 import NavMenu from "../components/NavMenu";
@@ -11,46 +10,33 @@ import GlobalStyle from "../components/GlobalStyle";
 import * as store from "../utils/storage"; // adjust path if needed
 
 export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
-  const [recipes, setRecipes] = useState(store.loadData(defaultData));
-  const [selected, setSelected] = useState(
-    selectedCategory || recipes.site.pages[0]
-  );
+  const [recipes, setRecipes] = useState(null); // Initialize with null
+  const [selected, setSelected] = useState(selectedCategory);
   const [menuOpen, setMenuOpen] = useState(false);
   const { i18n } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const addNewRecipe = {
-    image: "https://placehold.co/100x100?text=Paris",
-    title: "Parisian Steak",
-    description: "Juicy steak with a Paris-style herb sauce.",
-    ingredients: "Beef, butter, garlic, thyme, salt, pepper",
-    preparation: "Sear the meat on a hot pan, add butter and herbs. Serve hot.",
-    createdAt: "01-05-2025",
-  };
-  // Load dark mode preference from localStorage
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem("darkMode") === "enabled";
-    setIsDarkMode(savedDarkMode);
-    //store.addCategory("Desserts2");
-    console.log("recipes:", recipes);
-  }, []);
 
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    localStorage.setItem("darkMode", !isDarkMode ? "enabled" : "disabled");
-  };
-
-  // Update direction based on language
-  useEffect(() => {
-    document.body.dir =
-      i18n.language === "ar" || i18n.language === "en" ? "rtl" : "ltr";
-  }, [i18n.language]);
-
-  // Define the hamburger toggle as a const function
+  // Define the handleHamburgerClick function
   const handleHamburgerClick = () => {
-    console.log(!menuOpen ? "on" : "off");
-    setMenuOpen(!menuOpen); // Toggle the menu state
+    setMenuOpen((prevMenuOpen) => !prevMenuOpen); // Toggle the menu state
   };
+
+  // Fetch recipes data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await store.loadData(); // Call the async function
+      setRecipes(data); // Update state with the fetched data
+      setSelected(data?.site?.pages[0]); // Set the first page as selected
+    };
+    fetchData();
+  }, []); // Empty dependency array ensures this runs only once
+
+  useEffect(() => {
+    console.log("recipes", recipes); // Log recipes whenever it updates
+  }, [recipes]);
+
+  if (!recipes) return null; // Wait until recipes are loaded
+  if (!recipes?.site?.pages) return null;
 
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
@@ -60,9 +46,9 @@ export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
           <div className="TOP">
             <HeaderBar
               logo={recipes?.site?.header?.logo}
-              onHamburgerClick={handleHamburgerClick}
-              pages={recipes.site.pages}
-              toggleDarkMode={toggleDarkMode}
+              onHamburgerClick={handleHamburgerClick} // Pass the function here
+              pages={recipes?.site?.pages}
+              toggleDarkMode={() => setIsDarkMode((prev) => !prev)} // Toggle dark mode
               data={recipes}
             />
             <NavMenu
@@ -71,12 +57,12 @@ export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
               onSelect={setSelected}
               data={recipes}
             />
-            <MainContent
+            {selected&& (<MainContent
               selected={selected}
               selectedRecipe={selectedRecipe}
               addRecipe={newRecipe}
               data={recipes}
-            />
+            />)}
           </div>
         </div>
       </div>

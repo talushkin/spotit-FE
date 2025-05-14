@@ -5,12 +5,8 @@ import Button from "@mui/material/Button";
 import RecipeDialog from "./RecipeDialog";
 import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI"; // <-- Add this
-import {
-  loadData,
-  saveData,
-  addRecipe as utilsAddRecipe,
-  delRecipe as utilsDelRecipe,
-} from "../utils/storage";
+import * as storage from "../utils/storage";
+import { generateImage } from "./imageAI"; // Import the imageAI function
 
 export default function MainContent({
   data,
@@ -21,7 +17,7 @@ export default function MainContent({
   const { t, i18n } = useTranslation();
   const [page, setPage] = useState(1);
   const [translatedCategory, setTranslatedCategory] = useState(
-    selected.category
+    selected?.category
   );
   const itemsPerPage = 4;
   const [openView, setOpenView] = useState(selectedRecipe || false);
@@ -31,25 +27,26 @@ export default function MainContent({
   const [newRecipe, setNewRecipe] = useState({
     title: "",
     ingredients: "",
-    instructions: "",
+    preparation: "",
   });
 
   useEffect(() => {
     const translateCategory = async () => {
       if (i18n.language !== "he") {
         const translated = await translateDirectly(
-          selected.category,
+          selected?.category,
           i18n.language
         );
         setTranslatedCategory(translated);
       } else {
-        setTranslatedCategory(selected.category);
+        setTranslatedCategory(selected?.category);
       }
     };
     translateCategory();
-  }, [selected.category, i18n.language]);
+  }, [selected?.category, i18n.language]);
 
   const handleViewOpen = (item) => {
+    console.log("View:", item);
     setViewedItem(item);
     setOpenView(true);
   };
@@ -58,23 +55,47 @@ export default function MainContent({
     setOpenAdd(true);
   };
 
-  const handleAddRecipe = (recipe) => {
-    console.log("Add:", recipe, selected.category);
-    const category = selected.category;
-    // Check if editing an existing recipe
+  const handleAddRecipe = async (recipe) => {
+    console.log("Add:", recipe, selected);
+
+    const category = selected;
+
+    try {
+      // Generate an image based on the recipe title
+      const imageUrl = await generateImage(recipe.title);
+      console.log("Generated Image URL:", imageUrl);
+
+      // Use store.addRecipe to add the recipe with the generated image
+      const response = await storage.addRecipe(
+        {
+          title: recipe.title,
+          ingredients: recipe.ingredients.split(",").map((i) => i.trim()),
+          preparation: recipe.preparation,
+          categoryId: selected?._id,
+          imageUrl: imageUrl || "https://placehold.co/100x100?text=No+Image", // Fallback if image generation fails
+        },
+        category
+      );
+
+      console.log("Recipe added:", response);
+
+      // Optionally call a function to refresh recipes list from parent
+      // onRecipeAdded?.(response);
+    } catch (error) {
+      console.error("Error adding recipe:", error.response?.data || error.message);
+    }
+
     // Cleanup dialogs
-    setNewRecipe({ title: "", ingredients: "", instructions: "" });
+    setNewRecipe({ title: "", ingredients: "", preparation: "" });
     setOpenAdd(false);
     setOpenView(false);
-
-    // Inform parent to refresh data from storage
   };
 
-  const totalItems = selected.itemPage.length;
+  const totalItems = selected?.itemPage?.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const currentItems = selected.itemPage.slice(startIndex, endIndex);
+  const currentItems = selected?.itemPage?.slice(startIndex, endIndex);
 
   const handlePageChange = (event, value) => {
     setPage(value);
@@ -104,7 +125,7 @@ export default function MainContent({
         />
       )}
       <div className="row d-flex justify-content-center">
-        {currentItems.map((item, index) => (
+        {currentItems?.map((item, index) => (
           <div
             key={index}
             className="col-12 col-sm-8 col-md-6 col-lg-4 mb-4 d-flex justify-content-center"
@@ -123,17 +144,22 @@ export default function MainContent({
         onClose={() => setOpenView(false)}
         type="view"
         recipe={viewedItem}
-        onSave={handleAddRecipe}
+        onSave={(recipe) => {
+          console.log("update:", recipe);
+          handleAddRecipe(recipe)}} // Pass the recipe data to handleAddRecipe
         targetLang={i18n.language} // <-- Add this
       />
-      <RecipeDialog
-        open={openAdd}
-        onClose={() => setOpenAdd(false)}
-        type="add"
-        recipe={newRecipe}
-        onSave={handleAddRecipe}
-        targetLang={i18n.language} // <-- Add this
-      />
+<RecipeDialog
+  open={openAdd}
+  onClose={() => setOpenAdd(false)}
+  type="add"
+  recipe={newRecipe}
+  onSave={(recipe) => {
+    handleAddRecipe(recipe)
+  }
+} // Pass the recipe data to handleAddRecipe
+  targetLang={i18n.language}
+/>
     </div>
   );
 }

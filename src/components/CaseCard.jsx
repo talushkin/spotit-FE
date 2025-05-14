@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
+import dayjs from "dayjs";
+import * as storage from "../utils/storage";
 
 export default function CaseCard({ item, category, index }) {
   const { t, i18n } = useTranslation();
@@ -10,7 +12,7 @@ export default function CaseCard({ item, category, index }) {
     title: "",
     description: "",
   });
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("C:\\FE-code\\recipes\\BE\\images\\1747127810600-generated-image.png");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -44,9 +46,9 @@ export default function CaseCard({ item, category, index }) {
 
   return (
     <div className="case">
-      <img src={item.image || imageUrl} alt={translated.title || item.title} />
+      <img src={item.imageUrl || imageUrl} alt={translated.title || item.title} />
       <p>{index ? `${t("recipe")} ${index}` : ""}</p>
-      <p>{item.createdAt ? `${t("createdAt")}: ${item.createdAt}` : ""}</p>
+      <p>{item.createdAt? `${t("createdAt")}: ${dayjs(item.createdAt).format("DD-MM-YYYY") }` : ""}</p>
       <h2>{isLoading ? t("loading") : translated.title}</h2>
       <p>{isLoading ? "..." : translated.description}</p>
     </div>
