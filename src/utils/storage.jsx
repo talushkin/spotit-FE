@@ -105,7 +105,7 @@ export const addCategory = async (categoryName) => {
   try {
     const res = await axios.post(
       `${BASE_URL}/api/categories`,
-      { name: categoryName.trim() },
+      { category: categoryName.trim() },
       { headers: AUTH_HEADER }
     );
     console.log("Category added:", res.data);

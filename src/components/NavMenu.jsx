@@ -1,28 +1,44 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import NavItemList from "./NavItemList";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
 import { Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
 export default function NavMenu({ pages, onSelect, isOpen }) {
   const { t, i18n } = useTranslation();
   const [editCategories, setEditCategories] = useState(false);
+  const [reorder, setReorder] = useState(false);
   const [language, setLanguage] = useState(i18n.language || "en");
+
+  // Create a state for orderedPages that will be updated when the order changes
+  const [orderedPages, setOrderedPages] = useState(pages);
+
+  // Resync orderedPages when pages prop changes
+  useEffect(() => {
+    setOrderedPages(pages);
+  }, [pages]);
+
+  // Callback to update the order from NavItemList
+  const handleOrderChange = (newOrder) => {
+    console.log("New order received:", newOrder);
+    setOrderedPages(newOrder);
+  };
 
   const handleLanguageChange = (event) => {
     const newLang = event.target.value;
     setLanguage(newLang);
     i18n.changeLanguage(newLang);
-    document.body.dir = newLang === "he" || newLang === "ar" ? "rtl" : "ltr";
+    document.body.dir =
+      newLang === "he" || newLang === "ar" ? "rtl" : "ltr";
   };
 
   return (
-    <div className={`nav ${isOpen ? "show" : "hide"}`}>
+    <div className={`nav ${isOpen || reorder ? "show" : "hide"}`}>
       <NavItemList
         editCategories={editCategories}
-        pages={pages}
+        pages={orderedPages}
         onSelect={onSelect}
+        onOrderChange={handleOrderChange}
+        setReorder={setReorder}
       />
       <a href="#" onClick={() => setEditCategories(!editCategories)}>
         {t("changeOrder")}
@@ -30,9 +46,9 @@ export default function NavMenu({ pages, onSelect, isOpen }) {
       <Box
         mt={2}
         sx={{
-          backgroundColor: "lightblue", // Set the background color to light blue
-          padding: "1rem", // Optional: Add padding if needed
-          borderRadius: "8px", // Optional: Add border radius for rounded corners
+          backgroundColor: "lightblue",
+          padding: "1rem",
+          borderRadius: "8px",
         }}
       >
         <FormControl fullWidth>

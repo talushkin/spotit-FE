@@ -19,7 +19,7 @@ export const generateImage = async (text) => {
       },
     });
     console.log("image result:", res.data);
-    return res?.data?.imageUrl || null; // Return the translated text or fallback to original text
+    return res?.data?.s3Url||res?.data?.imageUrl || null; // Return the translated text or fallback to original text
   } catch (err) {
     console.error("Error creating image:", err.response?.data || err.message);
     return text; // Return original text on error
