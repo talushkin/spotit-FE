@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
-import * as store from "../utils/storage";
+import { useDispatch } from "react-redux";
+import { addCategoryThunk, reorderCategoriesThunk, delCategoryThunk } from "../store/dataSlice";
 
 import {
   DndContext,
@@ -20,8 +21,17 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 // A sortable item component using dnd‑kit
-function SortableItem({ item, index, onSelect, editCategories, translatedCategory, delCategoryCallback }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item._id });
+function SortableItem({
+  item,
+  index,
+  onSelect,
+  editCategories,
+  translatedCategory,
+  delCategoryCallback,
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: item._id,
+  });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -37,7 +47,26 @@ function SortableItem({ item, index, onSelect, editCategories, translatedCategor
     >
       <div className="flex items-center w-full">
         <div className="flex items-center mr-2">
-
+          {editCategories && (
+            <div className="flex items-center">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (
+                    window.confirm("Delete ? `" + translatedCategory + "`")
+                  ) {
+                    delCategoryCallback(item._id);
+                  }
+                }}
+                className="text-red-500 mr-1"
+              >
+                🗑
+              </button>
+              <span>☰</span>
+            </div>
+          )}
+        </div>
         <a
           href="#"
           onClick={(e) => {
@@ -46,32 +75,24 @@ function SortableItem({ item, index, onSelect, editCategories, translatedCategor
           }}
           className="flex-1"
           style={{ display: "flex", alignItems: "center" }}
-        >        {editCategories && (
-          <>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                if (window.confirm("Delete ? `"+translatedCategory+ "`")) {
-                  delCategoryCallback(item._id);
-                }
-              }}
-              className="text-red-500 mr-1"
-            >
-              🗑
-            </button>
-            <span>☰</span>
-          </>
-        )}
-          {editCategories && index + 1 + ". "}{translatedCategory || item.category}
+        >
+          {editCategories && index + 1 + ". "}
+          {translatedCategory || item.category}
         </a>
-      </div></div>
+      </div>
     </li>
   );
 }
 
-export default function NavItemList({ pages = [], onSelect, editCategories, onOrderChange, setReorder }) {
+export default function NavItemList({
+  pages = [],
+  onSelect,
+  editCategories,
+  onOrderChange,
+  setReorder,
+}) {
   const { t, i18n } = useTranslation();
+  const dispatch = useDispatch();
 
   // Initialize items with a unique _id and default priority 
   const initializeItems = () =>
@@ -113,12 +134,13 @@ export default function NavItemList({ pages = [], onSelect, editCategories, onOr
       itemPage: [],
       priority: items.length + 1,
     };
-    store.addCategory(inputValue.trim());
+    // Dispatch redux thunk to add category instead of calling storage directly
+    dispatch(addCategoryThunk(inputValue.trim()));
     setItems([...items, newItem]);
     setInputValue("");
   };
 
-  // Callback when drag ends: update order, set new priorities & persist
+  // Callback when drag ends: update order, set new priorities, persist via redux
   const handleDragEnd = (event) => {
     const { active, over } = event;
     console.log("Drag ended", active, over);
@@ -131,23 +153,17 @@ export default function NavItemList({ pages = [], onSelect, editCategories, onOr
       newItems = newItems.map((item, idx) => ({ ...item, priority: idx + 1 }));
       console.log("Moved items", newItems);
       setItems(newItems);
-      store.handleItemsChangeOrder(newItems);
+      dispatch(reorderCategoriesThunk(newItems));
       // Notify parent if needed
       onOrderChange && onOrderChange(newItems);
-      setReorder(true)
+      setReorder(true);
     }
   };
 
-  // Configure pointer sensor for drag activation
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    })
-  );
-
-  // Callback to delete an item from state
+  // Callback to delete an item from state using redux thunk
   const handleDelCategory = (id) => {
-      store.delCategory(id, translatedCategories.find((item) => item._id === id)?.category);
+    const categoryToDelete = items.find((i) => i._id === id)?.category || "";
+    dispatch(delCategoryThunk({ categoryId: id, categoryName: categoryToDelete }));
     setItems((prevItems) => prevItems.filter((i) => i._id !== id));
   };
 
@@ -156,7 +172,7 @@ export default function NavItemList({ pages = [], onSelect, editCategories, onOr
 
   return (
     <>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={sortedItems.map((item) => item._id)} strategy={verticalListSortingStrategy}>
           {sortedItems.map((item, index) => (
             <SortableItem

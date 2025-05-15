@@ -35,6 +35,9 @@ i18n
           addCategory: "Add Category",
           changeOrder: "Change Category Order",
           addRecipe: "Add Recipe",
+          editOrder: "Reorder",
+          delete: "Delete",
+          
           recipeName: "Recipe Name",
           ingredients: "Ingredients",
           preparation: "Preparation",

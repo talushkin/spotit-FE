@@ -4,39 +4,78 @@ import Pagination from "@mui/material/Pagination";
 import Button from "@mui/material/Button";
 import RecipeDialog from "./RecipeDialog";
 import { useTranslation } from "react-i18next";
-import { translateDirectly } from "./translateAI"; // <-- Add this
-import * as storage from "../utils/storage";
-import { generateImage } from "./imageAI"; // Import the imageAI function
+import { translateDirectly } from "./translateAI";
+import { generateImage } from "./imageAI";
+import { useDispatch } from "react-redux";
+import { addRecipeThunk, delRecipeThunk, updateRecipeThunk } from "../store/dataSlice";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
-export default function MainContent({
-  data,
-  selected,
-  selectedRecipe,
-  addRecipe,
-}) {
-  const { t, i18n } = useTranslation();
-  const [page, setPage] = useState(1);
-  const [translatedCategory, setTranslatedCategory] = useState(
-    selected?.category
+function SortableRecipe({ recipe, index, onSelect }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: recipe._id,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    marginBottom: "10px",
+    cursor: "grab",
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onClick={() => onSelect(recipe)}
+    >
+      <CaseCard item={recipe} category={recipe.category} index={index + 1} />
+    </div>
   );
+}
+
+export default function MainContent({ data, selected, selectedRecipe, addRecipe }) {
+  const { t, i18n } = useTranslation();
+  const dispatch = useDispatch();
+
+  const [page, setPage] = useState(1);
+  const [translatedCategory, setTranslatedCategory] = useState(selected?.category);
   const itemsPerPage = 4;
   const [openView, setOpenView] = useState(selectedRecipe || false);
   const [openAdd, setOpenAdd] = useState(addRecipe || false);
   const [viewedItem, setViewedItem] = useState(selectedRecipe || null);
-
   const [newRecipe, setNewRecipe] = useState({
     title: "",
     ingredients: "",
     preparation: "",
   });
+  const [editOrder, setEditOrder] = useState(false);
+
+  // Assume recipes are stored in selected.itemPage
+  const [recipes, setRecipes] = useState(selected?.itemPage || []);
 
   useEffect(() => {
+    setRecipes(selected?.itemPage || []);
+  }, [selected]);
+
+  // Translate category name
+  useEffect(() => {
     const translateCategory = async () => {
-      if (i18n.language !== "he") {
-        const translated = await translateDirectly(
-          selected?.category,
-          i18n.language
-        );
+      if (selected?.category && i18n.language !== "he") {
+        const translated = await translateDirectly(selected.category, i18n.language);
         setTranslatedCategory(translated);
       } else {
         setTranslatedCategory(selected?.category);
@@ -45,121 +84,177 @@ export default function MainContent({
     translateCategory();
   }, [selected?.category, i18n.language]);
 
-  const handleViewOpen = (item) => {
-    console.log("View:", item);
-    setViewedItem(item);
-    setOpenView(true);
-  };
+  // Sensors for DnD
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
-  const handleAddClick = () => {
-    setOpenAdd(true);
+  const handleRecipeDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over) return;
+    if (active.id !== over.id) {
+      const oldIndex = recipes.findIndex((r) => r._id === active.id);
+      const newIndex = recipes.findIndex((r) => r._id === over.id);
+      const newRecipes = arrayMove(recipes, oldIndex, newIndex);
+      setRecipes(newRecipes);
+      // Optionally: dispatch a thunk to persist this new order
+      // dispatch(reorderRecipesThunk(newRecipes));
+    }
   };
 
   const handleAddRecipe = async (recipe) => {
-    console.log("Add:", recipe, selected);
-
-    const category = selected;
+    let imageUrlGenerated;
+    try {
+      imageUrlGenerated = await generateImage(recipe.title);
+    } catch (error) {
+      imageUrlGenerated = "https://placehold.co/100x100?text=No+Image";
+    }
+    const newRecipeData = {
+      title: recipe.title,
+      ingredients: recipe.ingredients.split(",").map((i) => i.trim()),
+      preparation: recipe.preparation,
+      categoryId: selected?._id,
+      imageUrl: imageUrlGenerated,
+      _id: Date.now().toString(),
+      category: selected?.category,
+    };
 
     try {
-      // Generate an image based on the recipe title
-      const imageUrl = await generateImage(recipe.title);
-      console.log("Generated Image URL:", imageUrl);
-
-      // Use store.addRecipe to add the recipe with the generated image
-      const response = await storage.addRecipe(
-        {
-          title: recipe.title,
-          ingredients: recipe.ingredients.split(",").map((i) => i.trim()),
-          preparation: recipe.preparation,
-          categoryId: selected?._id,
-          imageUrl: imageUrl || "https://placehold.co/100x100?text=No+Image", // Fallback if image generation fails
-        },
-        category
-      );
-
+      const response = await dispatch(
+        addRecipeThunk({ recipe: newRecipeData, category: selected })
+      ).unwrap();
       console.log("Recipe added:", response);
-
-      // Optionally call a function to refresh recipes list from parent
-      // onRecipeAdded?.(response);
+      setRecipes([...recipes, newRecipeData]);
     } catch (error) {
       console.error("Error adding recipe:", error.response?.data || error.message);
     }
 
-    // Cleanup dialogs
     setNewRecipe({ title: "", ingredients: "", preparation: "" });
     setOpenAdd(false);
     setOpenView(false);
   };
 
-  const totalItems = selected?.itemPage?.length;
+  // New function: Update existing recipe
+  const handleUpdateRecipe = async (updatedRecipe) => {
+    updatedRecipe._id = viewedItem._id; // Ensure we have the correct ID
+    updatedRecipe.categoryId = selected?._id; // Ensure we have the correct category ID
+    updatedRecipe.category = selected?.category; // Ensure we have the correct category name
+    console.log("Updating recipe:", updatedRecipe);
+    try {
+      const response = await dispatch(updateRecipeThunk(updatedRecipe)).unwrap();
+      console.log("Recipe updated:", response);
+      setRecipes((prevRecipes) =>
+        prevRecipes.map((r) => (r._id === updatedRecipe._id ? updatedRecipe : r))
+      );
+      setOpenView(false);
+    } catch (error) {
+      console.error("Error updating recipe:", error.response?.data || error.message);
+    }
+  };
+
+  // Function to delete a recipe using Redux and update local state
+  const handleDeleteRecipe = (recipe) => {
+    if (window.confirm(t("Are you sure you want to delete this recipe? ID:" + recipe._id + " " + recipe.title))) {  
+      dispatch(delRecipeThunk(recipe._id))
+        .unwrap()
+        .then(() => {
+          setRecipes((prevRecipes) =>
+            prevRecipes.filter((r) => r._id !== recipe._id)
+          );
+        })
+        .catch((err) => {
+          console.error("Error deleting recipe:", err);
+        });
+    }
+  };
+
+  const totalItems = recipes.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const currentItems = selected?.itemPage?.slice(startIndex, endIndex);
+  const currentItems = recipes.slice(startIndex, endIndex);
 
   const handlePageChange = (event, value) => {
     setPage(value);
   };
 
+  const handleSelectRecipe = (recipe) => {
+    setViewedItem(recipe);
+    setOpenView(true);
+  };
+
   return (
     <div className="main">
-      <div
-        className="main-title"
-        style={{ display: "flex", alignItems: "center", gap: "1rem" }}
-      >
+      <div className="main-title" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         <h1>{translatedCategory}</h1>
-        <Button variant="contained" color="primary" onClick={handleAddClick}>
+        <Button variant="contained" color="primary" onClick={() => setOpenAdd(true)}>
           {t("addRecipe")}
+        </Button>
+        <Button variant="outlined" color="secondary" onClick={() => setEditOrder((prev) => !prev)}>
+          {t("editOrder")}
         </Button>
       </div>
       <p style={{ flexBasis: "100%", textAlign: "center" }}>
-        {t("page")} {page}, {t("recipes")} {startIndex + 1}–{endIndex} {t("of")}{" "}
-        {totalItems}
-      </p>{" "}
+        {t("page")} {page}, {t("recipes")} {startIndex + 1}–{endIndex} {t("of")} {totalItems}
+      </p>
       {totalPages > 1 && (
-        <Pagination
-          count={totalPages}
-          page={page}
-          onChange={handlePageChange}
-          color="primary"
-        />
+        <div className="pagination-container">
+          <Pagination count={totalPages} page={page} onChange={handlePageChange} color="primary" />
+        </div>
       )}
-      <div className="row d-flex justify-content-center">
-        {currentItems?.map((item, index) => (
-          <div
-            key={index}
-            className="col-12 col-sm-8 col-md-6 col-lg-4 mb-4 d-flex justify-content-center"
-            onClick={() => handleViewOpen(item)}
-          >
-            <CaseCard
-              index={startIndex + index + 1}
-              item={item}
-              category={selected.category}
-            />
-          </div>
-        ))}
-      </div>
+      {editOrder ? (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleRecipeDragEnd}>
+          <SortableContext items={recipes.map((r) => r._id)} strategy={verticalListSortingStrategy}>
+            {recipes.map((recipe, index) => (
+              <SortableRecipe key={recipe._id} recipe={recipe} index={index} onSelect={handleSelectRecipe} />
+            ))}
+          </SortableContext>
+        </DndContext>
+      ) : (
+        <div className="row d-flex justify-content-center">
+          {currentItems.map((item, index) => {
+            let colClass = "col-12 col-sm-8 col-md-6 col-lg-4";
+            if (currentItems.length === 1) {
+              colClass = "col-12";
+            } else if (currentItems.length === 2) {
+              colClass = "col-12 col-sm-6";
+            }
+            return (
+              <div
+                key={index}
+                className={`${colClass} mb-4 d-flex justify-content-center`}
+                onClick={() => handleSelectRecipe(item)}
+              >
+                <CaseCard index={startIndex + index + 1} item={item} category={selected?.category} />
+              </div>
+            );
+          })}
+        </div>
+      )}
       <RecipeDialog
         open={openView}
         onClose={() => setOpenView(false)}
         type="view"
         recipe={viewedItem}
         onSave={(recipe) => {
-          console.log("update:", recipe);
-          handleAddRecipe(recipe)}} // Pass the recipe data to handleAddRecipe
-        targetLang={i18n.language} // <-- Add this
+          // If editing an existing recipe, call update; otherwise, add new.
+          viewedItem?._id ? handleUpdateRecipe(recipe) : handleAddRecipe(recipe);
+        }}
+        onDelete={(recipe) => {
+          handleDeleteRecipe(recipe);
+        }}
+        targetLang={i18n.language}
       />
-<RecipeDialog
-  open={openAdd}
-  onClose={() => setOpenAdd(false)}
-  type="add"
-  recipe={newRecipe}
-  onSave={(recipe) => {
-    handleAddRecipe(recipe)
-  }
-} // Pass the recipe data to handleAddRecipe
-  targetLang={i18n.language}
-/>
+      <RecipeDialog
+        open={openAdd}
+        onClose={() => setOpenAdd(false)}
+        type="add"
+        recipe={newRecipe}
+        onSave={(recipe) => {
+          handleAddRecipe(recipe);
+        }}
+        targetLang={i18n.language}
+      />
     </div>
   );
 }

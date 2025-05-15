@@ -83,6 +83,32 @@ export const addRecipe = async (recipe, category) => {
   }
 };
 
+// Update a recipe
+export const updateRecipe = async (updatedRecipe) => {
+  if (!updatedRecipe._id) {
+    console.error("Missing recipe ID for update.");
+    return null;
+  }
+  try {
+    const res = await axios.put(
+      `${BASE_URL}/api/recipes/${updatedRecipe._id}`,
+      {
+        title: updatedRecipe.title,
+        ingredients: updatedRecipe.ingredients,
+        preparation: updatedRecipe.preparation,
+        imageUrl: updatedRecipe.imageUrl || "https://placehold.co/100x100?text=No+Image",
+        categoryId: updatedRecipe.categoryId,
+      },
+      { headers: AUTH_HEADER }
+    );
+    console.log("Recipe updated:", res.data);
+    return res.data;
+  } catch (err) {
+    console.error("Error updating recipe:", err.response?.data || err.message);
+    return null;
+  }
+};
+
 // Delete a recipe
 export const delRecipe = async (recipeId) => {
   try {
