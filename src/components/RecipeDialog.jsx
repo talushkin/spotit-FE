@@ -98,6 +98,7 @@ const RecipeDialog = ({
         ingredients: data.ingredients,
         preparation: data.preparation,
       }));
+      handleRecreateImage();
     } catch (error) {
       console.error("Error while filling recipe via AI:", error);
     }
@@ -112,7 +113,7 @@ const RecipeDialog = ({
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`,
         },
-        body: JSON.stringify({ text: editableRecipe.title, recipeId: recipe?._id }),
+        body: JSON.stringify({ text: editableRecipe.title+':'+editableRecipe.ingredients, recipeId: recipe?._id }),
       });
       if (!response.ok) {
         throw new Error("Failed to recreate image via AI");
