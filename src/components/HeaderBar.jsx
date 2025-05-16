@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Autocomplete, TextField } from "@mui/material";
 import RecipeDialog from "./RecipeDialog";
-import Button from "@mui/material/Button";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
-import Brightness4Icon from '@mui/icons-material/Brightness4';
 
 export default function HeaderBar({
   logo,
@@ -19,7 +17,7 @@ export default function HeaderBar({
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const allRecipes = pages?.flatMap((category) => category.itemPage);
-console.log("allRecipes", allRecipes);
+
   const handleSearchChange = (event, value) => {
     setSearchQuery(value);
     if (!value) {
@@ -47,20 +45,27 @@ console.log("allRecipes", allRecipes);
         style={{
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between", // space between hamburger and search
           padding: "8px",
-          gap: "16px",
+          flexWrap: "wrap",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
-        <button className="hamburger" onClick={onHamburgerClick}>
-          ☰
-        </button>
-        <div className="SiteName">{t("appName")}</div>
-        <div style={{ flex: 1 }}>
+        {/* Left side: Hamburger and Site Name */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <button className="hamburger" onClick={onHamburgerClick}>
+            ☰
+          </button>
+          <div className="SiteName">{t("appName")}</div>
+        </div>
+        {/* Right side: Search */}
+        <div style={{ flexShrink: 0 }}>
           <Autocomplete
             freeSolo
             options={filteredSuggestions.map((page) => page.title)}
             onInputChange={handleSearchChange}
-            onChange={handleSelect} // Open dialog on select
+            onChange={handleSelect}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -73,11 +78,11 @@ console.log("allRecipes", allRecipes);
               />
             )}
             sx={{
-              width: "200px",
+              minWidth: "200px" ,
               transition: "width 0.3s ease",
               backgroundImage: `url(${cardboardTexture})`,
-              backgroundSize: "cover",
-              backgroundRepeat: "no-repeat",
+              backgroundSize: "fit",
+              backgroundRepeat: "repeat",
               "& .MuiInputBase-input": {
                 color: "white",
               },
@@ -88,8 +93,7 @@ console.log("allRecipes", allRecipes);
                 width: "100%",
               },
               borderRadius: "8px",
-              padding: "0.5rem",
-              borderBlockStyle: "solid",
+              padding: "1rem",
               "& .MuiOutlinedInput-root": {
                 "& fieldset": {
                   borderColor: "black",
@@ -104,21 +108,6 @@ console.log("allRecipes", allRecipes);
             }}
           />
         </div>
-        <Button
-          variant="contained"
-          onClick={toggleDarkMode}
-          sx={{
-            backgroundColor: "Black",
-            "&:hover": {
-              backgroundColor: "White",
-            },
-          }}
-        >
-          <Brightness4Icon sx={{ color: "White",
-            "&:hover": {
-              color: "Black",
-            }, }} />
-        </Button>
       </div>
 
       {selectedRecipe && (

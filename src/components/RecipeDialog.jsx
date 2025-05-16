@@ -12,6 +12,9 @@ import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
 
+// Define base URL
+const BASE_URL = "https://be-tan-theta.vercel.app";
+
 const RecipeDialog = ({
   open,
   onClose,
@@ -81,11 +84,11 @@ const RecipeDialog = ({
   const handleFillAI = async () => {
     try {
       const authToken = localStorage.getItem("authToken") || "1234";
-      const response = await fetch("http://localhost:5000/api/ai/fill-recipe", {
+      const response = await fetch(`${BASE_URL}/api/ai/fill-recipe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({ title: editableRecipe.title, recipeId: recipe?._id }),
       });
@@ -108,11 +111,11 @@ const RecipeDialog = ({
   const handleRecreateImage = async () => {
     try {
       const authToken = localStorage.getItem("authToken") || "1234";
-      const response = await fetch("http://localhost:5000/api/ai/image", {
+      const response = await fetch(`${BASE_URL}/api/ai/image`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           text: editableRecipe.title + ":" + editableRecipe.ingredients,
@@ -143,16 +146,24 @@ const RecipeDialog = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} dir={isRTL ? "rtl" : "ltr"}>
-      <DialogTitle         style={{
-          //backgroundImage: `url(${cardboardTexture})`,
+    <Dialog
+      open={open}
+      onClose={onClose}
+      dir={isRTL ? "rtl" : "ltr"}
+      PaperProps={{
+        style: { maxWidth: "90%", width: "90%" },
+      }}
+    >
+      <DialogTitle
+        style={{
           backgroundColor: "#f7f1e3",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           textAlign: "center",
           justifyContent: "center",
-        }}>
+        }}
+      >
         {editableRecipe.title}
         <IconButton
           onClick={onClose}
@@ -162,8 +173,7 @@ const RecipeDialog = ({
         </IconButton>
       </DialogTitle>
       <DialogContent
-                style={{
-          //backgroundImage: `url(${cardboardTexture})`,
+        style={{
           backgroundColor: "#f7f1e3",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -171,7 +181,15 @@ const RecipeDialog = ({
         }}
       >
         {/* Container for image and recycle (pencil) icon */}
-        <div style={{ justifyContent:"center", justifyItems:"center" ,display: "flex", alignItems: "center", borderRadius: "8px" }}>
+        <div
+          style={{
+            justifyContent:"center",
+            justifyItems:"center",
+            display: "flex",
+            alignItems: "center",
+            borderRadius: "8px"
+          }}
+        >
           <img
             src={editableRecipe.imageUrl || "https://placehold.co/100x100?text=No+Image"}
             alt={editableRecipe.title}

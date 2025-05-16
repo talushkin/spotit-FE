@@ -42,17 +42,18 @@ export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <div className="App">
         <GlobalStyle />
-        <div>
+
           <div className="TOP">
             <HeaderBar
               logo={recipes?.site?.header?.logo}
               onHamburgerClick={handleHamburgerClick} // Pass the function here
               pages={recipes?.site?.pages}
-              toggleDarkMode={() => setIsDarkMode((prev) => !prev)} // Toggle dark mode
+              
               data={recipes}
             />
             <NavMenu
               pages={recipes?.site?.pages}
+              toggleDarkMode={() => setIsDarkMode((prev) => !prev)} // Toggle dark mode
               isOpen={menuOpen}
               onSelect={(item) => {
                 setSelected(item);
@@ -70,7 +71,6 @@ export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
               data={recipes}
             />)}
           </div>
-        </div>
       </div>
     </ThemeProvider>
   );

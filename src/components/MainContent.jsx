@@ -22,6 +22,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import Box from "@mui/material/Box";
 
 function SortableRecipe({ recipe, index, onSelect }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -32,6 +33,10 @@ function SortableRecipe({ recipe, index, onSelect }) {
     transition,
     marginBottom: "10px",
     cursor: "grab",
+    display: "flex",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: "1rem",
   };
 
   return (
@@ -74,7 +79,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
   // Translate category name
   useEffect(() => {
     const translateCategory = async () => {
-      if (selected?.category && i18n.language !== "he") {
+      if (selected?.category && i18n.language !== "en") {
         const translated = await translateDirectly(selected.category, i18n.language);
         setTranslatedCategory(translated);
       } else {
@@ -154,7 +159,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
 
   // Function to delete a recipe using Redux and update local state
   const handleDeleteRecipe = (recipe) => {
-    if (window.confirm(t("Are you sure you want to delete this recipe? ID:" + recipe._id + " " + recipe.title))) {  
+    if (window.confirm(t("Are you sure you want to delete this recipe? ID:" + recipe._id + " " + recipe.title))) {
       dispatch(delRecipeThunk(recipe._id))
         .unwrap()
         .then(() => {
@@ -185,14 +190,51 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
 
   return (
     <div className="main">
-      <div className="main-title" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-        {translatedCategory}
-        <Button variant="contained" color="primary" onClick={() => setOpenAdd(true)}>
-          {t("addRecipe")}
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={() => setEditOrder((prev) => !prev)}>
-          {t("editOrder")}
-        </Button>
+      <div
+        className="main-title"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: "1rem",
+        }}
+      >
+        <div style={{ flexBasis: "100%", textAlign: "center" }}>
+          {translatedCategory}
+        </div>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            width: "100%",
+            gap: "10px",
+            px: "10px", // Ensures 10px padding on each side on all devices
+            boxSizing: "border-box"
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setOpenAdd(true)}
+            sx={{
+              flexGrow: 1,
+              width: "100%",
+            }}
+          >
+            {t("addRecipe")}
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => setEditOrder((prev) => !prev)}
+            sx={{
+              flexGrow: 1,
+              width: "100%",
+            }}
+          >
+            {t("editOrder")}
+          </Button>
+        </Box>
       </div>
       <p style={{ flexBasis: "100%", textAlign: "center" }}>
         {t("page")} {page}, {t("recipes")} {startIndex + 1}–{endIndex} {t("of")} {totalItems}
