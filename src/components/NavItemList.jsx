@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
-import * as store from "../utils/storage";
+import { useDispatch } from "react-redux";
+import { addCategoryThunk, reorderCategoriesThunk, delCategoryThunk } from "../store/dataSlice";
 
-// dnd-kit imports
 import {
   DndContext,
   closestCenter,
@@ -20,52 +20,106 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// A sortable item component using dnd-kit
-function SortableItem({ item, index, onSelect, editCategories, translatedCategory, delCategoryCallback }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item._id });
+// A sortable item component using dnd‑kit
+function SortableItem({
+  item,
+  index,
+  onSelect,
+  editCategories,
+  translatedCategory,
+  delCategoryCallback,
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: item._id,
+  });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  // Compute recipe count for this category
+  const recipeCount = item.itemPage?.length || 0;
+
+  // Get the image URL from the first recipe in the category, if available
+  const firstRecipeImage =
+    item.itemPage && item.itemPage.length > 0
+      ? item.itemPage[0].imageUrl
+      : "https://placehold.co/40x40?text=No+Image";
+
   return (
-    <li ref={setNodeRef} style={style} className="flex items-center justify-start">
-      {editCategories && <span className="cursor-move" {...attributes} {...listeners}> ☰ </span>}
-      <a
-        href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          onSelect(item);
-        }}
-      >
-        {editCategories && index + 1 + "."}{" "}
-        {translatedCategory || item.category}
-      </a>
-      {editCategories && (
-        <button
+    <li
+      ref={setNodeRef}
+      style={style}
+      className="nav-item flex items-center justify-start" // added "nav-item" class
+      {...attributes}
+      {...listeners}
+    >
+      <div className="flex items-center w-full">
+        <div className="flex items-center mr-2">
+          {editCategories && (
+            <div className="flex items-center">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (window.confirm("Delete ? `" + translatedCategory + "`")) {
+                    delCategoryCallback(item._id);
+                  }
+                }}
+                className="text-red-500 mr-1"
+              >
+                🗑
+              </button>
+              <span>☰</span>
+            </div>
+          )}
+        </div>
+        <a
+          href="#"
           onClick={(e) => {
             e.preventDefault();
-            if (window.confirm("Are you sure?")) {
-              store.delCategory(item._id, item.category);
-              delCategoryCallback(item._id);
-            }
+            onSelect(item);
           }}
-          className="ml-2 text-red-500"
+          className="flex-1 flex items-center"
         >
-          🗑
-        </button>
-      )}
+          {editCategories && index + 1 + ". "}
+          <img
+            src={firstRecipeImage}
+            alt="Category"
+            style={{
+              width: "40px",
+              height: "40px",
+              marginRight: "0.5rem",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+          {translatedCategory || item.category}{" "}
+          <span style={{ color: "gray", marginLeft: "0.5rem" }}>
+            ({recipeCount})
+          </span>
+        </a>
+      </div>
     </li>
   );
 }
 
-export default function NavItemList({ pages = [], onSelect, editCategories }) {
+export default function NavItemList({
+  pages = [],
+  onSelect,
+  editCategories,
+  onOrderChange,
+  setReorder,
+}) {
   const { t, i18n } = useTranslation();
+  const dispatch = useDispatch();
 
-  // Initialize items with a unique _id
+  // Initialize items with a unique _id and default priority 
   const initializeItems = () =>
-    pages.map((item) => ({
+    pages.map((item, index) => ({
       ...item,
       _id: item._id || Date.now() + Math.random(),
+      priority: item.priority !== undefined ? item.priority : index + 1,
     }));
 
   const [items, setItems] = useState(initializeItems());
@@ -94,45 +148,53 @@ export default function NavItemList({ pages = [], onSelect, editCategories }) {
     setNewCat(false);
     if (inputValue.trim() === "") return;
     const newItem = {
-      _id: Date.now() + Math.random(), // assign a unique id
+      _id: Date.now() + Math.random(),
       category: inputValue.trim(),
       createdAt: dayjs().format("DD-MM-YYYY"),
       itemPage: [],
+      priority: items.length + 1,
     };
-    store.addCategory(inputValue.trim());
+    // Dispatch redux thunk to add category instead of calling storage directly
+    dispatch(addCategoryThunk(inputValue.trim()));
     setItems([...items, newItem]);
     setInputValue("");
   };
 
-  // Callback when drag ends: update order and persist
+  // Callback when drag ends: update order, set new priorities, persist via redux
   const handleDragEnd = (event) => {
     const { active, over } = event;
+    console.log("Drag ended", active, over);
+    if (!over) return; // No item was dropped
     if (active.id !== over.id) {
       const oldIndex = items.findIndex((item) => item._id === active.id);
       const newIndex = items.findIndex((item) => item._id === over.id);
-      const newItems = arrayMove(items, oldIndex, newIndex);
+      let newItems = arrayMove(items, oldIndex, newIndex);
+      // Update each item's priority based on its new index
+      newItems = newItems.map((item, idx) => ({ ...item, priority: idx + 1 }));
+      console.log("Moved items", newItems);
       setItems(newItems);
-      store.handleItemsChangeOrder(newItems);
+      dispatch(reorderCategoriesThunk(newItems));
+      // Notify parent if needed
+      onOrderChange && onOrderChange(newItems);
+      setReorder(true);
     }
   };
 
-  // Configure sensors for pointer activation
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    })
-  );
-
-  // Callback to delete an item from state
+  // Callback to delete an item from state using redux thunk
   const handleDelCategory = (id) => {
+    const categoryToDelete = items.find((i) => i._id === id)?.category || "";
+    dispatch(delCategoryThunk({ categoryId: id, categoryName: categoryToDelete }));
     setItems((prevItems) => prevItems.filter((i) => i._id !== id));
   };
 
+  // Sort items by priority before rendering
+  const sortedItems = [...items].sort((a, b) => a.priority - b.priority);
+
   return (
     <>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={items.map((item) => item._id)} strategy={verticalListSortingStrategy}>
-          {items.map((item, index) => (
+      <DndContext sensors={useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={sortedItems.map((item) => item._id)} strategy={verticalListSortingStrategy}>
+          {sortedItems.map((item, index) => (
             <SortableItem
               key={item._id}
               item={item}

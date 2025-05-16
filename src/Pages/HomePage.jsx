@@ -54,7 +54,13 @@ export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
             <NavMenu
               pages={recipes?.site?.pages}
               isOpen={menuOpen}
-              onSelect={setSelected}
+              onSelect={(item) => {
+                setSelected(item);
+                setMenuOpen(false); // Close the menu when a category is selected
+              }}
+              
+              editCategories={false}  
+
               data={recipes}
             />
             {selected && (<MainContent
