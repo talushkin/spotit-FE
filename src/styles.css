@@ -20,7 +20,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #333;
+  background-color: #024803;
   padding: 10px 20px;
   color: white;
 }
@@ -39,26 +39,45 @@ body {
 /* ======================= */
 
 .nav {
-  background-color: #333;
+    background-color: #f7f1e3;
   color: white;
-  padding: 20px;
-  display: none;
   flex-direction: column;
   gap: 15px;
   font-size: 20px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.5s ease, opacity 0.5s ease;
+}
+
+.nav.show {
+  /* Adjust max-height to suit your nav content */
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.nav.hide {
+  max-height: 0;
+  opacity: 0;
 }
 
 .nav a {
-  color: rgb(166, 168, 233);
+  color: rgb(9, 57, 7);
   text-decoration: none;
-  padding: 5px 0;
+  padding: 5px 20px;
 }
 
 .nav a:hover {
-  background-color: #575757;
-  padding-left: 10px;
+  background-color: #baf1ba;
 }
 
+.nav-item {
+  background-color: #f7f1e3;  /* light cream background */
+  color: darkgreen;           /* dark green text */
+  padding: 0.5rem;
+  border-radius: 5px;
+  margin-bottom: 0.5rem;
+}
 
 /* ======================= */
 /*        HAMBURGER        */
@@ -85,7 +104,7 @@ body {
 .sidebar {
   width: 200px;
   background-color: #333;
-  color: white;
+  color: #f7f1e3;
 }
 
 .content {
@@ -99,8 +118,9 @@ body {
 
 .main-title {
   width: 100%;
-  font-size: 24px;
+  font-size: 4rem;
   font-weight: bold;
+  color: rgb(3, 50, 3); /* Set text color to dark green */
   margin-bottom: 20px;
   border-bottom: 2px solid #bbb;
   padding-bottom: 10px;

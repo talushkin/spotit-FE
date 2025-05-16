@@ -37,11 +37,20 @@ function SortableItem({
     transition,
   };
 
+  // Compute recipe count for this category
+  const recipeCount = item.itemPage?.length || 0;
+
+  // Get the image URL from the first recipe in the category, if available
+  const firstRecipeImage =
+    item.itemPage && item.itemPage.length > 0
+      ? item.itemPage[0].imageUrl
+      : "https://placehold.co/40x40?text=No+Image";
+
   return (
     <li
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-start"
+      className="nav-item flex items-center justify-start" // added "nav-item" class
       {...attributes}
       {...listeners}
     >
@@ -53,9 +62,7 @@ function SortableItem({
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  if (
-                    window.confirm("Delete ? `" + translatedCategory + "`")
-                  ) {
+                  if (window.confirm("Delete ? `" + translatedCategory + "`")) {
                     delCategoryCallback(item._id);
                   }
                 }}
@@ -73,11 +80,24 @@ function SortableItem({
             e.preventDefault();
             onSelect(item);
           }}
-          className="flex-1"
-          style={{ display: "flex", alignItems: "center" }}
+          className="flex-1 flex items-center"
         >
           {editCategories && index + 1 + ". "}
-          {translatedCategory || item.category}
+          <img
+            src={firstRecipeImage}
+            alt="Category"
+            style={{
+              width: "40px",
+              height: "40px",
+              marginRight: "0.5rem",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+          {translatedCategory || item.category}{" "}
+          <span style={{ color: "gray", marginLeft: "0.5rem" }}>
+            ({recipeCount})
+          </span>
         </a>
       </div>
     </li>

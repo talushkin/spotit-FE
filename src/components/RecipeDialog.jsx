@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
+import cardboardTexture from "../assets/cardboard-texture.jpg";
 
 const RecipeDialog = ({
   open,
@@ -74,7 +75,7 @@ const RecipeDialog = ({
 
   const handleSave = () => {
     onSave(editableRecipe); // Pass the updated recipe to the onSave callback
-            onClose()
+    onClose();
   };
 
   const handleFillAI = async () => {
@@ -113,7 +114,10 @@ const RecipeDialog = ({
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`,
         },
-        body: JSON.stringify({ text: editableRecipe.title+':'+editableRecipe.ingredients, recipeId: recipe?._id }),
+        body: JSON.stringify({
+          text: editableRecipe.title + ":" + editableRecipe.ingredients,
+          recipeId: recipe?._id,
+        }),
       });
       if (!response.ok) {
         throw new Error("Failed to recreate image via AI");
@@ -130,27 +134,48 @@ const RecipeDialog = ({
   };
 
   const handleDelete = () => {
-      if (onDelete) {
-        editableRecipe._id = recipe?._id; // Ensure we have the correct ID
-        console.log("Deleting recipe:", editableRecipe);
-        onDelete(editableRecipe);
-        onClose()
-      }
-
+    if (onDelete) {
+      editableRecipe._id = recipe?._id; // Ensure correct ID
+      console.log("Deleting recipe:", editableRecipe);
+      onDelete(editableRecipe);
+      onClose();
+    }
   };
 
   return (
     <Dialog open={open} onClose={onClose} dir={isRTL ? "rtl" : "ltr"}>
-      <DialogTitle>
-        {type} recipe {recipe?._id ? recipe._id : ""}
+      <DialogTitle         style={{
+          //backgroundImage: `url(${cardboardTexture})`,
+          backgroundColor: "#f7f1e3",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          textAlign: "center",
+          justifyContent: "center",
+        }}>
+        {editableRecipe.title}
+        <IconButton
+          onClick={onClose}
+          style={{ position: "absolute", right: 8, top: 8 }}
+        >
+          <span style={{ fontSize: "24px", fontWeight: "bold" }}>×</span>
+        </IconButton>
       </DialogTitle>
-      <DialogContent>
+      <DialogContent
+                style={{
+          //backgroundImage: `url(${cardboardTexture})`,
+          backgroundColor: "#f7f1e3",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+        }}
+      >
         {/* Container for image and recycle (pencil) icon */}
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <div style={{ justifyContent:"center", justifyItems:"center" ,display: "flex", alignItems: "center", borderRadius: "8px" }}>
           <img
             src={editableRecipe.imageUrl || "https://placehold.co/100x100?text=No+Image"}
             alt={editableRecipe.title}
-            style={{ margin: "10px", maxWidth: "100%" }}
+            style={{ margin: "10px", maxWidth: "100%", borderRadius: "28px" }}
           />
           <IconButton onClick={handleRecreateImage} title={t("recreate image")}>
             {/* Using a simple pencil icon (Unicode) */}
@@ -184,7 +209,6 @@ const RecipeDialog = ({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t("close")}</Button>
         <Button onClick={handleFillAI} variant="contained" color="secondary">
           {t("fill AI")}
         </Button>

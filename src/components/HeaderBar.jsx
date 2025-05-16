@@ -1,9 +1,10 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Autocomplete, TextField } from "@mui/material";
-import RecipeDialog from "./RecipeDialog"; // Import the dialog
-import Button from "@mui/material/Button"; // Corrected import from MUI
+import RecipeDialog from "./RecipeDialog";
+import Button from "@mui/material/Button";
+import cardboardTexture from "../assets/cardboard-texture.jpg";
+import Brightness4Icon from '@mui/icons-material/Brightness4';
 
 export default function HeaderBar({
   logo,
@@ -18,20 +19,16 @@ export default function HeaderBar({
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const allRecipes = pages?.flatMap((category) => category.itemPage);
-
+console.log("allRecipes", allRecipes);
   const handleSearchChange = (event, value) => {
     setSearchQuery(value);
-    const filtered = allRecipes?.filter((page) => {
-      const title = page?.title?.toLowerCase() || "";
-      const ingredients = page?.ingredients?.toLowerCase() || "";
-      const description = page?.description?.toLowerCase() || "";
-
-      return (
-        title.includes(value.toLowerCase()) ||
-        ingredients.includes(value.toLowerCase()) ||
-        description.includes(value.toLowerCase())
-      );
-    });
+    if (!value) {
+      setFilteredSuggestions([]);
+      return;
+    }
+    const filtered = allRecipes?.filter((recipe) =>
+      recipe.title?.toLowerCase().includes(value.toLowerCase())
+    );
     setFilteredSuggestions(filtered);
   };
 
@@ -60,7 +57,6 @@ export default function HeaderBar({
         <div className="SiteName">{t("appName")}</div>
         <div style={{ flex: 1 }}>
           <Autocomplete
-            fullWidth
             freeSolo
             options={filteredSuggestions.map((page) => page.title)}
             onInputChange={handleSearchChange}
@@ -77,19 +73,54 @@ export default function HeaderBar({
               />
             )}
             sx={{
-              width: "100%",
-              backgroundColor: "lightblue", // Set the background color to light blue
-              padding: "1rem", // Optional: Add padding if needed
-              borderRadius: "8px", // Optional: Add border radius for rounded corners
+              width: "200px",
+              transition: "width 0.3s ease",
+              backgroundImage: `url(${cardboardTexture})`,
+              backgroundSize: "cover",
+              backgroundRepeat: "no-repeat",
+              "& .MuiInputBase-input": {
+                color: "white",
+              },
+              "& .MuiInputLabel-root": {
+                color: "white",
+              },
+              "&:focus-within": {
+                width: "100%",
+              },
+              borderRadius: "8px",
+              padding: "0.5rem",
+              borderBlockStyle: "solid",
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "black",
+                },
+                "&:hover fieldset": {
+                  borderColor: "black",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "black",
+                },
+              },
             }}
           />
         </div>
-        <Button variant="contained" color="primary" onClick={toggleDarkMode}>
-          Dark
+        <Button
+          variant="contained"
+          onClick={toggleDarkMode}
+          sx={{
+            backgroundColor: "Black",
+            "&:hover": {
+              backgroundColor: "White",
+            },
+          }}
+        >
+          <Brightness4Icon sx={{ color: "White",
+            "&:hover": {
+              color: "Black",
+            }, }} />
         </Button>
       </div>
 
-      {/* Show Recipe Dialog when recipe is selected */}
       {selectedRecipe && (
         <RecipeDialog
           open={dialogOpen}

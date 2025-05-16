@@ -186,7 +186,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
   return (
     <div className="main">
       <div className="main-title" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-        <h1>{translatedCategory}</h1>
+        {translatedCategory}
         <Button variant="contained" color="primary" onClick={() => setOpenAdd(true)}>
           {t("addRecipe")}
         </Button>
@@ -199,7 +199,17 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
       </p>
       {totalPages > 1 && (
         <div className="pagination-container">
-          <Pagination count={totalPages} page={page} onChange={handlePageChange} color="primary" />
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            sx={{
+              "& .MuiPaginationItem-root": {
+                color: (theme) => theme.mode === "dark" ? "white" : "inherit",
+              },
+            }}
+          />
         </div>
       )}
       {editOrder ? (

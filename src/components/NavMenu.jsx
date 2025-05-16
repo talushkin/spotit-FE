@@ -23,12 +23,19 @@ export default function NavMenu({ pages, onSelect, isOpen }) {
     setOrderedPages(newOrder);
   };
 
+  // New function to handle category selection, closing the nav afterward
+  const handleSelectCategory = (item) => {
+    onSelect(item);
+    // Close the navigation menu by resetting states
+    setEditCategories(false);
+    setReorder(false);
+  };
+
   const handleLanguageChange = (event) => {
     const newLang = event.target.value;
     setLanguage(newLang);
     i18n.changeLanguage(newLang);
-    document.body.dir =
-      newLang === "he" || newLang === "ar" ? "rtl" : "ltr";
+    document.body.dir = newLang === "he" || newLang === "ar" ? "rtl" : "ltr";
   };
 
   return (
@@ -36,7 +43,7 @@ export default function NavMenu({ pages, onSelect, isOpen }) {
       <NavItemList
         editCategories={editCategories}
         pages={orderedPages}
-        onSelect={onSelect}
+        onSelect={handleSelectCategory}
         onOrderChange={handleOrderChange}
         setReorder={setReorder}
       />
@@ -46,7 +53,8 @@ export default function NavMenu({ pages, onSelect, isOpen }) {
       <Box
         mt={2}
         sx={{
-          backgroundColor: "lightblue",
+          width: "400px", // Fixed width for language bar
+          backgroundColor: "#f7f1e3",
           padding: "1rem",
           borderRadius: "8px",
         }}

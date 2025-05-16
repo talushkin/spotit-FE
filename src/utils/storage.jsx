@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 
 // Base URL and Authorization token
-const BASE_URL = "http://localhost:5000";
+const LOCAL_URL = "http://localhost:5000";
+const BASE_URL = "https://be-tan-theta.vercel.app";
+
 const AUTH_HEADER = {
   Authorization: `Bearer 1234`,
 };
