@@ -49,7 +49,7 @@ const RecipeDialog = ({
   }, [recipe]);
 
   useEffect(() => {
-    if (!recipe || !targetLang || !open) return;
+    if (!recipe || !targetLang || !open || targetLang==='en') return;
     const doTranslate = async () => {
       try {
         const [title, ingredients, preparation] = await Promise.all([
