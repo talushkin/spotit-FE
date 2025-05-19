@@ -23,6 +23,7 @@ const RecipeDialog = ({
   recipe,
   targetLang = "en",
   type,
+  categoryName
 }) => {
   const { i18n, t } = useTranslation();
   const isRTL = i18n.language === "he" || i18n.language === "ar";
@@ -90,7 +91,7 @@ const RecipeDialog = ({
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify({ title: editableRecipe.title, recipeId: recipe?._id }),
+        body: JSON.stringify({ categoryName:categoryName , title: editableRecipe.title, recipeId: recipe?._id }),
       });
       if (!response.ok) {
         throw new Error("Failed to fill recipe via AI");
@@ -100,15 +101,16 @@ const RecipeDialog = ({
       setEditableRecipe((prev) => ({
         ...prev,
         ingredients: data.ingredients,
+        title: data.title || prev.title,
         preparation: data.preparation,
       }));
-      handleRecreateImage();
+      handleRecreateImage(data.title || editableRecipe.title);
     } catch (error) {
       console.error("Error while filling recipe via AI:", error);
     }
   };
 
-  const handleRecreateImage = async () => {
+  const handleRecreateImage = async (text=editableRecipe.title) => {
     try {
       const authToken = localStorage.getItem("authToken") || "1234";
       const response = await fetch(`${BASE_URL}/api/ai/image`, {
@@ -118,7 +120,7 @@ const RecipeDialog = ({
           Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          text: editableRecipe.title + ":" + editableRecipe.ingredients,
+          text: text,
           recipeId: recipe?._id,
         }),
       });

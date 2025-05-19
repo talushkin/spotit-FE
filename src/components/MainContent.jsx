@@ -108,18 +108,13 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
   };
 
   const handleAddRecipe = async (recipe) => {
-    let imageUrlGenerated;
-    try {
-      imageUrlGenerated = await generateImage(recipe.title);
-    } catch (error) {
-      imageUrlGenerated = "https://placehold.co/100x100?text=No+Image";
-    }
+console.log("Adding recipe:", recipe);
     const newRecipeData = {
-      title: recipe.title,
-      ingredients: recipe?.ingredients?.split(",").map((i) => i.trim()),
+      title: recipe?.title,
+      ingredients: recipe?.ingredients,
       preparation: recipe?.preparation,
       categoryId: selected?._id,
-      imageUrl: imageUrlGenerated,
+      imageUrl: recipe?.imageUrl || "",
       category: selected?.category,
     };
     console.log("Adding recipe:", newRecipeData);
@@ -289,6 +284,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
         recipe={viewedItem}
         onSave={(recipe) => {
           // If editing an existing recipe, call update; otherwise, add new.
+          console.log("Saving recipe:", recipe, viewedItem?._id);
           viewedItem?._id ? handleUpdateRecipe(recipe) : handleAddRecipe(recipe);
         }}
         onDelete={(recipe) => {
@@ -301,7 +297,9 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
         onClose={() => setOpenAdd(false)}
         type="add"
         recipe={newRecipe}
+        categoryName={selected?.category}
         onSave={(recipe) => {
+          console.log("Saving recipe:", recipe, viewedItem?._id);
           handleAddRecipe(recipe);
         }}
         targetLang={i18n.language}
