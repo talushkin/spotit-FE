@@ -116,14 +116,13 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
     }
     const newRecipeData = {
       title: recipe.title,
-      ingredients: recipe.ingredients.split(",").map((i) => i.trim()),
-      preparation: recipe.preparation,
+      ingredients: recipe?.ingredients?.split(",").map((i) => i.trim()),
+      preparation: recipe?.preparation,
       categoryId: selected?._id,
       imageUrl: imageUrlGenerated,
-      _id: Date.now().toString(),
       category: selected?.category,
     };
-
+    console.log("Adding recipe:", newRecipeData);
     try {
       const response = await dispatch(
         addRecipeThunk({ recipe: newRecipeData, category: selected })

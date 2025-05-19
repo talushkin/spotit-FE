@@ -3,20 +3,33 @@ import { useTranslation } from "react-i18next";
 import { Autocomplete, TextField } from "@mui/material";
 import RecipeDialog from "./RecipeDialog";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
-
+import
+  {FormControl,
+  InputLabel,
+  Select as MuiSelect,
+  MenuItem} from "@mui/material";
 export default function HeaderBar({
   logo,
   onHamburgerClick,
   pages,
   toggleDarkMode,
+  desktop
 }) {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [language, setLanguage] = useState(i18n.language);
 
   const allRecipes = pages?.flatMap((category) => category.itemPage);
+
+const handleLanguageChange = (event) => {
+    const newLang = event.target.value;
+    setLanguage(newLang);
+    i18n.changeLanguage(newLang);
+    document.body.dir = newLang === "he" || newLang === "ar" ? "rtl" : "ltr";
+  };
 
   const handleSearchChange = (event, value) => {
     setSearchQuery(value);
@@ -50,14 +63,54 @@ export default function HeaderBar({
           flexWrap: "wrap",
           width: "100%",
           boxSizing: "border-box",
+          maxHeight: "80px",
         }}
       >
         {/* Left side: Hamburger and Site Name */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <button className="hamburger" onClick={onHamburgerClick}>
+          {!desktop&& 
+          (<button className="hamburger" onClick={onHamburgerClick}>
             ☰
-          </button>
+          </button>)
+          }
           <div className="SiteName">{t("appName")}</div>
+        </div>
+
+        <div>
+                          <FormControl fullWidth>
+          <InputLabel id="language-select-label">
+            {t("language") || "Language"}
+          </InputLabel>
+          <MuiSelect
+            labelId="language-select-label"
+            value={language}
+            label={t("language") || "Language"}
+            onChange={handleLanguageChange}
+            sx={{
+              backgroundColor: "darkgreen",
+              color: "white",
+              "& .MuiSvgIcon-root": {
+                color: "white",
+              },
+            }}
+          >
+            <MenuItem value="en">English</MenuItem>
+            <MenuItem value="he">עברית</MenuItem>
+            <MenuItem value="fr">Français</MenuItem>
+            <MenuItem value="ar">العربية</MenuItem>
+            <MenuItem value="de">Deutsch</MenuItem>
+            <MenuItem value="es">Español</MenuItem>
+            <MenuItem value="it">Italiano</MenuItem>
+            <MenuItem value="pt">Português</MenuItem>
+            <MenuItem value="ru">Русский</MenuItem>
+            <MenuItem value="zh">中文</MenuItem>
+            <MenuItem value="ja">日本語</MenuItem>
+            <MenuItem value="ko">한국어</MenuItem>
+            <MenuItem value="pl">Polski</MenuItem>
+            <MenuItem value="tr">Türkçe</MenuItem>
+            <MenuItem value="nl">Nederlands</MenuItem>
+          </MuiSelect>
+        </FormControl>
         </div>
         {/* Right side: Search */}
         <div style={{ flexShrink: 0 }}>
@@ -72,16 +125,23 @@ export default function HeaderBar({
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e, e.target.value)}
                 label={t("search")}
-                placeholder="Enter recipe title, ingredients or keywords"
+                placeholder="keywords"
                 variant="outlined"
                 fullWidth
+                sx={{
+                  maxHeight: "60px",
+                  padding: "0rem",
+                }}
               />
             )}
             sx={{
-              minWidth: "200px" ,
+              maxHeight: "80px",
+              padding: "0px",
+              minWidth: "200px",
               transition: "width 0.3s ease",
               backgroundImage: `url(${cardboardTexture})`,
               backgroundSize: "fit",
+              padding: "0.1rem",
               backgroundRepeat: "repeat",
               "& .MuiInputBase-input": {
                 color: "white",
@@ -93,8 +153,8 @@ export default function HeaderBar({
                 width: "100%",
               },
               borderRadius: "8px",
-              padding: "1rem",
-              "& .MuiOutlinedInput-root": {
+              "&.MuiOutlinedInput-root": {
+                padding: "0 px",
                 "& fieldset": {
                   borderColor: "black",
                 },
@@ -104,6 +164,10 @@ export default function HeaderBar({
                 "&.Mui-focused fieldset": {
                   borderColor: "black",
                 },
+                "&.MuiOutlinedInput-root": {
+                  padding: "0 px",
+                }
+
               },
             }}
           />

@@ -21,12 +21,22 @@ body {
 /* ======================= */
 
 .HeaderBar {
+  top: 0;
+  z-index: 1000; /* Make sure it stays above other elements */
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #024803;
   /* padding: 10px 20px 10px 20px; */
   color: white;
+}
+
+/* Sticky only on mobile */
+@media (max-width: 768px) {
+  .HeaderBar {
+    position: sticky;
+    top: 0;
+  }
 }
 
 .SiteName {
@@ -43,22 +53,23 @@ body {
 /* ======================= */
 
 .nav {
-    background-color: #f7f1e3;
+  background-color: #f7f1e3;
   color: white;
   flex-direction: column;
   gap: 15px;
   font-size: 20px;
   overflow: hidden;
-  max-height: 0;
   opacity: 0;
+  padding-left: 0px;
   transition: max-height 0.5s ease, opacity 0.5s ease;
 }
 
-.nav.show {
-  /* Adjust max-height to suit your nav content */
-  max-height: 1000px;
-  opacity: 1;
-}
+  .nav.show {
+    display: flex; /* was block – change to flex */
+      opacity: 1;
+      max-height: 1000px;
+   
+  }
 
 .nav.hide {
   max-height: 0;
@@ -105,11 +116,6 @@ body {
   min-height: calc(100vh - 60px); /* subtract header height */
 }
 
-.sidebar {
-  width: 200px;
-  background-color: #333;
-  color: #f7f1e3;
-}
 
 .content {
   flex: 1;
@@ -182,13 +188,6 @@ body {
 /* ======================= */
 
 
-
-  .nav.show {
-    display: flex; /* was block – change to flex */
-    flex-direction: column; /* ensure vertical layout */
-    gap: 15px; /* optional: keep spacing */
-  }
-
   .hamburger {
     display: block;
   }
@@ -212,6 +211,28 @@ body {
 @media (max-width: 600px) {
   body {
     background-position: calc(0% - 180px) center, calc(100% + 180px) center;
+  }
+}
+
+@media (min-width: 768px) {
+  .HeaderBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .SiteName {
+    margin-bottom: 10px;
+  }
+
+  .nav {
+    width: 100%;
+    padding: 10px;
+    min-height: 100vh; /* Ensure it takes full height */
+  }
+
+  .nav a {
+    width: 100%;
+    text-align: center;
   }
 }
 
