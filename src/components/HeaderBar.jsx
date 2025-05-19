@@ -79,12 +79,10 @@ const handleLanguageChange = (event) => {
         <div>
                           <FormControl fullWidth>
           <InputLabel id="language-select-label">
-            {t("language") || "Language"}
           </InputLabel>
           <MuiSelect
             labelId="language-select-label"
             value={language}
-            label={t("language") || "Language"}
             onChange={handleLanguageChange}
             sx={{
               backgroundColor: "darkgreen",
