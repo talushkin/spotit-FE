@@ -58,7 +58,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
 
   const [page, setPage] = useState(1);
   const [translatedCategory, setTranslatedCategory] = useState(selected?.category);
-  const itemsPerPage = 4;
+  const itemsPerPage = 8;
   const [openView, setOpenView] = useState(selectedRecipe || false);
   const [openAdd, setOpenAdd] = useState(addRecipe || false);
   const [viewedItem, setViewedItem] = useState(selectedRecipe || null);
@@ -196,28 +196,20 @@ console.log("Adding recipe:", recipe);
         <div style={{ flexBasis: "100%", textAlign: "center" }}>
           {translatedCategory}
         </div>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            width: "100%",
-            gap: "10px",
-            px: "10px", // Ensures 10px padding on each side on all devices
-            boxSizing: "border-box"
-          }}
-        >
+
           <Button
             variant="contained"
             color="primary"
             onClick={() => setOpenAdd(true)}
             sx={{
-              flexGrow: 1,
-              width: "100%",
+              width: "400 px",
+              alignItems: "center",
+              textAlign: "center",
             }}
           >
             {t("addRecipe")}
           </Button>
-          <Button
+          {/* <Button
             variant="outlined"
             color="secondary"
             onClick={() => setEditOrder((prev) => !prev)}
@@ -227,8 +219,7 @@ console.log("Adding recipe:", recipe);
             }}
           >
             {t("editOrder")}
-          </Button>
-        </Box>
+          </Button> */} 
       </div>
       <p style={{ flexBasis: "100%", textAlign: "center" }}>
         {t("page")} {page}, {t("recipes")} {startIndex + 1}–{endIndex} {t("of")} {totalItems}
@@ -259,11 +250,11 @@ console.log("Adding recipe:", recipe);
       ) : (
         <div className="row d-flex justify-content-center">
           {currentItems.map((item, index) => {
-            let colClass = "col-12 col-sm-8 col-md-6 col-lg-4";
+            let colClass = "col-12 col-sm-8 col-md-6 col-lg-3";
             if (currentItems.length === 1) {
               colClass = "col-12";
             } else if (currentItems.length === 2) {
-              colClass = "col-12 col-sm-6";
+              colClass = "col-sm-6";
             }
             return (
               <div
