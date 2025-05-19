@@ -206,6 +206,12 @@ position: sticky;
   body {
     background-position: calc(0% - 180px) center, calc(100% + 180px) center;
   }
+  .TOP {
+
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* Make sure it stays above other elements */
+}
 }
 
   .SiteName {
