@@ -15,7 +15,7 @@ export default function RecipeCategory(props) {
   );
 
   if (selectedCategoryData) {
-    console.log("Found category:", selectedCategoryData);
+   // console.log("Found category:", selectedCategoryData);
     return <HomePage
       recipes={recipes}
       setRecipes={setRecipes}

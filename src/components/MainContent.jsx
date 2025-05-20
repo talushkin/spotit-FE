@@ -76,7 +76,9 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
   const [recipes, setRecipes] = useState(selected?.itemPage || []);
   const navigate = useNavigate();
 
-
+  useEffect(() => {
+    setOpenView(selectedRecipe)
+  }, [selectedRecipe]);
 
 
   useEffect(() => {
@@ -185,11 +187,12 @@ console.log("Adding recipe:", recipe);
   };
 
 const handleSelectRecipe = (recipe) => {
+  console.log("Selected recipe:", recipe);
   setViewedItem(recipe);
   setOpenView(true);
-  if (recipe && recipe.category && recipe.title) {
-    const categoryEncoded = encodeURIComponent(recipe.category);
-    const titleEncoded = encodeURIComponent(recipe.title);
+  if (recipe && selected?.category && recipe?.title) {
+    const categoryEncoded = encodeURIComponent(selected?.category);
+    const titleEncoded = encodeURIComponent(recipe?.title);
     navigate(`/recipes/${categoryEncoded}/${titleEncoded}`);
     console.log("Navigating to:", `/recipes/${categoryEncoded}/${titleEncoded}`);
   }

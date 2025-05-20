@@ -7,7 +7,7 @@ export default function RecipeDetail(props) {
   const { selectedRecipe, newRecipe, recipes, setRecipes, selected, setSelected } = props;
   const { category, title } = useParams();
 
-  const pages = data?.site?.pages || [];
+  const pages = recipes?.site?.pages || [];
 
   // Normalize category (lowercase) for comparison
   const selectedCategoryData = pages.find(
@@ -19,7 +19,12 @@ export default function RecipeDetail(props) {
   );
 
   if (selectedCategoryData) {
-    console.log("Found category:", selectedCategoryData, selectedRecipeData);
+   // console.log("Found category:", selectedCategoryData, selectedRecipeData);
+    if (!selectedRecipeData) {
+      console.warn("Recipe not found:", title);
+      return <div>Recipe not found.</div>;
+    }
+   // console.log("Found recipe:", selectedRecipeData);
     return (
       <HomePage
         selectedCategory={selectedCategoryData}
@@ -30,7 +35,7 @@ export default function RecipeDetail(props) {
         setSelected={setSelected}
       />
     );
-  } else {
+  }  else {
     console.warn("Category not found:", category);
     return <div>Category not found.</div>;
   }
