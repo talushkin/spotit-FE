@@ -58,9 +58,9 @@ export default function Main(props) {
           />
         </div>
         <div className="container-fluid ps-0 pe-0">
-          <div className="row flex-column flex-md-row">
+          <div className="flex-column flex-md-row ps-0 pe-0 row">
             <div
-              className="nav-menu col-12 col-md-auto ps-0"
+              className="nav-menu col-12 col-md-auto ps-0 pe-0"
               style={{ width: desktop ? '400px' : '100%' }}
             >
               <NavMenu
@@ -86,6 +86,7 @@ export default function Main(props) {
                   selectedRecipe={selectedRecipe}
                   addRecipe={newRecipe}
                   data={recipes}
+                  desktop={desktop}
                 />
               )}
             </div>

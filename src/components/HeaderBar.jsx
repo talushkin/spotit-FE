@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 import { Autocomplete, TextField } from "@mui/material";
 import RecipeDialog from "./RecipeDialog";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
-import
-  {FormControl,
-  InputLabel,
-  Select as MuiSelect,
-  MenuItem} from "@mui/material";
+import {
+FormControl,
+InputLabel,
+Select as MuiSelect,
+MenuItem
+} from "@mui/material";
 export default function HeaderBar({
   logo,
   onHamburgerClick,
@@ -24,7 +25,7 @@ export default function HeaderBar({
 
   const allRecipes = pages?.flatMap((category) => category.itemPage);
 
-const handleLanguageChange = (event) => {
+  const handleLanguageChange = (event) => {
     const newLang = event.target.value;
     setLanguage(newLang);
     i18n.changeLanguage(newLang);
@@ -60,7 +61,7 @@ const handleLanguageChange = (event) => {
           alignItems: "center",
           justifyContent: "space-between", // space between hamburger and search
           padding: "8px",
-          flexWrap: "wrap",
+          flexWrap: "nowrap",
           width: "100%",
           boxSizing: "border-box",
           maxHeight: "80px",
@@ -68,50 +69,50 @@ const handleLanguageChange = (event) => {
       >
         {/* Left side: Hamburger and Site Name */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {!desktop&& 
-          (<button className="hamburger" onClick={onHamburgerClick}>
-            ☰
-          </button>)
+          {!desktop &&
+            (<button className="hamburger" onClick={onHamburgerClick}>
+              ☰
+            </button>)
           }
           <div className="SiteName">{t("appName")}</div>
         </div>
 
         <div>
-                          <FormControl fullWidth>
-          <InputLabel id="language-select-label">
-          </InputLabel>
-          <MuiSelect
-            labelId="language-select-label"
-            value={language}
-            onChange={handleLanguageChange}
-            sx={{
-              backgroundColor: "darkgreen",
-              color: "white",
-              "& .MuiSvgIcon-root": {
+          <FormControl sx={{ maxWidth: "150px", marginRight: "8px" }}>
+            <InputLabel id="language-select-label">
+            </InputLabel>
+            <MuiSelect
+              labelId="language-select-label"
+              value={language}
+              onChange={handleLanguageChange}
+              sx={{
+                backgroundColor: "darkgreen",
                 color: "white",
-              },
-            }}
-          >
-            <MenuItem value="en">English</MenuItem>
-            <MenuItem value="he">עברית</MenuItem>
-            <MenuItem value="fr">Français</MenuItem>
-            <MenuItem value="ar">العربية</MenuItem>
-            <MenuItem value="de">Deutsch</MenuItem>
-            <MenuItem value="es">Español</MenuItem>
-            <MenuItem value="it">Italiano</MenuItem>
-            <MenuItem value="pt">Português</MenuItem>
-            <MenuItem value="ru">Русский</MenuItem>
-            <MenuItem value="zh">中文</MenuItem>
-            <MenuItem value="ja">日本語</MenuItem>
-            <MenuItem value="ko">한국어</MenuItem>
-            <MenuItem value="pl">Polski</MenuItem>
-            <MenuItem value="tr">Türkçe</MenuItem>
-            <MenuItem value="nl">Nederlands</MenuItem>
-          </MuiSelect>
-        </FormControl>
+                "& .MuiSvgIcon-root": {
+                  color: "white",
+                },
+              }}
+            >
+              <MenuItem value="en">English</MenuItem>
+              <MenuItem value="he">עברית</MenuItem>
+              <MenuItem value="fr">Français</MenuItem>
+              <MenuItem value="ar">العربية</MenuItem>
+              <MenuItem value="de">Deutsch</MenuItem>
+              <MenuItem value="es">Español</MenuItem>
+              <MenuItem value="it">Italiano</MenuItem>
+              <MenuItem value="pt">Português</MenuItem>
+              <MenuItem value="ru">Русский</MenuItem>
+              <MenuItem value="zh">中文</MenuItem>
+              <MenuItem value="ja">日本語</MenuItem>
+              <MenuItem value="ko">한국어</MenuItem>
+              <MenuItem value="pl">Polski</MenuItem>
+              <MenuItem value="tr">Türkçe</MenuItem>
+              <MenuItem value="nl">Nederlands</MenuItem>
+            </MuiSelect>
+          </FormControl>
         </div>
         {/* Right side: Search */}
-        <div style={{ flexShrink: 0 }}>
+        <div style={{ flex: 0, maxWidth: "400px" }}>
           <Autocomplete
             freeSolo
             options={filteredSuggestions.map((page) => page.title)}
@@ -127,15 +128,21 @@ const handleLanguageChange = (event) => {
                 variant="outlined"
                 fullWidth
                 sx={{
-                  maxHeight: "60px",
-                  padding: "0rem",
+                  minWidth: "150px",
+                  maxWidth: "400px",
+                  backgroundImage: `url(${cardboardTexture})`,
+                  backgroundSize: "cover",
+                  backgroundRepeat: "repeat",
+                  borderRadius: "8px",
+                  "& .MuiInputBase-input": { color: "white" },
+                  "& .MuiInputLabel-root": { color: "white" },
                 }}
               />
             )}
             sx={{
               maxHeight: "80px",
               padding: "0px",
-              minWidth: "200px",
+              maxWidth: "150px",
               transition: "width 0.3s ease",
               backgroundImage: `url(${cardboardTexture})`,
               backgroundSize: "fit",
@@ -179,7 +186,8 @@ const handleLanguageChange = (event) => {
           recipe={selectedRecipe}
           targetLang={i18n.language}
         />
-      )}
+      )},
+
     </>
   );
 }

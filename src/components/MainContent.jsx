@@ -55,7 +55,7 @@ function SortableRecipe({ recipe, index, onSelect }) {
   );
 }
 
-export default function MainContent({ data, selected, selectedRecipe, addRecipe }) {
+export default function MainContent({ data, selected, selectedRecipe, addRecipe, desktop }) {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
 
