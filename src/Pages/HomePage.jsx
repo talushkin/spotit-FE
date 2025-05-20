@@ -83,6 +83,7 @@ export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
                 toggleDarkMode={() => setIsDarkMode((prev) => !prev)}
                 isOpen={menuOpen || desktop}
                 onSelect={(item) => {
+                  console.log("Selected item:", item);
                   setSelected(item);
                   if (!desktop) setMenuOpen(false);
                 }}
