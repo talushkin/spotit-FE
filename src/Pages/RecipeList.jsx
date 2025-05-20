@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React from "react";
 import { useParams } from "react-router-dom";
 import HomePage from "./HomePage";
@@ -22,28 +21,3 @@ export default function RecipeDetail() {
     return <div>Category not found.</div>;
   }
 }
-=======
-import React from "react";
-import { useParams } from "react-router-dom";
-import HomePage from "./HomePage";
-import data from "../data/recipes.json";
-
-export default function RecipeDetail() {
-  const { category, title } = useParams();
-
-  const pages = data?.site?.pages || [];
-
-  // Normalize category (lowercase) for comparison
-  const selectedCategoryData = pages.find(
-    (page) => page?.category?.toLowerCase() === category?.toLowerCase()
-  );
-
-  if (selectedCategoryData) {
-    console.log("Found category:", selectedCategoryData);
-    return <HomePage selectedCategory={selectedCategoryData} />;
-  } else {
-    console.warn("Category not found:", category);
-    return <div>Category not found.</div>;
-  }
-}
->>>>>>> a9ba5b25307e1e51fb4bcd3920e822172e771c75
