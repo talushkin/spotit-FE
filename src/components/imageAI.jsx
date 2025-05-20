@@ -10,7 +10,7 @@ export const generateImage = async (text) => {
 
   try {
     console.log("Requesting image for:", text);
-    const res = await axios.post("http://localhost:5000/api/ai/image", {
+    const res = await axios.post("https://be-tan-theta.vercel.app/api/ai/image", {
       text: text
     }, {
       headers: {

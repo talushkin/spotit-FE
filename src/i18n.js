@@ -31,13 +31,12 @@ i18n
     resources: {
       en: {
         translation: {
-          appName: "Recipes App",
+          appName: "Recipes",
           addCategory: "Add Category",
           changeOrder: "Change Category Order",
           addRecipe: "Add Recipe",
           editOrder: "Reorder",
           delete: "Delete",
-          
           recipeName: "Recipe Name",
           ingredients: "Ingredients",
           preparation: "Preparation",
@@ -49,12 +48,12 @@ i18n
           of: "of",
           recipes: "Recipes",
           loading: "Translating...",
-          search: "Search", // Added search key here
+          search: "Search",
         },
       },
       he: {
         translation: {
-          appName: "מתכונים בעמ",
+          appName: "מתכונים",
           addCategory: "הוסף סוג",
           changeOrder: "שנה סדר סוגים",
           addRecipe: "הוסף מתכון",
@@ -69,12 +68,12 @@ i18n
           of: "מתוך",
           recipes: "מתכונים",
           loading: "מתרגם...",
-          search: "חיפוש", // Added search key here
+          search: "חיפוש",
         },
       },
       fr: {
         translation: {
-          appName: "Application de recettes",
+          appName: "Recettes",
           addCategory: "Ajouter une catégorie",
           changeOrder: "Changer l'ordre des catégories",
           addRecipe: "Ajouter une recette",
@@ -89,12 +88,12 @@ i18n
           of: "de",
           recipes: "recettes",
           loading: "Traduction...",
-          search: "Rechercher", // Added search key here
+          search: "Rechercher",
         },
       },
       ar: {
         translation: {
-          appName: "تطبيق الوصفات",
+          appName: "وصفات",
           addCategory: "أضف فئة",
           changeOrder: "تغيير ترتيب الفئات",
           addRecipe: "أضف وصفة",
@@ -109,12 +108,12 @@ i18n
           of: "من",
           recipes: "وصفات",
           loading: "جارٍ الترجمة...",
-          search: "بحث", // Added search key here
+          search: "بحث",
         },
       },
       de: {
         translation: {
-          appName: "Rezepte App",
+          appName: "Rezepte",
           addCategory: "Kategorie hinzufügen",
           changeOrder: "Kategorie-Reihenfolge ändern",
           addRecipe: "Rezept hinzufügen",
@@ -129,12 +128,12 @@ i18n
           of: "von",
           recipes: "Rezepte",
           loading: "Übersetzen...",
-          search: "Suche", // Added search key here
+          search: "Suche",
         },
       },
       es: {
         translation: {
-          appName: "Aplicación de recetas",
+          appName: "Recetas",
           addCategory: "Agregar categoría",
           changeOrder: "Cambiar orden de categorías",
           addRecipe: "Agregar receta",
@@ -149,12 +148,12 @@ i18n
           of: "de",
           recipes: "recetas",
           loading: "Traduciendo...",
-          search: "Buscar", // Added search key here
+          search: "Buscar",
         },
       },
       it: {
         translation: {
-          appName: "App di ricette",
+          appName: "Ricette",
           addCategory: "Aggiungi categoria",
           changeOrder: "Cambia ordine categorie",
           addRecipe: "Aggiungi ricetta",
@@ -169,12 +168,12 @@ i18n
           of: "di",
           recipes: "ricette",
           loading: "Traduzione...",
-          search: "Cerca", // Added search key here
+          search: "Cerca",
         },
       },
       pt: {
         translation: {
-          appName: "Aplicativo de Receitas",
+          appName: "Receitas",
           addCategory: "Adicionar categoria",
           changeOrder: "Alterar ordem das categorias",
           addRecipe: "Adicionar receita",
@@ -189,12 +188,12 @@ i18n
           of: "de",
           recipes: "receitas",
           loading: "Traduzindo...",
-          search: "Procurar", // Added search key here
+          search: "Procurar",
         },
       },
       ru: {
         translation: {
-          appName: "Приложение рецептов",
+          appName: "Рецепты",
           addCategory: "Добавить категорию",
           changeOrder: "Изменить порядок категорий",
           addRecipe: "Добавить рецепт",
@@ -209,12 +208,12 @@ i18n
           of: "из",
           recipes: "рецепты",
           loading: "Перевод...",
-          search: "Поиск", // Added search key here
+          search: "Поиск",
         },
       },
       zh: {
         translation: {
-          appName: "食谱应用",
+          appName: "食谱",
           addCategory: "添加类别",
           changeOrder: "更改类别顺序",
           addRecipe: "添加食谱",
@@ -229,12 +228,12 @@ i18n
           of: "的",
           recipes: "食谱",
           loading: "翻译中...",
-          search: "搜索", // Added search key here
+          search: "搜索",
         },
       },
       ja: {
         translation: {
-          appName: "レシピアプリ",
+          appName: "レシピ",
           addCategory: "カテゴリを追加",
           changeOrder: "カテゴリの順序を変更",
           addRecipe: "レシピを追加",
@@ -249,12 +248,12 @@ i18n
           of: "の",
           recipes: "レシピ",
           loading: "翻訳中...",
-          search: "検索", // Added search key here
+          search: "検索",
         },
       },
       ko: {
         translation: {
-          appName: "레시피 앱",
+          appName: "레시피",
           addCategory: "카테고리 추가",
           changeOrder: "카테고리 순서 변경",
           addRecipe: "레시피 추가",
@@ -269,12 +268,12 @@ i18n
           of: "중",
           recipes: "레시피",
           loading: "번역 중...",
-          search: "검색", // Added search key here
+          search: "검색",
         },
       },
       pl: {
         translation: {
-          appName: "Aplikacja z przepisami",
+          appName: "Przepisy",
           addCategory: "Dodaj kategorię",
           changeOrder: "Zmień kolejność kategorii",
           addRecipe: "Dodaj przepis",
@@ -289,12 +288,12 @@ i18n
           of: "z",
           recipes: "przepisy",
           loading: "Tłumaczenie...",
-          search: "Szukaj", // Added search key here
+          search: "Szukaj",
         },
       },
       tr: {
         translation: {
-          appName: "Tarif Uygulaması",
+          appName: "Tarifler",
           addCategory: "Kategori Ekle",
           changeOrder: "Kategori Sırasını Değiştir",
           addRecipe: "Tarif Ekle",
@@ -309,12 +308,12 @@ i18n
           of: "İçin",
           recipes: "Tarifler",
           loading: "Çevriliyor...",
-          search: "Ara", // Added search key here
+          search: "Ara",
         },
       },
       nl: {
         translation: {
-          appName: "Recepten App",
+          appName: "Recepten",
           addCategory: "Categorie toevoegen",
           changeOrder: "Wijzig volgorde van categorieën",
           addRecipe: "Voeg recept toe",
@@ -329,7 +328,7 @@ i18n
           of: "van",
           recipes: "recepten",
           loading: "Vertalen...",
-          search: "Zoeken", // Added search key here
+          search: "Zoeken",
         },
       },
     },

@@ -12,6 +12,9 @@ import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
 
+// Define base URL
+const BASE_URL = "https://be-tan-theta.vercel.app";
+
 const RecipeDialog = ({
   open,
   onClose,
@@ -20,6 +23,7 @@ const RecipeDialog = ({
   recipe,
   targetLang = "en",
   type,
+  categoryName
 }) => {
   const { i18n, t } = useTranslation();
   const isRTL = i18n.language === "he" || i18n.language === "ar";
@@ -45,7 +49,7 @@ const RecipeDialog = ({
   }, [recipe]);
 
   useEffect(() => {
-    if (!recipe || !targetLang || !open) return;
+    if (!recipe || !targetLang || !open || targetLang==='en') return;
     const doTranslate = async () => {
       try {
         const [title, ingredients, preparation] = await Promise.all([
@@ -81,13 +85,13 @@ const RecipeDialog = ({
   const handleFillAI = async () => {
     try {
       const authToken = localStorage.getItem("authToken") || "1234";
-      const response = await fetch("http://localhost:5000/api/ai/fill-recipe", {
+      const response = await fetch(`${BASE_URL}/api/ai/fill-recipe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify({ title: editableRecipe.title, recipeId: recipe?._id }),
+        body: JSON.stringify({ categoryName:categoryName , title: editableRecipe.title, recipeId: recipe?._id }),
       });
       if (!response.ok) {
         throw new Error("Failed to fill recipe via AI");
@@ -97,25 +101,26 @@ const RecipeDialog = ({
       setEditableRecipe((prev) => ({
         ...prev,
         ingredients: data.ingredients,
+        title: data.title || prev.title,
         preparation: data.preparation,
       }));
-      handleRecreateImage();
+      handleRecreateImage(data.title || editableRecipe.title);
     } catch (error) {
       console.error("Error while filling recipe via AI:", error);
     }
   };
 
-  const handleRecreateImage = async () => {
+  const handleRecreateImage = async (text=editableRecipe.title) => {
     try {
       const authToken = localStorage.getItem("authToken") || "1234";
-      const response = await fetch("http://localhost:5000/api/ai/image", {
+      const response = await fetch(`${BASE_URL}/api/ai/image`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          text: editableRecipe.title + ":" + editableRecipe.ingredients,
+          text: text,
           recipeId: recipe?._id,
         }),
       });
@@ -143,16 +148,24 @@ const RecipeDialog = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} dir={isRTL ? "rtl" : "ltr"}>
-      <DialogTitle         style={{
-          //backgroundImage: `url(${cardboardTexture})`,
+    <Dialog
+      open={open}
+      onClose={onClose}
+      dir={isRTL ? "rtl" : "ltr"}
+      PaperProps={{
+        style: { maxWidth: "90%", width: "90%" },
+      }}
+    >
+      <DialogTitle
+        style={{
           backgroundColor: "#f7f1e3",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           textAlign: "center",
           justifyContent: "center",
-        }}>
+        }}
+      >
         {editableRecipe.title}
         <IconButton
           onClick={onClose}
@@ -162,8 +175,7 @@ const RecipeDialog = ({
         </IconButton>
       </DialogTitle>
       <DialogContent
-                style={{
-          //backgroundImage: `url(${cardboardTexture})`,
+        style={{
           backgroundColor: "#f7f1e3",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -171,7 +183,15 @@ const RecipeDialog = ({
         }}
       >
         {/* Container for image and recycle (pencil) icon */}
-        <div style={{ justifyContent:"center", justifyItems:"center" ,display: "flex", alignItems: "center", borderRadius: "8px" }}>
+        <div
+          style={{
+            justifyContent:"center",
+            justifyItems:"center",
+            display: "flex",
+            alignItems: "center",
+            borderRadius: "8px"
+          }}
+        >
           <img
             src={editableRecipe.imageUrl || "https://placehold.co/100x100?text=No+Image"}
             alt={editableRecipe.title}

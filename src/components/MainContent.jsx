@@ -22,6 +22,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import Box from "@mui/material/Box";
 
 function SortableRecipe({ recipe, index, onSelect }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -32,6 +33,10 @@ function SortableRecipe({ recipe, index, onSelect }) {
     transition,
     marginBottom: "10px",
     cursor: "grab",
+    display: "flex",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: "1rem",
   };
 
   return (
@@ -53,7 +58,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
 
   const [page, setPage] = useState(1);
   const [translatedCategory, setTranslatedCategory] = useState(selected?.category);
-  const itemsPerPage = 4;
+  const itemsPerPage = 8;
   const [openView, setOpenView] = useState(selectedRecipe || false);
   const [openAdd, setOpenAdd] = useState(addRecipe || false);
   const [viewedItem, setViewedItem] = useState(selectedRecipe || null);
@@ -74,7 +79,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
   // Translate category name
   useEffect(() => {
     const translateCategory = async () => {
-      if (selected?.category && i18n.language !== "he") {
+      if (selected?.category && i18n.language !== "en") {
         const translated = await translateDirectly(selected.category, i18n.language);
         setTranslatedCategory(translated);
       } else {
@@ -103,22 +108,16 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
   };
 
   const handleAddRecipe = async (recipe) => {
-    let imageUrlGenerated;
-    try {
-      imageUrlGenerated = await generateImage(recipe.title);
-    } catch (error) {
-      imageUrlGenerated = "https://placehold.co/100x100?text=No+Image";
-    }
+console.log("Adding recipe:", recipe);
     const newRecipeData = {
-      title: recipe.title,
-      ingredients: recipe.ingredients.split(",").map((i) => i.trim()),
-      preparation: recipe.preparation,
+      title: recipe?.title,
+      ingredients: recipe?.ingredients,
+      preparation: recipe?.preparation,
       categoryId: selected?._id,
-      imageUrl: imageUrlGenerated,
-      _id: Date.now().toString(),
+      imageUrl: recipe?.imageUrl || "",
       category: selected?.category,
     };
-
+    console.log("Adding recipe:", newRecipeData);
     try {
       const response = await dispatch(
         addRecipeThunk({ recipe: newRecipeData, category: selected })
@@ -154,7 +153,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
 
   // Function to delete a recipe using Redux and update local state
   const handleDeleteRecipe = (recipe) => {
-    if (window.confirm(t("Are you sure you want to delete this recipe? ID:" + recipe._id + " " + recipe.title))) {  
+    if (window.confirm(t("Are you sure you want to delete this recipe? ID:" + recipe._id + " " + recipe.title))) {
       dispatch(delRecipeThunk(recipe._id))
         .unwrap()
         .then(() => {
@@ -185,14 +184,42 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
 
   return (
     <div className="main">
-      <div className="main-title" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-        {translatedCategory}
-        <Button variant="contained" color="primary" onClick={() => setOpenAdd(true)}>
-          {t("addRecipe")}
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={() => setEditOrder((prev) => !prev)}>
-          {t("editOrder")}
-        </Button>
+      <div
+        className="main-title"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: "1rem",
+        }}
+      >
+        <div style={{ flexBasis: "100%", textAlign: "center" }}>
+          {translatedCategory}
+        </div>
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setOpenAdd(true)}
+            sx={{
+              width: "400 px",
+              alignItems: "center",
+              textAlign: "center",
+            }}
+          >
+            {t("addRecipe")}
+          </Button>
+          {/* <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => setEditOrder((prev) => !prev)}
+            sx={{
+              flexGrow: 1,
+              width: "100%",
+            }}
+          >
+            {t("editOrder")}
+          </Button> */} 
       </div>
       <p style={{ flexBasis: "100%", textAlign: "center" }}>
         {t("page")} {page}, {t("recipes")} {startIndex + 1}–{endIndex} {t("of")} {totalItems}
@@ -223,11 +250,11 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
       ) : (
         <div className="row d-flex justify-content-center">
           {currentItems.map((item, index) => {
-            let colClass = "col-12 col-sm-8 col-md-6 col-lg-4";
+            let colClass = "col-12 col-sm-8 col-md-6 col-lg-3";
             if (currentItems.length === 1) {
               colClass = "col-12";
             } else if (currentItems.length === 2) {
-              colClass = "col-12 col-sm-6";
+              colClass = "col-sm-6";
             }
             return (
               <div
@@ -248,6 +275,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
         recipe={viewedItem}
         onSave={(recipe) => {
           // If editing an existing recipe, call update; otherwise, add new.
+          console.log("Saving recipe:", recipe, viewedItem?._id);
           viewedItem?._id ? handleUpdateRecipe(recipe) : handleAddRecipe(recipe);
         }}
         onDelete={(recipe) => {
@@ -260,7 +288,9 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
         onClose={() => setOpenAdd(false)}
         type="add"
         recipe={newRecipe}
+        categoryName={selected?.category}
         onSave={(recipe) => {
+          console.log("Saving recipe:", recipe, viewedItem?._id);
           handleAddRecipe(recipe);
         }}
         targetLang={i18n.language}
