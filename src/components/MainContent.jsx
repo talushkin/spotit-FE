@@ -24,7 +24,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useNavigate } from "react-router-dom";
 
-const navigate = useNavigate();
+
 
 
 function SortableRecipe({ recipe, index, onSelect }) {
@@ -74,6 +74,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
 
   // Assume recipes are stored in selected.itemPage
   const [recipes, setRecipes] = useState(selected?.itemPage || []);
+  const navigate = useNavigate();
 
 
 

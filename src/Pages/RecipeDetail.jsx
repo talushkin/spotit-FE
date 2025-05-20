@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import HomePage from "./HomePage";
 import data from "../data/recipes.json";
 
-export default function RecipeDetail() {
+export default function RecipeDetail(props) {
+  const { selectedRecipe, newRecipe, recipes, setRecipes, selected, setSelected } = props;
   const { category, title } = useParams();
 
   const pages = data?.site?.pages || [];
@@ -23,6 +24,10 @@ export default function RecipeDetail() {
       <HomePage
         selectedCategory={selectedCategoryData}
         selectedRecipe={selectedRecipeData}
+        recipes={recipes}
+        setRecipes={setRecipes}
+        selected={selected}
+        setSelected={setSelected}
       />
     );
   } else {

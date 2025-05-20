@@ -3,10 +3,11 @@ import { useParams } from "react-router-dom";
 import HomePage from "./HomePage";
 import data from "../data/recipes.json";
 
-export default function RecipeDetail() {
+export default function RecipeCategory(props) {
+  const { selectedRecipe, newRecipe, recipes, setRecipes, selected, setSelected } = props;
   const { category, title } = useParams();
-
-  const pages = data?.site?.pages || [];
+  console.log('trying to find category:',useParams());
+  const pages = recipes?.site?.pages || [];
 
   // Normalize category (lowercase) for comparison
   const selectedCategoryData = pages.find(
@@ -15,7 +16,11 @@ export default function RecipeDetail() {
 
   if (selectedCategoryData) {
     console.log("Found category:", selectedCategoryData);
-    return <HomePage selectedCategory={selectedCategoryData} />;
+    return <HomePage
+      recipes={recipes}
+      setRecipes={setRecipes}
+      setSelected={setSelected}
+      selected={selectedCategoryData} />;
   } else {
     console.warn("Category not found:", category);
     return <div>Category not found.</div>;

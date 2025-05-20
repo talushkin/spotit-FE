@@ -9,9 +9,8 @@ import { lightTheme, darkTheme } from "../components/themes";
 import GlobalStyle from "../components/GlobalStyle";
 import * as store from "../utils/storage"; // adjust path if needed
 
-export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
-  const [recipes, setRecipes] = useState(null); // Initialize with null
-  const [selected, setSelected] = useState(selectedCategory);
+export default function Main(props) {
+  const { selectedRecipe, newRecipe, recipes, setRecipes, selected, setSelected } = props;
   const [menuOpen, setMenuOpen] = useState(true);
   const { i18n } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -31,20 +30,6 @@ export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
       console.log("Should show the menu", menuOpen);
     }
   };
-
-  // Fetch recipes data on component mount
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await store.loadData(); // Call the async function
-      setRecipes(data); // Update state with the fetched data
-      setSelected(data?.site?.pages[0]); // Set the first page as selected
-    };
-    fetchData();
-  }, []); // Empty dependency array ensures this runs only once
-
-  useEffect(() => {
-    console.log("recipes", recipes); // Log recipes whenever it updates
-  }, [recipes]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -76,7 +61,7 @@ export default function Main({ selectedCategory, selectedRecipe, newRecipe }) {
           <div className="row flex-column flex-md-row">
             <div
               className="nav-menu col-12 col-md-auto ps-0"
-                  style={{ width: desktop ? '400px' : '100%'}}
+              style={{ width: desktop ? '400px' : '100%' }}
             >
               <NavMenu
                 pages={recipes?.site?.pages}
