@@ -22,7 +22,10 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import Box from "@mui/material/Box";
+import { useNavigate } from "react-router-dom";
+
+const navigate = useNavigate();
+
 
 function SortableRecipe({ recipe, index, onSelect }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -71,6 +74,9 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe 
 
   // Assume recipes are stored in selected.itemPage
   const [recipes, setRecipes] = useState(selected?.itemPage || []);
+
+
+
 
   useEffect(() => {
     setRecipes(selected?.itemPage || []);
@@ -177,10 +183,16 @@ console.log("Adding recipe:", recipe);
     setPage(value);
   };
 
-  const handleSelectRecipe = (recipe) => {
-    setViewedItem(recipe);
-    setOpenView(true);
-  };
+const handleSelectRecipe = (recipe) => {
+  setViewedItem(recipe);
+  setOpenView(true);
+  if (recipe && recipe.category && recipe.title) {
+    const categoryEncoded = encodeURIComponent(recipe.category);
+    const titleEncoded = encodeURIComponent(recipe.title);
+    navigate(`/recipes/${categoryEncoded}/${titleEncoded}`);
+    console.log("Navigating to:", `/recipes/${categoryEncoded}/${titleEncoded}`);
+  }
+};
 
   return (
     <div className="main">
