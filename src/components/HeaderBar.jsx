@@ -4,10 +4,10 @@ import { Autocomplete, TextField } from "@mui/material";
 import RecipeDialog from "./RecipeDialog";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
 import {
-FormControl,
-InputLabel,
-Select as MuiSelect,
-MenuItem
+  FormControl,
+  InputLabel,
+  Select as MuiSelect,
+  MenuItem
 } from "@mui/material";
 export default function HeaderBar({
   logo,
@@ -74,7 +74,18 @@ export default function HeaderBar({
               ☰
             </button>)
           }
+          <img
+            src="https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"
+            alt="Logo"
+            style={{
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              marginLeft: "8px",
+            }}
+          />
           <div className="SiteName">{t("appName")}</div>
+
         </div>
 
         <div>

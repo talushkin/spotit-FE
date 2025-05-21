@@ -46,13 +46,13 @@ export default function CaseCard({ item, category, index }) {
 
   return (
     <div className="case">
-        <p>{item.createdAt ? ` ${dayjs(item.createdAt).format("DD-MM-YYYY")}` : ""}</p>
       <img 
         src={item.imageUrl || imageUrl} 
         alt={translated.title || item.title}
         onError={(e) => {e.target.src=`https://placehold.co/100x100?text=${item.title}`;}}
       />
       <h2>{isLoading ? t("loading") : translated.title}</h2>
+      <p>{item.createdAt ? ` ${dayjs(item.createdAt).format("DD-MM-YYYY")}` : ""}</p>
     </div>
   );
 }

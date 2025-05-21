@@ -7,23 +7,24 @@ import {
   Button,
   TextField,
   IconButton,
+  CircularProgress,
+  Box,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
-import cardboardTexture from "../assets/cardboard-texture.jpg";
 
-// Define base URL
 const BASE_URL = "https://be-tan-theta.vercel.app";
 
 const RecipeDialog = ({
   open,
   onClose,
   onSave,
-  onDelete, // new prop for deleting recipe
+  onDelete,
   recipe,
   targetLang = "en",
   type,
-  categoryName
+  categoryName,
+  autoFill = false,
 }) => {
   const { i18n, t } = useTranslation();
   const isRTL = i18n.language === "he" || i18n.language === "ar";
@@ -36,7 +37,9 @@ const RecipeDialog = ({
     _id: recipe?._id || "",
   });
 
-  // Sync editableRecipe with the recipe prop when it changes
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
+  const [isFillingAI, setIsFillingAI] = useState(false);
+
   useEffect(() => {
     if (recipe) {
       setEditableRecipe({
@@ -49,7 +52,13 @@ const RecipeDialog = ({
   }, [recipe]);
 
   useEffect(() => {
-    if (!recipe || !targetLang || !open || targetLang==='en') return;
+    if (editableRecipe && autoFill) {
+      handleFillAI();
+    }
+  }, [autoFill]);
+
+  useEffect(() => {
+    if (!recipe || !targetLang || !open || targetLang === "en") return;
     const doTranslate = async () => {
       try {
         const [title, ingredients, preparation] = await Promise.all([
@@ -78,11 +87,12 @@ const RecipeDialog = ({
   };
 
   const handleSave = () => {
-    onSave(editableRecipe); // Pass the updated recipe to the onSave callback
+    onSave(editableRecipe);
     onClose();
   };
 
   const handleFillAI = async () => {
+    setIsFillingAI(true);
     try {
       const authToken = localStorage.getItem("authToken") || "1234";
       const response = await fetch(`${BASE_URL}/api/ai/fill-recipe`, {
@@ -91,26 +101,31 @@ const RecipeDialog = ({
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify({ categoryName:categoryName , title: editableRecipe.title, recipeId: recipe?._id }),
+        body: JSON.stringify({
+          categoryName: categoryName,
+          title: editableRecipe.title,
+          recipeId: recipe?._id,
+        }),
       });
-      if (!response.ok) {
-        throw new Error("Failed to fill recipe via AI");
-      }
+      if (!response.ok) throw new Error("Failed to fill recipe via AI");
+
       const data = await response.json();
-      // Assuming data contains { ingredients, preparation }
       setEditableRecipe((prev) => ({
         ...prev,
         ingredients: data.ingredients,
         title: data.title || prev.title,
         preparation: data.preparation,
       }));
-      handleRecreateImage(data.title || editableRecipe.title);
+      await handleRecreateImage(data.title || editableRecipe.title);
     } catch (error) {
       console.error("Error while filling recipe via AI:", error);
+    } finally {
+      setIsFillingAI(false);
     }
   };
 
-  const handleRecreateImage = async (text=editableRecipe.title) => {
+  const handleRecreateImage = async (text = editableRecipe?.title) => {
+    setIsLoadingImage(true);
     try {
       const authToken = localStorage.getItem("authToken") || "1234";
       const response = await fetch(`${BASE_URL}/api/ai/image`, {
@@ -124,24 +139,23 @@ const RecipeDialog = ({
           recipeId: recipe?._id,
         }),
       });
-      if (!response.ok) {
-        throw new Error("Failed to recreate image via AI");
-      }
+      if (!response.ok) throw new Error("Failed to recreate image via AI");
+
       const data = await response.json();
-      // Assuming data contains { imageUrl }
       setEditableRecipe((prev) => ({
         ...prev,
         imageUrl: data.imageUrl,
       }));
     } catch (error) {
       console.error("Error while recreating image via AI:", error);
+    } finally {
+      setIsLoadingImage(false);
     }
   };
 
   const handleDelete = () => {
     if (onDelete) {
-      editableRecipe._id = recipe?._id; // Ensure correct ID
-      console.log("Deleting recipe:", editableRecipe);
+      editableRecipe._id = recipe?._id;
       onDelete(editableRecipe);
       onClose();
     }
@@ -153,17 +167,15 @@ const RecipeDialog = ({
       onClose={onClose}
       dir={isRTL ? "rtl" : "ltr"}
       PaperProps={{
-        style: { maxWidth: "90%", width: "90%" },
+        style: { maxWidth: "95%", width: "95%" },
       }}
     >
       <DialogTitle
         style={{
           backgroundColor: "#f7f1e3",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
           textAlign: "center",
-          justifyContent: "center",
+          padding: "10px 0 0 0",
+          fontSize: "20px",
         }}
       >
         {editableRecipe.title}
@@ -174,60 +186,90 @@ const RecipeDialog = ({
           <span style={{ fontSize: "24px", fontWeight: "bold" }}>×</span>
         </IconButton>
       </DialogTitle>
-      <DialogContent
-        style={{
-          backgroundColor: "#f7f1e3",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-        }}
-      >
-        {/* Container for image and recycle (pencil) icon */}
-        <div
+
+      <Box position="relative">
+        {isFillingAI && (
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            width="100%"
+            height="100%"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            bgcolor="rgba(255,255,255,0.6)"
+            zIndex={10}
+          >
+            <CircularProgress />
+          </Box>
+        )}
+
+        <DialogContent
           style={{
-            justifyContent:"center",
-            justifyItems:"center",
-            display: "flex",
-            alignItems: "center",
-            borderRadius: "8px"
+            backgroundColor: "#f7f1e3",
           }}
         >
-          <img
-            src={editableRecipe.imageUrl || "https://placehold.co/100x100?text=No+Image"}
-            alt={editableRecipe.title}
-            style={{ margin: "10px", maxWidth: "100%", borderRadius: "28px" }}
+          <Box
+            position="relative"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            marginBottom={2}
+          >
+            <img
+              src={
+                editableRecipe.imageUrl ||
+                "https://placehold.co/100x100?text=No+Image"
+              }
+              alt={editableRecipe.title}
+              style={{ maxHeight: "300px", borderRadius: "28px" }}
+            />
+            {isLoadingImage && (
+              <CircularProgress
+                size={48}
+                style={{
+                  position: "absolute",
+                }}
+              />
+            )}
+            <IconButton
+              onClick={() => handleRecreateImage(editableRecipe.title)}
+              title={t("recreate image")}
+              style={{ position: "absolute", right: 10, top: 10 }}
+            >
+              <span style={{ fontSize: "24px" }}>✏️</span>
+            </IconButton>
+          </Box>
+
+          <TextField
+            label={t("recipeName")}
+            value={editableRecipe.title}
+            onChange={handleChange("title")}
+            fullWidth
+            margin="normal"
           />
-          <IconButton onClick={handleRecreateImage} title={t("recreate image")}>
-            {/* Using a simple pencil icon (Unicode) */}
-            <span style={{ fontSize: "24px" }}>✏️</span>
-          </IconButton>
-        </div>
-        <TextField
-          label={t("recipeName")}
-          value={editableRecipe.title}
-          onChange={handleChange("title")}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label={t("ingredients")}
-          value={editableRecipe.ingredients}
-          onChange={handleChange("ingredients")}
-          fullWidth
-          multiline
-          rows={4}
-          margin="normal"
-        />
-        <TextField
-          label={t("preparation")}
-          value={editableRecipe.preparation}
-          onChange={handleChange("preparation")}
-          fullWidth
-          multiline
-          rows={4}
-          margin="normal"
-        />
-      </DialogContent>
+          <TextField
+            label={t("ingredients")}
+            value={editableRecipe.ingredients}
+            onChange={handleChange("ingredients")}
+            fullWidth
+            multiline
+            rows={4}
+            margin="normal"
+          />
+          <TextField
+            label={t("preparation")}
+            value={editableRecipe.preparation}
+            onChange={handleChange("preparation")}
+            fullWidth
+            multiline
+            rows={4}
+            margin="normal"
+          />
+        </DialogContent>
+      </Box>
+
       <DialogActions>
         <Button onClick={handleFillAI} variant="contained" color="secondary">
           {t("fill AI")}
@@ -237,6 +279,9 @@ const RecipeDialog = ({
         </Button>
         <Button onClick={handleSave} variant="contained">
           {t("save")}
+        </Button>
+        <Button onClick={onClose} variant="contained" color="primary">
+          Close
         </Button>
       </DialogActions>
     </Dialog>

@@ -30,6 +30,8 @@ export const loadData = async () => {
       success: true,
       message: "Data loaded successfully",
       site: {
+        header: {
+          logo: "https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"},
         pages: categoriesRes.data.map((cat) => ({
           category: cat.category || "unknown category",
           _id: cat._id,

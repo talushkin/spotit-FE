@@ -64,6 +64,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe,
   const itemsPerPage = 8;
   const [openView, setOpenView] = useState(selectedRecipe || false);
   const [openAdd, setOpenAdd] = useState(addRecipe || false);
+  const [openFill, setOpenFill] = useState(false);
   const [viewedItem, setViewedItem] = useState(selectedRecipe || null);
   const [newRecipe, setNewRecipe] = useState({
     title: "",
@@ -225,6 +226,21 @@ const handleSelectRecipe = (recipe) => {
           >
             {t("addRecipe")}
           </Button>
+                    <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => {
+              setOpenFill(true); 
+              setOpenAdd(true)
+            }}
+            sx={{
+              width: "400 px",
+              alignItems: "center",
+              textAlign: "center",
+            }}
+          >
+            AI {t("addRecipe")}
+          </Button>
           {/* <Button
             variant="outlined"
             color="secondary"
@@ -301,6 +317,7 @@ const handleSelectRecipe = (recipe) => {
       />
       <RecipeDialog
         open={openAdd}
+        autoFill={openFill}
         onClose={() => setOpenAdd(false)}
         type="add"
         recipe={newRecipe}

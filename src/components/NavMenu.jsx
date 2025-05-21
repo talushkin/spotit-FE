@@ -42,11 +42,21 @@ export default function NavMenu({ pages, onSelect, isOpen, toggleDarkMode, langu
         onOrderChange={handleOrderChange}
         setReorder={setReorder}
       />
-
-      <a href="#" onClick={() => setEditCategories(!editCategories)}>
-        {t("changeOrder")}
-      </a>
-
+<Button
+        variant="contained"
+        onClick={() => setEditCategories(!editCategories)}
+        sx={{
+          marginLeft: '60px',
+          backgroundColor: 'darkblue',
+          "&:hover": {
+            backgroundColor: 'blue',
+            "& .MuiSvgIcon-root": {
+              color: 'black',
+            },
+          },
+        }}
+      >{t("changeOrder")}
+      </Button>
       <Button
         variant="contained"
         onClick={toggleDarkMode}

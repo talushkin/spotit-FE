@@ -50,7 +50,7 @@ export default function Main(props) {
         <div className="TOP">
           <HeaderBar
             desktop={desktop}
-            logo={recipes?.site?.header?.logo}
+            logo={"https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"}
             onHamburgerClick={handleHamburgerClick} // Pass the function here
             pages={recipes?.site?.pages}
 
