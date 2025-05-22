@@ -50,6 +50,7 @@ export default function Main(props) {
         <div className="TOP">
           <HeaderBar
             desktop={desktop}
+            toggleDarkMode={() => setIsDarkMode((prev) => !prev)}
             logo={"https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"}
             onHamburgerClick={handleHamburgerClick} // Pass the function here
             pages={recipes?.site?.pages}
@@ -65,7 +66,6 @@ export default function Main(props) {
             >
               <NavMenu
                 pages={recipes?.site?.pages}
-                toggleDarkMode={() => setIsDarkMode((prev) => !prev)}
                 isOpen={menuOpen || desktop}
                 onSelect={(item) => {
                   console.log("Selected item:", item);

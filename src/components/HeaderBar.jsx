@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 import { Autocomplete, TextField } from "@mui/material";
 import RecipeDialog from "./RecipeDialog";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
 import {
   FormControl,
   InputLabel,
   Select as MuiSelect,
-  MenuItem
+  MenuItem, Button
 } from "@mui/material";
 export default function HeaderBar({
   logo,
@@ -122,6 +123,23 @@ export default function HeaderBar({
             </MuiSelect>
           </FormControl>
         </div>
+              <Button
+        variant="contained"
+        onClick={toggleDarkMode}
+        sx={{
+          backgroundColor: 'darkgreen',
+          // mt: '200px',
+          //mb: 2,
+          "&:hover": {
+            backgroundColor: 'green',
+            "& .MuiSvgIcon-root": {
+              color: 'black',
+            },
+          },
+        }}
+      >
+        <Brightness4Icon sx={{ color: 'black' }} />
+      </Button>
         {/* Right side: Search */}
         <div style={{ flex: 0, maxWidth: "400px" }}>
           <Autocomplete
