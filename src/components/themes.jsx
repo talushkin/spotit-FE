@@ -16,5 +16,6 @@ export const lightTheme = {
     sidebarBackground: "#444",
     caseBackground: "#333",
     caseTextColor: "#fff",
+    
   };
   

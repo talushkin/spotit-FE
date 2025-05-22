@@ -14,7 +14,7 @@ export default function HeaderBar({
   onHamburgerClick,
   pages,
   toggleDarkMode,
-  desktop
+  desktop, isDarkMode
 }) {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");

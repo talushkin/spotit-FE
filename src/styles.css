@@ -7,8 +7,11 @@ body {
   font-family: Arial, sans-serif;
   background-image: url('./assets/leaf-left.png'), url('./assets/leaf-right.png');
   background-position: left center, right center;
-  background-repeat: no-repeat;
-  background-size: auto 100%, auto 100%;
+  background-repeat: repeat-y;
+  background-size:  auto 40%, auto 40%;
+    background-position: 
+    calc(0% - 1rem) center,  /* Left image slightly inward */
+    calc(100% + 1rem) center; /* Right image slightly inward */
 }
 
 * {
@@ -150,13 +153,12 @@ body {
 .case {
   width: 300px;
   height: 350px;
-
   background-size: cover;
   background-position: center;
   background-repeat: repeat;
   background-color: #fffce8;
   border: 1px solid rgb(164, 164, 164);
-  border-radius: 15px;
+  border-radius: 20px;
   padding: 5px;
   display: flex;
   flex-direction: column;
@@ -170,8 +172,9 @@ body {
   width: 90%;
   height: auto;
   object-fit: contain;
-  border-radius: 5px;
+  border-radius: 10px;
   margin-bottom: 5px;
+  padding: 5px 0px;
 }
 
 .case h2 {
@@ -211,6 +214,10 @@ body {
 
 @media (max-width: 764px) {
   body {
+     background-image: url('./assets/leaf-left.png'), url('./assets/leaf-right.png');
+  background-position: left center, right center;
+  background-repeat: repeat-y;
+  background-size:  auto 40%, auto 40%;
     background-position: calc(0% - 180px) center, calc(100% + 180px) center;
   }
 
@@ -233,7 +240,6 @@ body {
 
 .nav a {
   width: 100%;
-  text-align: left;
   padding: 20px;
 }
 

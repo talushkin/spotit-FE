@@ -55,7 +55,7 @@ function SortableRecipe({ recipe, index, onSelect }) {
   );
 }
 
-export default function MainContent({ data, selected, selectedRecipe, addRecipe, desktop }) {
+export default function MainContent({ data, selected, selectedRecipe, addRecipe, desktop,isDarkMode }) {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
 
@@ -210,7 +210,7 @@ const handleSelectRecipe = (recipe) => {
           gap: "1rem",
         }}
       >
-        <div style={{ flexBasis: "100%", textAlign: "center" }}>
+        <div style={{  flexBasis: "100%", textAlign: "center" , color: isDarkMode ? "white" : "inherit",}}>
           {translatedCategory}
         </div>
 
@@ -294,7 +294,7 @@ const handleSelectRecipe = (recipe) => {
                 className={`${colClass} mb-4 d-flex justify-content-center`}
                 onClick={() => handleSelectRecipe(item)}
               >
-                <CaseCard index={startIndex + index + 1} item={item} category={selected?.category} />
+                <CaseCard index={startIndex + index + 1} item={item} category={selected?.category} isDarkMode={isDarkMode} />
               </div>
             );
           })}

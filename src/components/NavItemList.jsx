@@ -19,7 +19,9 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import i18n from "../i18n";
 
+  const isRTL = i18n.dir() === "rtl";
 // A sortable item component using dnd‑kit
 function SortableItem({
   item,
@@ -50,56 +52,56 @@ function SortableItem({
     <li
       ref={setNodeRef}
       style={style}
-      className="nav-item flex items-center justify-start" // added "nav-item" class
+      dir={isRTL ? "rtl" : "ltr"}
+      className="nav-item flex items-center justify-start nowrap" // added "nav-item" class
       {...attributes}
       {...listeners}
     >
-      <div className="flex items-center w-full">
-        <div className="flex items-center mr-2">
-          {editCategories && (
-            <div className="flex items-center">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  if (window.confirm("Delete ? `" + translatedCategory + "`")) {
-                    delCategoryCallback(item._id);
-                  }
-                }}
-                className="text-red-500 mr-1"
-              >
-                🗑
-              </button>
-              <span>☰</span>
-            </div>
-          )}
-        </div>
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            onSelect(item);
-          }}
-          className="flex-1 flex items-center"
-        >
-          {editCategories && index + 1 + ". "}
-          <img
-            src={firstRecipeImage}
-            alt="Category"
-            style={{
-              width: "40px",
-              height: "40px",
-              marginRight: "0.5rem",
-              borderRadius: "50%",
-              objectFit: "cover",
+      {editCategories && (
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (window.confirm("Delete ? `" + translatedCategory + "`")) {
+                delCategoryCallback(item._id);
+              }
             }}
-          />
-          {translatedCategory || item.category}{" "}
-          <span style={{ color: "gray", marginLeft: "0.5rem" }}>
-            ({recipeCount})
-          </span>
-        </a>
-      </div>
+          >
+            🗑
+          </button>
+          ☰
+        </>
+      )}
+      <a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          onSelect(item);
+        }}
+        className="flex-1 flex items-center"
+      >
+        {editCategories && index + 1 + ". "}
+        <img
+          src={firstRecipeImage}
+          alt="Category"
+          style={{
+            width: "40px",
+            height: "40px",
+            marginRight: "0.5rem",
+            marginLeft: "0.5rem",
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+        />
+        {translatedCategory || item.category}{" "}
+        <span
+          className="text-gray-500 ml-2"
+        >
+          ({recipeCount})
+        </span>
+      </a>
+
     </li>
   );
 }
@@ -208,9 +210,11 @@ export default function NavItemList({
         </SortableContext>
       </DndContext>
       {!newCat && (
-        <a href="#" onClick={() => setNewCat(true)}>
-          + {t("addCategory")}
-        </a>
+        <div className="nav-item flex items-center justify-start" >
+          <a href="#" onClick={() => setNewCat(true)}>
+            + {t("addCategory")}
+          </a>
+        </div>
       )}
       {newCat && (
         <input

@@ -4,7 +4,7 @@ import { translateDirectly } from "./translateAI";
 import dayjs from "dayjs";
 import * as storage from "../utils/storage";
 
-export default function CaseCard({ item, category, index }) {
+export default function CaseCard({ item, category, index , isDarkMode }) {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
 
@@ -45,14 +45,14 @@ export default function CaseCard({ item, category, index }) {
   )}/${encodeURIComponent(item.title)}`;
 
   return (
-    <div className="case">
-      <img 
+    <div className="case" style={{ backgroundColor: isDarkMode ? "#333" : "#fffce8" }}>
+      <img
         src={item.imageUrl || imageUrl} 
         alt={translated.title || item.title}
         onError={(e) => {e.target.src=`https://placehold.co/100x100?text=${item.title}`;}}
       />
       <h2>{isLoading ? t("loading") : translated.title}</h2>
-      <p>{item.createdAt ? ` ${dayjs(item.createdAt).format("DD-MM-YYYY")}` : ""}</p>
+      <p style={{color:isDarkMode?"#fff":"#333"}}>{item.createdAt ? ` ${dayjs(item.createdAt).format("DD-MM-YYYY")}` : ""}</p>
     </div>
   );
 }

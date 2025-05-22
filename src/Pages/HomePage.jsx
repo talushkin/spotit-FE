@@ -11,7 +11,7 @@ import * as store from "../utils/storage"; // adjust path if needed
 
 export default function Main(props) {
   const { selectedRecipe, newRecipe, recipes, setRecipes, selected, setSelected } = props;
-  const [menuOpen, setMenuOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { i18n } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [desktop, setDesktop] = useState(window.innerWidth > 768); // Check if desktop
@@ -53,7 +53,7 @@ export default function Main(props) {
             logo={"https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"}
             onHamburgerClick={handleHamburgerClick} // Pass the function here
             pages={recipes?.site?.pages}
-
+            isDarkMode={isDarkMode}
             data={recipes}
           />
         </div>
@@ -87,6 +87,7 @@ export default function Main(props) {
                   addRecipe={newRecipe}
                   data={recipes}
                   desktop={desktop}
+                  isDarkMode={isDarkMode}
                 />
               )}
             </div>

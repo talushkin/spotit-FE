@@ -54,8 +54,8 @@ i18n
       he: {
         translation: {
           appName: "מתכונים",
-          addCategory: "הוסף סוג",
-          changeOrder: "שנה סדר סוגים",
+          addCategory: "הוסף קטגוריה",
+          changeOrder: "שנה סדר קטגוריות",
           addRecipe: "הוסף מתכון",
           recipeName: "שם המתכון",
           ingredients: "מצרכים",

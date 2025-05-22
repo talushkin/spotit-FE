@@ -46,8 +46,8 @@ export default function NavMenu({ pages, onSelect, isOpen, toggleDarkMode, langu
         variant="contained"
         onClick={() => setEditCategories(!editCategories)}
         sx={{
-          marginLeft: '60px',
-          backgroundColor: 'darkblue',
+          
+          backgroundColor: 'black',
           "&:hover": {
             backgroundColor: 'blue',
             "& .MuiSvgIcon-root": {

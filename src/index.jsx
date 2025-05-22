@@ -37,6 +37,10 @@ function App() {
     console.log("recipes", recipes);
   }, [recipes]);
 
+    useEffect(() => {
+    document.body.dir = i18n.language === "he" || i18n.language === "ar" ? "rtl" : "ltr";
+  }, [i18n.language]);
+
   return (
     <>
     { recipes && (
