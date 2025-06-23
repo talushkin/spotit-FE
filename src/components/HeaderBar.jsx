@@ -4,6 +4,7 @@ import { Autocomplete, TextField, InputAdornment } from "@mui/material";
 import RecipeDialog from "./RecipeDialog";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
 import ClearIcon from "@mui/icons-material/Clear";
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function HeaderBar({
   logo,
@@ -20,6 +21,7 @@ export default function HeaderBar({
 
   // Track if search is active (focused or has value)
   const [searchActive, setSearchActive] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const searchInputRef = useRef(null);
 
@@ -97,7 +99,7 @@ export default function HeaderBar({
         {/* Left side: Hamburger and Site Name */}
         <div
           style={{
-            display: searchActive ? "none" : "flex", // Hide after fade out
+            display: searchActive ? "none" : "flex",
             alignItems: "center",
             gap: "8px",
             ...fadeStyle,
@@ -118,110 +120,133 @@ export default function HeaderBar({
           />
           <div className="SiteName">{t("appName")}</div>
         </div>
+        {/* Search input or icon */}
         <div style={{ flex: 0, maxWidth: "95%" }}>
-          <Autocomplete
-            freeSolo
-            options={filteredSuggestions.map((page) => page.title)}
-            onInputChange={handleSearchChange}
-            onChange={handleSelect}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                inputRef={searchInputRef}
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e, e.target.value)}
-                label={t("search")}
-                placeholder="keywords"
-                variant="outlined"
-                sx={{
-                  minWidth: "150px",
-                  maxWidth: "100%",
+          {/* Show magnifier on small screens, input on desktop or when expanded */}
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {/* Mobile: show icon if not expanded */}
+            <span
+              style={{
+                display:
+                  !desktop && !showMobileSearch ? "inline-flex" : "none",
+                alignItems: "center",
+                cursor: "pointer",
+                color: "white",
+                background: "rgba(0,0,0,0.2)",
+                borderRadius: "50%",
+                padding: "8px",
+                marginLeft: "8px",
+              }}
+              onClick={() => setShowMobileSearch(true)}
+            >
+              <SearchIcon sx={{ fontSize: 28 }} />
+            </span>
+            {/* Show input if desktop or mobile search expanded */}
+            <Autocomplete
+              freeSolo
+              options={filteredSuggestions.map((page) => page.title)}
+              onInputChange={handleSearchChange}
+              onChange={handleSelect}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  inputRef={searchInputRef}
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e, e.target.value)}
+                  label={t("search")}
+                  placeholder="keywords"
+                  variant="outlined"
+                  sx={{
+                    minWidth: "50px",
+                    maxWidth: "100%",
+                    borderRadius: "8px",
+                    borderWidth: "0px",
+                    backgroundImage: `url(${cardboardTexture})`,
+                    backgroundSize: "cover",
+                    backgroundRepeat: "repeat",
+                    "& .MuiInputBase-input": { color: "white" },
+                    "& .MuiInputLabel-root": { color: "white" },
+                    "& .MuiOutlinedInput-notchedOutline": { borderWidth: 0 },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "white",
+                      borderWidth: "2px",
+                      borderRadius: "8px",
+                    },
+                    "&.Mui-focused .MuiInputBase-input": {
+                      color: "white",
+                    },
+                    "&.Mui-focused .MuiInputLabel-root": {
+                      color: "white",
+                    },
+                    display:
+                      desktop || showMobileSearch ? "block" : "none",
+                    width:
+                      !desktop && showMobileSearch
+                        ? "90vw"
+                        : desktop
+                        ? "200px"
+                        : "0",
+                    transition: "width 0.3s",
+                  }}
+                  InputProps={{
+                    ...params.InputProps,
+                  }}
+                  onFocus={() => setSearchActive(true)}
+                  onBlur={() => {
+                    setTimeout(() => {
+                      if (!searchQuery) setSearchActive(false);
+                      if (!desktop) setShowMobileSearch(false);
+                    }, 100);
+                  }}
+                  onKeyDown={handleKeyDown}
+                />
+              )}
+              sx={{
+                width:
+                  desktop || showMobileSearch
+                    ? { xs: "90vw", sm: "200px" }
+                    : "0",
+                maxWidth: "95%",
+                transition: "width 0.3s ease",
+                backgroundImage: `url(${cardboardTexture})`,
+                backgroundSize: "fit",
+                backgroundRepeat: "repeat",
+                borderRadius: "8px",
+                position: "relative",
+                "& .MuiInputBase-input": {
+                  color: "white",
+                },
+                "& .MuiInputLabel-root": {
+                  color: "white",
+                },
+                "&:focus-within .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "white",
+                  borderWidth: "2px",
+                },
+                "&:focus-within .MuiInputBase-input": {
+                  color: "white",
+                },
+                "&:focus-within .MuiInputLabel-root": {
+                  color: "white",
+                },
+                "&:focus-within": {
+                  width: "95vw",
+                  maxWidth: "95vw",
+                  zIndex: 10,
+                  position: "relative",
+                  left: "unset",
+                  right: "unset",
+                  margin: "0 auto",
                   borderRadius: "8px",
                   borderWidth: "0px",
-                  backgroundImage: `url(${cardboardTexture})`,
-                  backgroundSize: "cover",
-                  backgroundRepeat: "repeat",
-                  "& .MuiInputBase-input": { color: "white" },
-                  "& .MuiInputLabel-root": { color: "white" },
-                  "& .MuiOutlinedInput-notchedOutline": { borderWidth: 0 },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "white",
-                    borderWidth: "2px",
-                    borderRadius: "8px",
-                  },
-                  "&.Mui-focused .MuiInputBase-input": {
-                    color: "white",
-                  },
-                  "&.Mui-focused .MuiInputLabel-root": {
-                    color: "white",
-                  },
-                }}
-                InputProps={{
-                  ...params.InputProps,
-                  // startAdornment: searchQuery && (
-                  //   <InputAdornment position="start">
-                  //     <ClearIcon
-                  //       onClick={() => {
-                  //         setSearchQuery("");
-                  //         setFilteredSuggestions([]);
-                  //         setSearchActive(false); // <-- Also close the search and fade in ham/recipes
-                  //       }}
-                  //       sx={{ cursor: "pointer", color: "white" }}
-                  //     />
-                  //   </InputAdornment>
-                  // ),
-                }}
-                onFocus={() => setSearchActive(true)}
-                onBlur={() => {
-                  setTimeout(() => {
-                    if (!searchQuery) setSearchActive(false);
-                  }, 100);
-                }}
-                onKeyDown={handleKeyDown}
-              />
-            )}
-            sx={{
-              width: { xs: "150px", sm: "200px" },
-              maxWidth: "95%",
-              transition: "width 0.3s ease",
-              backgroundImage: `url(${cardboardTexture})`,
-              backgroundSize: "fit",
-              backgroundRepeat: "repeat",
-              borderRadius: "8px",
-              position: "relative",
-              "& .MuiInputBase-input": {
-                color: "white",
-              },
-              "& .MuiInputLabel-root": {
-                color: "white",
-              },
-              "&:focus-within .MuiOutlinedInput-notchedOutline": {
-                borderColor: "white",
-                borderWidth: "2px",
-              },
-              "&:focus-within .MuiInputBase-input": {
-                color: "white",
-              },
-              "&:focus-within .MuiInputLabel-root": {
-                color: "white",
-              },
-              "&:focus-within": {
-                width: "95vw",
-                maxWidth: "95vw",
-                zIndex: 10,
-                position: "relative",
-                left: "unset",
-                right: "unset",
-                margin: "0 auto",
-                borderRadius: "8px",
-                borderWidth: "0px",
-              },
-              boxSizing: "border-box",
-            }}
-          />
+                },
+                boxSizing: "border-box",
+                display: desktop || showMobileSearch ? "block" : "none",
+              }}
+            />
+          </div>
         </div>
       </div>
-
       {selectedRecipe && (
         <RecipeDialog
           open={dialogOpen}
