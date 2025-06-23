@@ -223,64 +223,67 @@ export default function NavItemList({
           onClick={() => setNewCat(true)}
           sx={{
             backgroundColor: "darkgreen",
-            color: "white",
-            width: "100%",
-            marginTop: "0.5rem",
             "&:hover": {
-              backgroundColor: "#145214",
+              backgroundColor: "green",
+              "& .MuiSvgIcon-root": {
+                color: "black",
+              },
             },
           }}
         >
-          + {t("addCategory")}
-        </Button>
-      )}
-      {newCat && (
-        <div style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <input
-            type="text"
-            placeholder={t("addCategory")}
-            value={inputValue}
-            autoFocus
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape" || e.key === "x" || e.key === "X") {
-                setNewCat(false);
-                setInputValue("");
-              }
-              if (e.key === "Enter") {
-                handleAddItem();
-              }
-            }}
-            className="p-2 rounded w-full"
-            style={{
-              width: "calc(100% - 0.25rem)", // 80% of parent minus half the gap
-              minWidth: "80px",
-              maxWidth: "calc(100% - 0.25rem)",
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              setNewCat(false);
-              setInputValue("");
-            }}
-            style={{
-              width: "20%",
-              minWidth: "40px",
-              maxWidth: "60px",
-              background: "darkgreen",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              padding: "0.5rem 1rem",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            ×
-          </button>
-        </div>
-      )}
+      + {t("addCategory")}
+    </Button >
+      )
+}
+{
+  newCat && (
+    <div style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <input
+        type="text"
+        placeholder={t("addCategory")}
+        value={inputValue}
+        autoFocus
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape" || e.key === "x" || e.key === "X") {
+            setNewCat(false);
+            setInputValue("");
+          }
+          if (e.key === "Enter") {
+            handleAddItem();
+          }
+        }}
+        className="p-2 rounded w-full"
+        style={{
+          width: "calc(100% - 0.25rem)", // 80% of parent minus half the gap
+          minWidth: "80px",
+          maxWidth: "calc(100% - 0.25rem)",
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => {
+          setNewCat(false);
+          setInputValue("");
+        }}
+        style={{
+          width: "20%",
+          minWidth: "40px",
+          maxWidth: "60px",
+          background: "darkgreen",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          padding: "0.5rem 1rem",
+          cursor: "pointer",
+          fontWeight: "bold",
+        }}
+      >
+        ×
+      </button>
+    </div>
+  )
+}
     </>
   );
 }

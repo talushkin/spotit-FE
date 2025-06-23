@@ -49,16 +49,16 @@ export default function NavMenu({ pages, onSelect, isOpen, language, desktop, to
       />
       <Button
         variant="contained"
-        onClick={() => setEditCategories(!editCategories)}
         sx={{
-          backgroundColor: 'black',
+          backgroundColor: "darkgreen",
           "&:hover": {
-            backgroundColor: 'blue',
+            backgroundColor: "green",
             "& .MuiSvgIcon-root": {
-              color: 'black',
+              color: "black",
             },
           },
         }}
+        onClick={() => setEditCategories(!editCategories)}
       >
         {t("changeOrder")}
       </Button>
