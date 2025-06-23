@@ -1,7 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import HomePage from "./HomePage";
-import data from "../data/recipes.json";
 
 export default function RecipeDetail(props) {
   const { selectedRecipe, newRecipe, recipes, setRecipes, selected, setSelected } = props;
@@ -33,7 +32,8 @@ export default function RecipeDetail(props) {
         setRecipes={setRecipes}
         selected={selected}
         setSelected={setSelected}
-      />
+        newRecipe={!selectedRecipeData}
+        />
     );
   }  else {
     console.warn("Category not found:", category);

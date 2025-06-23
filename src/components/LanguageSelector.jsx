@@ -37,10 +37,13 @@ export default function LanguageSelector({ language, handleLanguageChange }) {
                         borderRadius: "4px",
                         fontWeight: "bold",
                         height: "40px",
+                        textAlign: "center", // Center the selected value
                         "& .MuiSelect-select": {
                             padding: "4px 16px",
                             display: "flex",
                             alignItems: "center",
+                            justifyContent: "center", // Center content horizontally
+                            textAlign: "center",      // Center text
                         },
                         "& .MuiSvgIcon-root": {
                             color: "white",
@@ -83,6 +86,9 @@ export default function LanguageSelector({ language, handleLanguageChange }) {
                                     backgroundColor: "#145214",
                                     color: "white",
                                 },
+                                textAlign: "center", // Center text in dropdown
+                                justifyContent: "center",
+                                display: "flex",
                             }}
                         >
                             {lang.label}

@@ -94,6 +94,15 @@ const RecipeDialog = ({
   const handleFillAI = async () => {
     setIsFillingAI(true);
     try {
+      let aiTitle = editableRecipe.title;
+      // If language is not English, translate the title to English before sending to AI
+      if (i18n.language !== "en") {
+        try {
+          aiTitle = await translateDirectly(editableRecipe.title, "en");
+        } catch (e) {
+          aiTitle = editableRecipe.title; // fallback if translation fails
+        }
+      }
       const authToken = localStorage.getItem("authToken") || "1234";
       const response = await fetch(`${BASE_URL}/api/ai/fill-recipe`, {
         method: "POST",
@@ -103,20 +112,38 @@ const RecipeDialog = ({
         },
         body: JSON.stringify({
           categoryName: categoryName,
-          title: editableRecipe.title,
+          title: aiTitle,
           recipeId: recipe?._id,
         }),
       });
       if (!response.ok) throw new Error("Failed to fill recipe via AI");
 
       const data = await response.json();
+
+      // If the current language is not English, translate the AI results back to the current language
+      let translatedTitle = data.title || editableRecipe.title;
+      let translatedIngredients = data.ingredients;
+      let translatedPreparation = data.preparation;
+      if (i18n.language !== "en") {
+        try {
+          [translatedTitle, translatedIngredients, translatedPreparation] =
+            await Promise.all([
+              translateDirectly(data.title , i18n.language),
+              translateDirectly(data.ingredients, i18n.language),
+              translateDirectly(data.preparation, i18n.language),
+            ]);
+        } catch (e) {
+          // fallback to original if translation fails
+        }
+      }
+
       setEditableRecipe((prev) => ({
         ...prev,
-        ingredients: data.ingredients,
-        title: data.title || prev.title,
-        preparation: data.preparation,
+        ingredients: translatedIngredients,
+        title: translatedTitle,
+        preparation: translatedPreparation,
       }));
-      await handleRecreateImage(data.title || editableRecipe.title);
+      await handleRecreateImage(aiTitle || editableRecipe.title);
     } catch (error) {
       console.error("Error while filling recipe via AI:", error);
     } finally {
