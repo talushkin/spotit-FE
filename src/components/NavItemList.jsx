@@ -228,7 +228,7 @@ export default function NavItemList({
         </Button>
       )}
       {newCat && (
-        <div style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
+        <div style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <input
             type="text"
             placeholder={t("addCategory")}
@@ -244,8 +244,12 @@ export default function NavItemList({
                 handleAddItem();
               }
             }}
-            className="mt-2 p-2 border rounded w-full"
-            style={{ flex: "0 1 80%" , maxWidth: "150px", minWidth: "100px" }}
+            className="p-2 rounded w-full"
+            style={{
+              width: "calc(100% - 0.25rem)", // 80% of parent minus half the gap
+              minWidth: "80px",
+              maxWidth: "calc(100% - 0.25rem)",
+            }}
           />
           <button
             type="button"
@@ -254,6 +258,9 @@ export default function NavItemList({
               setInputValue("");
             }}
             style={{
+              width: "20%",
+              minWidth: "40px",
+              maxWidth: "60px",
               background: "darkgreen",
               color: "white",
               border: "none",
@@ -261,9 +268,6 @@ export default function NavItemList({
               padding: "0.5rem 1rem",
               cursor: "pointer",
               fontWeight: "bold",
-              flex: "0 1 20%",
-              minWidth: 0,
-              maxWidth: "60px"
             }}
           >
             ×
