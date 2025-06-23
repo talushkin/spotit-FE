@@ -1,22 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Autocomplete, TextField } from "@mui/material";
+import { Autocomplete, TextField, InputAdornment } from "@mui/material";
 import RecipeDialog from "./RecipeDialog";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
-import LanguageSelector from "./LanguageSelector.jsx";
+import ClearIcon from "@mui/icons-material/Clear";
 
-import {
-  FormControl,
-  InputLabel,
-  Select as MuiSelect,
-  MenuItem, Button
-} from "@mui/material";
 export default function HeaderBar({
   logo,
   onHamburgerClick,
   pages,
-  toggleDarkMode,
-  desktop, isDarkMode
+  desktop
 }) {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,14 +18,20 @@ export default function HeaderBar({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [language, setLanguage] = useState(i18n.language);
 
+  // Track if search is active (focused or has value)
+  const [searchActive, setSearchActive] = useState(false);
+
+  const searchInputRef = useRef(null);
+
+  // Reset the input value in the DOM when searchQuery is reset
+  useEffect(() => {
+    if (searchInputRef.current && searchQuery === "") {
+      searchInputRef.current.value = "";
+    }
+  }, [searchQuery]);
+
   const allRecipes = pages?.flatMap((category) => category.itemPage);
 
-  const handleLanguageChange = (event) => {
-    const newLang = event.target.value;
-    setLanguage(newLang);
-    i18n.changeLanguage(newLang);
-    document.body.dir = newLang === "he" || newLang === "ar" ? "rtl" : "ltr";
-  };
 
   const handleSearchChange = (event, value) => {
     setSearchQuery(value);
@@ -54,6 +53,32 @@ export default function HeaderBar({
     }
   };
 
+  // Handle ESC key to exit search and fade in ham/recipes
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape" && searchActive) {
+      setSearchActive(false);
+      setSearchQuery(""); // <-- Reset the search text
+      setFilteredSuggestions([]);
+      console.log(searchQuery,"Search closed, fading in hamburger and recipes");
+      // Optionally blur the input
+      if (searchInputRef.current) {
+        searchInputRef.current.blur();
+      }
+    }
+  };
+
+  // Fade and width animation styles for left side (hamburger/logo/title)
+  const fadeStyle = {
+    transition: "opacity 0.4s cubic-bezier(.4,0,.2,1), width 0.4s cubic-bezier(.4,0,.2,1)",
+    opacity: searchActive ? 0 : 1,
+    width: searchActive ? 0 : "auto",
+    pointerEvents: searchActive ? "none" : "auto",
+    willChange: "opacity,width",
+    overflow: "hidden",
+    minWidth: 0,
+    display: searchActive ? "none" : "flex", // Hide completely when faded out
+  };
+
   return (
     <>
       <div
@@ -61,7 +86,7 @@ export default function HeaderBar({
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between", // space between hamburger and search
+          justifyContent: "space-between",
           padding: "8px",
           flexWrap: "nowrap",
           width: "100%",
@@ -70,12 +95,19 @@ export default function HeaderBar({
         }}
       >
         {/* Left side: Hamburger and Site Name */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {!desktop &&
-            (<button className="hamburger" onClick={onHamburgerClick}>
+        <div
+          style={{
+            display: searchActive ? "none" : "flex", // Hide after fade out
+            alignItems: "center",
+            gap: "8px",
+            ...fadeStyle,
+          }}
+        >
+          {!desktop && (
+            <button className="hamburger" onClick={onHamburgerClick}>
               ☰
-            </button>)
-          }
+            </button>
+          )}
           <img
             src="https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"
             alt="Logo"
@@ -87,9 +119,8 @@ export default function HeaderBar({
             }}
           />
           <div className="SiteName">{t("appName")}</div>
-
         </div>
-        <div style={{ flex: 0, maxWidth: "400px" }}>
+        <div style={{ flex: 0, maxWidth: "95%" }}>
           <Autocomplete
             freeSolo
             options={filteredSuggestions.map((page) => page.title)}
@@ -98,59 +129,96 @@ export default function HeaderBar({
             renderInput={(params) => (
               <TextField
                 {...params}
+                inputRef={searchInputRef}
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e, e.target.value)}
                 label={t("search")}
                 placeholder="keywords"
                 variant="outlined"
-                fullWidth
                 sx={{
                   minWidth: "150px",
-                  maxWidth: "400px",
+                  maxWidth: "100%",
+                  borderRadius: "8px",
+                  borderWidth: "0px",
                   backgroundImage: `url(${cardboardTexture})`,
                   backgroundSize: "cover",
                   backgroundRepeat: "repeat",
-                  borderRadius: "8px",
                   "& .MuiInputBase-input": { color: "white" },
                   "& .MuiInputLabel-root": { color: "white" },
+                  "& .MuiOutlinedInput-notchedOutline": { borderWidth: 0 },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "white",
+                    borderWidth: "2px",
+                    borderRadius: "8px",
+                  },
+                  "&.Mui-focused .MuiInputBase-input": {
+                    color: "white",
+                  },
+                  "&.Mui-focused .MuiInputLabel-root": {
+                    color: "white",
+                  },
                 }}
+                InputProps={{
+                  ...params.InputProps,
+                  // startAdornment: searchQuery && (
+                  //   <InputAdornment position="start">
+                  //     <ClearIcon
+                  //       onClick={() => {
+                  //         setSearchQuery("");
+                  //         setFilteredSuggestions([]);
+                  //         setSearchActive(false); // <-- Also close the search and fade in ham/recipes
+                  //       }}
+                  //       sx={{ cursor: "pointer", color: "white" }}
+                  //     />
+                  //   </InputAdornment>
+                  // ),
+                }}
+                onFocus={() => setSearchActive(true)}
+                onBlur={() => {
+                  setTimeout(() => {
+                    if (!searchQuery) setSearchActive(false);
+                  }, 100);
+                }}
+                onKeyDown={handleKeyDown}
               />
             )}
             sx={{
-              maxHeight: "80px",
-              padding: "0px",
-              maxWidth: "150px",
+              width: { xs: "150px", sm: "200px" },
+              maxWidth: "95%",
               transition: "width 0.3s ease",
               backgroundImage: `url(${cardboardTexture})`,
               backgroundSize: "fit",
-              padding: "0.1rem",
               backgroundRepeat: "repeat",
+              borderRadius: "8px",
+              position: "relative",
               "& .MuiInputBase-input": {
                 color: "white",
               },
               "& .MuiInputLabel-root": {
                 color: "white",
               },
+              "&:focus-within .MuiOutlinedInput-notchedOutline": {
+                borderColor: "white",
+                borderWidth: "2px",
+              },
+              "&:focus-within .MuiInputBase-input": {
+                color: "white",
+              },
+              "&:focus-within .MuiInputLabel-root": {
+                color: "white",
+              },
               "&:focus-within": {
-                width: "100%",
+                width: "95vw",
+                maxWidth: "95vw",
+                zIndex: 10,
+                position: "relative",
+                left: "unset",
+                right: "unset",
+                margin: "0 auto",
+                borderRadius: "8px",
+                borderWidth: "0px",
               },
-              borderRadius: "8px",
-              "&.MuiOutlinedInput-root": {
-                padding: "0 px",
-                "& fieldset": {
-                  borderColor: "black",
-                },
-                "&:hover fieldset": {
-                  borderColor: "black",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "black",
-                },
-                "&.MuiOutlinedInput-root": {
-                  padding: "0 px",
-                }
-
-              },
+              boxSizing: "border-box",
             }}
           />
         </div>
@@ -163,8 +231,7 @@ export default function HeaderBar({
           recipe={selectedRecipe}
           targetLang={i18n.language}
         />
-      )},
-
+      )}
     </>
   );
 }

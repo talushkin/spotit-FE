@@ -208,50 +208,58 @@ const handleSelectRecipe = (recipe) => {
           flexWrap: "wrap",
           alignItems: "center",
           gap: "1rem",
+          textAlign: "center", // <-- Add this line to center content horizontally
         }}
       >
-        <div style={{  flexBasis: "100%", textAlign: "center" , color: isDarkMode ? "white" : "inherit",}}>
+        <div
+          style={{
+            flexBasis: "100%",
+            textAlign: "center",
+            color: isDarkMode ? "white" : "inherit",
+            fontSize:
+              translatedCategory && translatedCategory.length > 24
+                ? "1.2rem"
+                : "2rem",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "100vw",
+            lineHeight: 1.2,
+          }}
+          title={translatedCategory}
+        >
           {translatedCategory}
         </div>
 
+        <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
           <Button
             variant="contained"
             color="primary"
             onClick={() => setOpenAdd(true)}
             sx={{
-              width: "400 px",
+              width: "400px",
               alignItems: "center",
               textAlign: "center",
             }}
           >
             {t("addRecipe")}
           </Button>
-                    <Button
+          <Button
             variant="contained"
             color="secondary"
             onClick={() => {
-              setOpenFill(true); 
-              setOpenAdd(true)
+              setOpenFill(true);
+              setOpenAdd(true);
             }}
             sx={{
-              width: "400 px",
+              width: "400px",
               alignItems: "center",
               textAlign: "center",
             }}
           >
             AI {t("addRecipe")}
           </Button>
-          {/* <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => setEditOrder((prev) => !prev)}
-            sx={{
-              flexGrow: 1,
-              width: "100%",
-            }}
-          >
-            {t("editOrder")}
-          </Button> */} 
+        </div>
       </div>
       <p style={{ flexBasis: "100%", textAlign: "center" }}>
         {t("page")} {page}, {t("recipes")} {startIndex + 1}–{endIndex} {t("of")} {totalItems}
