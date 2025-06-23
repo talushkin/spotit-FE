@@ -118,8 +118,8 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe,
   };
 
   const handleAddRecipe = async (recipe) => {
-console.log("Adding recipe:", recipe);
-    const newRecipeData = {
+    console.log("Adding recipe:", recipe);
+    let newRecipeData = {
       title: recipe?.title,
       ingredients: recipe?.ingredients,
       preparation: recipe?.preparation,
@@ -127,6 +127,26 @@ console.log("Adding recipe:", recipe);
       imageUrl: recipe?.imageUrl || "",
       category: selected?.category,
     };
+
+    // Translate fields to English if current language is not English
+    if (i18n.language !== "en") {
+      try {
+        const [titleEn, ingredientsEn, preparationEn] = await Promise.all([
+          translateDirectly(newRecipeData.title, "en"),
+          translateDirectly(newRecipeData.ingredients, "en"),
+          translateDirectly(newRecipeData.preparation, "en"),
+        ]);
+        newRecipeData = {
+          ...newRecipeData,
+          title: titleEn,
+          ingredients: ingredientsEn,
+          preparation: preparationEn,
+        };
+      } catch (e) {
+        // fallback to original if translation fails
+      }
+    }
+
     console.log("Adding recipe:", newRecipeData);
     try {
       const response = await dispatch(

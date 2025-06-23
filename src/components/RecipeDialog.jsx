@@ -87,6 +87,7 @@ const RecipeDialog = ({
   };
 
   const handleSave = () => {
+    console.log("Saving recipe:", editableRecipe);
     onSave(editableRecipe);
     onClose();
   };
@@ -128,7 +129,7 @@ const RecipeDialog = ({
         try {
           [translatedTitle, translatedIngredients, translatedPreparation] =
             await Promise.all([
-              translateDirectly(data.title , i18n.language),
+              translateDirectly(aiTitle , i18n.language),
               translateDirectly(data.ingredients, i18n.language),
               translateDirectly(data.preparation, i18n.language),
             ]);
