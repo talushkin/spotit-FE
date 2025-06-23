@@ -3,8 +3,8 @@ import NavItemList from "./NavItemList";
 import { useTranslation } from "react-i18next";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom"; // ✅ Step 1
-
-export default function NavMenu({ pages, onSelect, isOpen,  language, desktop }) {
+import themeModeButton from "./ThemeModeButton.jsx";
+export default function NavMenu({ pages, onSelect, isOpen,  language, desktop, toggleDarkMode }) {
   const { t, i18n } = useTranslation();
   const [editCategories, setEditCategories] = useState(false);
   const [reorder, setReorder] = useState(false);
@@ -56,6 +56,8 @@ export default function NavMenu({ pages, onSelect, isOpen,  language, desktop })
         }}
       >{t("changeOrder")}
       </Button>
+      <themeModeButton 
+      toggleDarkMode={toggleDarkMode}/>
     </div>
   );
 }

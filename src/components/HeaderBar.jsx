@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Autocomplete, TextField } from "@mui/material";
 import RecipeDialog from "./RecipeDialog";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
+import LanguageSelector from "./LanguageSelector.jsx";
+
 import {
   FormControl,
   InputLabel,
@@ -88,59 +89,6 @@ export default function HeaderBar({
           <div className="SiteName">{t("appName")}</div>
 
         </div>
-
-        <div>
-          <FormControl sx={{ maxWidth: "150px", marginRight: "8px" }}>
-            <InputLabel id="language-select-label">
-            </InputLabel>
-            <MuiSelect
-              labelId="language-select-label"
-              value={language}
-              onChange={handleLanguageChange}
-              sx={{
-                backgroundColor: "darkgreen",
-                color: "white",
-                "& .MuiSvgIcon-root": {
-                  color: "white",
-                },
-              }}
-            >
-              <MenuItem value="en">English</MenuItem>
-              <MenuItem value="he">עברית</MenuItem>
-              <MenuItem value="fr">Français</MenuItem>
-              <MenuItem value="ar">العربية</MenuItem>
-              <MenuItem value="de">Deutsch</MenuItem>
-              <MenuItem value="es">Español</MenuItem>
-              <MenuItem value="it">Italiano</MenuItem>
-              <MenuItem value="pt">Português</MenuItem>
-              <MenuItem value="ru">Русский</MenuItem>
-              <MenuItem value="zh">中文</MenuItem>
-              <MenuItem value="ja">日本語</MenuItem>
-              <MenuItem value="ko">한국어</MenuItem>
-              <MenuItem value="pl">Polski</MenuItem>
-              <MenuItem value="tr">Türkçe</MenuItem>
-              <MenuItem value="nl">Nederlands</MenuItem>
-            </MuiSelect>
-          </FormControl>
-        </div>
-              <Button
-        variant="contained"
-        onClick={toggleDarkMode}
-        sx={{
-          backgroundColor: 'darkgreen',
-          // mt: '200px',
-          //mb: 2,
-          "&:hover": {
-            backgroundColor: 'green',
-            "& .MuiSvgIcon-root": {
-              color: 'black',
-            },
-          },
-        }}
-      >
-        <Brightness4Icon sx={{ color: 'black' }} />
-      </Button>
-        {/* Right side: Search */}
         <div style={{ flex: 0, maxWidth: "400px" }}>
           <Autocomplete
             freeSolo

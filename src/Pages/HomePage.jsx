@@ -16,6 +16,11 @@ export default function Main(props) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [desktop, setDesktop] = useState(window.innerWidth > 768); // Check if desktop
 
+  // Add toggleDarkMode function
+  const toggleDarkMode = () => {
+    setIsDarkMode((prev) => !prev);
+  };
+
   // Define the handleHamburgerClick function
   const handleHamburgerClick = () => {
     console.log("Hamburger clicked", desktop);
@@ -50,12 +55,12 @@ export default function Main(props) {
         <div className="TOP">
           <HeaderBar
             desktop={desktop}
-            toggleDarkMode={() => setIsDarkMode((prev) => !prev)}
             logo={"https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"}
-            onHamburgerClick={handleHamburgerClick} // Pass the function here
+            onHamburgerClick={handleHamburgerClick}
             pages={recipes?.site?.pages}
             isDarkMode={isDarkMode}
             data={recipes}
+            toggleDarkMode={toggleDarkMode} // Pass down the function
           />
         </div>
         <div className="container-fluid ps-0 pe-0">
@@ -65,6 +70,7 @@ export default function Main(props) {
               style={{ width: desktop ? '400px' : '100%' }}
             >
               <NavMenu
+                toggleDarkMode={toggleDarkMode}
                 pages={recipes?.site?.pages}
                 isOpen={menuOpen || desktop}
                 onSelect={(item) => {
@@ -93,8 +99,6 @@ export default function Main(props) {
             </div>
           </div>
         </div>
-
-
       </div>
     </ThemeProvider>
   );
