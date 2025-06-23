@@ -270,9 +270,26 @@ const RecipeDialog = ({
         </DialogContent>
       </Box>
 
-      <DialogActions>
+      <DialogActions
+        sx={{
+          display: "flex",
+          gap: 2,
+          width: "100%",
+          justifyContent: "center",
+          "& > button": {
+            flex: 1,
+            minWidth: 0,
+            maxWidth: "100%",
+            paddingLeft: 2,
+            paddingRight: 2,
+            height: "48px", // Ensures all buttons have the same height
+            fontWeight: "bold", // Matches nav button style
+            borderRadius: "4px",
+          },
+        }}
+      >
         <Button onClick={handleFillAI} variant="contained" color="secondary">
-          {t("fill AI")}
+          {t("AI")}
         </Button>
         <Button onClick={handleDelete} variant="contained" color="error">
           {t("delete")}

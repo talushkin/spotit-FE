@@ -62,7 +62,7 @@ export default function NavMenu({ pages, onSelect, isOpen, language, desktop, to
       >
         {t("changeOrder")}
       </Button>
-      <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+      <div style={{ marginTop: "0rem", marginBottom: "0rem" }}>
         <LanguageSelector language={language} handleLanguageChange={handleLanguageChange} />
       </div>
       <ThemeModeButton toggleDarkMode={toggleDarkMode} />

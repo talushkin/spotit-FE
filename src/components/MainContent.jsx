@@ -224,7 +224,10 @@ const handleSelectRecipe = (recipe) => {
             overflow: "hidden",
             textOverflow: "ellipsis",
             maxWidth: "100vw",
-            lineHeight: 1.2,
+            lineHeight: translatedCategory && translatedCategory.length > 24
+                ? "1.2rem"
+                : "2rem",
+                marginTop: "1rem",
           }}
           title={translatedCategory}
         >
@@ -297,7 +300,7 @@ const handleSelectRecipe = (recipe) => {
           </SortableContext>
         </DndContext>
       ) : (
-        <div className="row d-flex justify-content-center">
+        <div className="row d-flex justify-content-left">
           {currentItems.map((item, index) => {
             let colClass = "col-12 col-sm-8 col-md-6 col-lg-3";
             if (currentItems.length === 1) {
@@ -305,13 +308,23 @@ const handleSelectRecipe = (recipe) => {
             } else if (currentItems.length === 2) {
               colClass = "col-sm-6";
             }
+            // Determine alignment based on direction
+            const isRTL = i18n.dir && i18n.dir() === "rtl";
             return (
               <div
                 key={index}
-                className={`${colClass} mb-4 d-flex justify-content-center`}
+                className={`${colClass} mb-4 d-flex`}
+                style={{
+                  justifyContent: isRTL ? "flex-end" : "flex-start",
+                }}
                 onClick={() => handleSelectRecipe(item)}
               >
-                <CaseCard index={startIndex + index + 1} item={item} category={selected?.category} isDarkMode={isDarkMode} />
+                <CaseCard
+                  index={startIndex + index + 1}
+                  item={item}
+                  category={selected?.category}
+                  isDarkMode={isDarkMode}
+                />
               </div>
             );
           })}
