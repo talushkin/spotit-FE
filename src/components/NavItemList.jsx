@@ -147,18 +147,25 @@ export default function NavItemList({
     translateCategories();
   }, [pages, i18n.language]);
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     setNewCat(false);
     if (inputValue.trim() === "") return;
+    // Translate the category to English before saving
+    let englishCategory = inputValue.trim();
+    try {
+      englishCategory = await translateDirectly(inputValue.trim(), "en");
+    } catch (e) {
+      // fallback to original if translation fails
+      englishCategory = inputValue.trim();
+    }
     const newItem = {
       _id: Date.now() + Math.random(),
-      category: inputValue.trim(),
+      category: englishCategory,
       createdAt: dayjs().format("DD-MM-YYYY"),
       itemPage: [],
       priority: items.length + 1,
     };
-    // Dispatch redux thunk to add category instead of calling storage directly
-    dispatch(addCategoryThunk(inputValue.trim()));
+    dispatch(addCategoryThunk(englishCategory));
     setItems([...items, newItem]);
     setInputValue("");
   };
