@@ -22,7 +22,7 @@ export default function RecipeDetail(props) {
    // console.log("Found category:", selectedCategoryData, selectedRecipeData);
     if (!selectedRecipeData) {
       console.warn("Recipe not found:", title);
-      return <div>Recipe not found.</div>;
+      // return <div>Recipe not found.</div>;
     }
    // console.log("Found recipe:", selectedRecipeData);
     return (

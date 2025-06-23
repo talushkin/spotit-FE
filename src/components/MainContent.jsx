@@ -231,35 +231,44 @@ const handleSelectRecipe = (recipe) => {
           {translatedCategory}
         </div>
 
-        <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setOpenAdd(true)}
-            sx={{
-              width: "400px",
-              alignItems: "center",
-              textAlign: "center",
-            }}
-          >
-            {t("addRecipe")}
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => {
-              setOpenFill(true);
-              setOpenAdd(true);
-            }}
-            sx={{
-              width: "400px",
-              alignItems: "center",
-              textAlign: "center",
-            }}
-          >
-            AI {t("addRecipe")}
-          </Button>
-        </div>
+        <div style={{
+  display: "flex",
+  gap: "1rem",
+  justifyContent: "center",
+  width: "100%",
+  maxWidth: "800px",
+  margin: "0 auto"
+}}>
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={() => setOpenAdd(true)}
+    sx={{
+      flex: 1,
+      minWidth: 0,
+      alignItems: "center",
+      textAlign: "center",
+    }}
+  >
+    {t("addRecipe")}
+  </Button>
+  <Button
+    variant="contained"
+    color="secondary"
+    onClick={() => {
+      setOpenFill(true);
+      setOpenAdd(true);
+    }}
+    sx={{
+      flex: 1,
+      minWidth: 0,
+      alignItems: "center",
+      textAlign: "center",
+    }}
+  >
+    AI {t("addRecipe")}
+  </Button>
+</div>
       </div>
       <p style={{ flexBasis: "100%", textAlign: "center" }}>
         {t("page")} {page}, {t("recipes")} {startIndex + 1}–{endIndex} {t("of")} {totalItems}

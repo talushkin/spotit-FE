@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
 import { useDispatch } from "react-redux";
 import { addCategoryThunk, reorderCategoriesThunk, delCategoryThunk } from "../store/dataSlice";
+import { Button } from "@mui/material";
 
 import {
   DndContext,
@@ -21,7 +22,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import i18n from "../i18n";
 
-  const isRTL = i18n.dir() === "rtl";
+const isRTL = i18n.dir() === "rtl";
 // A sortable item component using dnd‑kit
 function SortableItem({
   item,
@@ -210,25 +211,64 @@ export default function NavItemList({
         </SortableContext>
       </DndContext>
       {!newCat && (
-        <div className="nav-item flex items-center justify-start" >
-          <a href="#" onClick={() => setNewCat(true)}>
-            + {t("addCategory")}
-          </a>
-        </div>
+        <Button
+          variant="contained"
+          onClick={() => setNewCat(true)}
+          sx={{
+            backgroundColor: "darkgreen",
+            color: "white",
+            width: "100%",
+            marginTop: "0.5rem",
+            "&:hover": {
+              backgroundColor: "#145214",
+            },
+          }}
+        >
+          + {t("addCategory")}
+        </Button>
       )}
       {newCat && (
-        <input
-          type="text"
-          placeholder={t("addCategory")}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleAddItem();
-            }
-          }}
-          className="mt-2 p-2 border rounded w-full"
-        />
+        <div style={{ width: "100%", display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.5rem" }}>
+          <input
+            type="text"
+            placeholder={t("addCategory")}
+            value={inputValue}
+            autoFocus
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" || e.key === "x" || e.key === "X") {
+                setNewCat(false);
+                setInputValue("");
+              }
+              if (e.key === "Enter") {
+                handleAddItem();
+              }
+            }}
+            className="mt-2 p-2 border rounded w-full"
+            style={{ flex: "0 1 80%" , maxWidth: "150px", minWidth: "100px" }}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setNewCat(false);
+              setInputValue("");
+            }}
+            style={{
+              background: "darkgreen",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              padding: "0.5rem 1rem",
+              cursor: "pointer",
+              fontWeight: "bold",
+              flex: "0 1 20%",
+              minWidth: 0,
+              maxWidth: "60px"
+            }}
+          >
+            ×
+          </button>
+        </div>
       )}
     </>
   );

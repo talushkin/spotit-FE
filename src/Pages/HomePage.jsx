@@ -67,7 +67,7 @@ export default function Main(props) {
           <div className="flex-column flex-md-row ps-0 pe-0 row">
             <div
               className="nav-menu col-12 col-md-auto ps-0 pe-0"
-              style={{ width: desktop ? '400px' : '100%' }}
+              style={{ width: desktop ? '250px' : '100%' }}
             >
               <NavMenu
                 toggleDarkMode={toggleDarkMode}
