@@ -114,7 +114,6 @@ export default function HeaderBar({
             style={{
               width: "60px",
               borderRadius: "50%",
-              margin: "30px",
             }}
           />
           <div className="SiteName">{t("appName")}</div>
