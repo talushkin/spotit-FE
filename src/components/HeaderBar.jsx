@@ -112,10 +112,9 @@ export default function HeaderBar({
             src="https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"
             alt="Logo"
             style={{
-              width: "40px",
-              height: "40px",
+              width: "60px",
               borderRadius: "50%",
-              marginLeft: "8px",
+              margin: "30px",
             }}
           />
           <div className="SiteName">{t("appName")}</div>
