@@ -47,38 +47,14 @@ export default function HeaderBar({
   );
 
   useEffect(() => {
-    let isMounted = true;
-    const translateTitles = async () => {
-      if (!allRecipes) return;
-      if (i18n.language === "en") {
-        if (isMounted)
+          if (!allRecipes) return;
           setTranslatedOptions(
             allRecipes.map((r) => ({
               title: r.title, // Displayed (English) title
               category: r.category,
               originalTitle: r.title, // Save original English title
             }))
-          );
-        return;
-      }
-      const translated = await Promise.all(
-        allRecipes.map((r) =>
-          r.title ? translateDirectly(r.title, i18n.language) : ""
-        )
-      );
-      if (isMounted)
-        setTranslatedOptions(
-          allRecipes.map((r, idx) => ({
-            title: translated[idx], // Displayed (translated) title
-            category: r.category,
-            originalTitle: r.title, // Save original English title
-          }))
-        );
-    };
-    translateTitles();
-    return () => {
-      isMounted = false;
-    };
+          );  
   }, [allRecipes, i18n.language]);
 
   const handleSearchChange = (event, value) => {

@@ -45,6 +45,29 @@ const RecipeDialog = ({
     ingredients: false,
     preparation: false,
   });
+  const [showTranslated, setShowTranslated] = useState(false);
+  const [translatedRecipe, setTranslatedRecipe] = useState({
+    title: "",
+    ingredients: "",
+    preparation: "",
+  });
+
+  useEffect(() => {
+    // Reset to English when dialog opens or recipe changes
+    setShowTranslated(false);
+    setEditableRecipe({
+      title: recipe?.title || "",
+      ingredients: recipe?.ingredients || "",
+      preparation: recipe?.preparation || "",
+      imageUrl: recipe?.imageUrl || "",
+      _id: recipe?._id || "",
+    });
+    setTranslatedRecipe({
+      title: "",
+      ingredients: "",
+      preparation: "",
+    });
+  }, [recipe, open]);
 
   useEffect(() => {
     if (recipe) {
@@ -63,30 +86,30 @@ const RecipeDialog = ({
     }
   }, [autoFill]);
 
-  useEffect(() => {
-    if (!recipe || !targetLang || !open || targetLang === "en") return;
-    const doTranslate = async () => {
-      try {
-        setIsTranslating({ title: true, ingredients: true, preparation: true });
-        const [title, ingredients, preparation] = await Promise.all([
-          translateDirectly(recipe.title, targetLang),
-          translateDirectly(recipe.ingredients, targetLang),
-          translateDirectly(recipe.preparation, targetLang),
-        ]);
-        setEditableRecipe((prev) => ({
-          ...prev,
-          title,
-          ingredients,
-          preparation,
-        }));
-      } catch (error) {
-        console.error("Error during translation:", error);
-      } finally {
-        setIsTranslating({ title: false, ingredients: false, preparation: false });
-      }
-    };
-    doTranslate();
-  }, [recipe, targetLang, open]);
+  // useEffect(() => {
+  //   if (!recipe || !targetLang || !open || targetLang === "en") return;
+  //   const doTranslate = async () => {
+  //     try {
+  //       setIsTranslating({ title: true, ingredients: true, preparation: true });
+  //       const [title, ingredients, preparation] = await Promise.all([
+  //         translateDirectly(recipe.title, targetLang),
+  //         translateDirectly(recipe.ingredients, targetLang),
+  //         translateDirectly(recipe.preparation, targetLang),
+  //       ]);
+  //       setEditableRecipe((prev) => ({
+  //         ...prev,
+  //         title,
+  //         ingredients,
+  //         preparation,
+  //       }));
+  //     } catch (error) {
+  //       console.error("Error during translation:", error);
+  //     } finally {
+  //       setIsTranslating({ title: false, ingredients: false, preparation: false });
+  //     }
+  //   };
+  //   doTranslate();
+  // }, [recipe, targetLang, open]);
 
   const handleChange = (field) => (event) => {
     setEditableRecipe((prev) => ({
@@ -131,14 +154,14 @@ const RecipeDialog = ({
       const data = await response.json();
 
       // If the current language is not English, translate the AI results back to the current language
-      let translatedTitle = data.title || editableRecipe.title;
+      let translatedTitle = data.title;
       let translatedIngredients = data.ingredients;
       let translatedPreparation = data.preparation;
       if (i18n.language !== "en") {
         try {
           [translatedTitle, translatedIngredients, translatedPreparation] =
             await Promise.all([
-              translateDirectly(aiTitle , i18n.language),
+              translateDirectly(data.title , i18n.language),
               translateDirectly(data.ingredients, i18n.language),
               translateDirectly(data.preparation, i18n.language),
             ]);
@@ -153,7 +176,7 @@ const RecipeDialog = ({
         title: translatedTitle,
         preparation: translatedPreparation,
       }));
-      await handleRecreateImage(aiTitle || editableRecipe.title);
+      await handleRecreateImage(data.title);
     } catch (error) {
       console.error("Error while filling recipe via AI:", error);
     } finally {
@@ -198,6 +221,41 @@ const RecipeDialog = ({
     }
   };
 
+  const handleLangButton = async () => {
+    if (!showTranslated && targetLang !== "en") {
+      setIsTranslating({ title: true, ingredients: true, preparation: true });
+      try {
+        const [title, ingredients, preparation] = await Promise.all([
+          translateDirectly(recipe.title, targetLang),
+          translateDirectly(recipe.ingredients, targetLang),
+          translateDirectly(recipe.preparation, targetLang),
+        ]);
+        setTranslatedRecipe({ title, ingredients, preparation });
+        setEditableRecipe((prev) => ({
+          ...prev,
+          title,
+          ingredients,
+          preparation,
+        }));
+      } catch (error) {
+        console.error("Error during translation:", error);
+      } finally {
+        setIsTranslating({ title: false, ingredients: false, preparation: false });
+        setShowTranslated(true);
+      }
+    } else {
+      // Switch back to English/original
+      setEditableRecipe({
+        title: recipe?.title || "",
+        ingredients: recipe?.ingredients || "",
+        preparation: recipe?.preparation || "",
+        imageUrl: recipe?.imageUrl || "",
+        _id: recipe?._id || "",
+      });
+      setShowTranslated(false);
+    }
+  };
+
   return (
     <Dialog
       open={open}
@@ -233,6 +291,7 @@ const RecipeDialog = ({
           borderTopLeftRadius: "24px",
           borderTopRightRadius: "24px",
           position: "relative",
+          minHeight: "60px",
         }}
       >
         {editableRecipe.title}
@@ -287,6 +346,29 @@ const RecipeDialog = ({
             marginBottom={2}
             style={{ minHeight: "180px" }}
           >
+            {/* Left button: ENGLISH */}
+            <Button
+              variant={showTranslated ? "outlined" : "contained"}
+              size="small"
+              sx={{
+                position: "absolute",
+                left: 0,
+                top: 16,
+                zIndex: 3,
+                background: showTranslated ? "#fff" : "darkgreen",
+                color: showTranslated ? "inherit" : "#fff",
+                borderRadius: "16px",
+                fontWeight: "bold",
+                minWidth: "90px",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+              }}
+              onClick={() => {
+                if (showTranslated) handleLangButton();
+              }}
+            >
+              ENGLISH
+            </Button>
+
             <img
               src={
                 editableRecipe.imageUrl ||
@@ -322,6 +404,32 @@ const RecipeDialog = ({
             >
               <AutorenewIcon sx={{ fontSize: 40 }} />
             </IconButton>
+
+            {/* Right button: Current language name */}
+            <Button
+              variant={showTranslated ? "contained" : "outlined"}
+              size="small"
+              sx={{
+                position: "absolute",
+                right: 0,
+                top: 16,
+                zIndex: 3,
+                background: showTranslated ? "darkgreen" : "#fff",
+                color: showTranslated ? "#fff" : "inherit",
+                borderRadius: "16px",
+                fontWeight: "bold",
+                minWidth: "90px",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+              }}
+              onClick={() => {
+                if (!showTranslated) handleLangButton();
+              }}
+              disabled={targetLang === "en"}
+            >
+              {targetLang === "en"
+                ? "ENGLISH"
+                : t(targetLang.charAt(0).toUpperCase() + targetLang.slice(1))}
+            </Button>
           </Box>
 
           <Box position="relative">
