@@ -11,7 +11,8 @@ export default function HeaderBar({
   logo,
   onHamburgerClick,
   pages,
-  desktop
+  desktop,
+  setSelectedCategory, // <-- Add prop for setting selected category
 }) {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,26 +34,47 @@ export default function HeaderBar({
     }
   }, [searchQuery]);
 
-  const allRecipes = pages?.flatMap((category) => category.itemPage);
-  const [translatedTitles, setTranslatedTitles] = useState([]);
+  // Replace the translatedTitles state with an array of objects: { title, category }
+  const [translatedOptions, setTranslatedOptions] = useState([]);
+
+  // Build allRecipes as before
+  const allRecipes = pages?.flatMap((category) =>
+    category.itemPage.map((r) => ({ ...r, category: category.category }))
+  );
 
   useEffect(() => {
     let isMounted = true;
     const translateTitles = async () => {
       if (!allRecipes) return;
       if (i18n.language === "en") {
-        if (isMounted) setTranslatedTitles(allRecipes.map(r => r.title));
+        if (isMounted)
+          setTranslatedOptions(
+            allRecipes.map((r) => ({
+              title: r.title, // Displayed (English) title
+              category: r.category,
+              originalTitle: r.title, // Save original English title
+            }))
+          );
         return;
       }
       const translated = await Promise.all(
-        allRecipes.map(r =>
+        allRecipes.map((r) =>
           r.title ? translateDirectly(r.title, i18n.language) : ""
         )
       );
-      if (isMounted) setTranslatedTitles(translated);
+      if (isMounted)
+        setTranslatedOptions(
+          allRecipes.map((r, idx) => ({
+            title: translated[idx], // Displayed (translated) title
+            category: r.category,
+            originalTitle: r.title, // Save original English title
+          }))
+        );
     };
     translateTitles();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [allRecipes, i18n.language]);
 
   const handleSearchChange = (event, value) => {
@@ -60,30 +82,39 @@ export default function HeaderBar({
     setSearchQuery(value);
     if (!value) {
       setFilteredSuggestions([]);
-      
       return;
-     
     }
-    const filtered = allRecipes?.filter((recipe, idx) =>
-      translatedTitles[idx]?.toLowerCase().includes(value.toLowerCase())
+    const filtered = translatedOptions.filter((opt) =>
+      opt.title?.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredSuggestions(filtered);
   };
 
   const handleSelect = (event, value) => {
-    // Find the recipe by translated title
-    const idx = translatedTitles.findIndex(title => title === value);
-    const recipe = allRecipes[idx];
-    if (recipe) {
-      setSelectedRecipe(recipe);
-      setDialogOpen(true);
-      setSearchActive(false);
-       setShowMobileSearch(false); // Reset mobile search when input is cleared
-      setSearchQuery(""); // <-- Reset the search text
-      setFilteredSuggestions([]);
-      console.log(searchQuery,"Search closed, fading in hamburger and recipes");
-            if (searchInputRef.current) {
-        searchInputRef.current.blur();
+    // Find the option object by title
+    console.log("Selected value:", value);
+
+    const option = translatedOptions.find((opt) => opt.title === value);
+    console.log("Found option:", option);
+    if (option) {
+      // Find the original recipe object by originalTitle
+      const recipe = allRecipes.find(
+        (r) => r.title === option.originalTitle
+      );
+      console.log("Found recipe:", recipe);
+      if (recipe) {
+        setSelectedRecipe(recipe);
+        setDialogOpen(true);
+        setSearchActive(false);
+        setShowMobileSearch(false);
+        setSearchQuery("");
+        setFilteredSuggestions([]);
+        if (option?.category) {
+          setSelectedCategory(option?.category);
+        }
+        if (searchInputRef.current) {
+          searchInputRef.current.blur();
+        }
       }
     }
   };
@@ -94,7 +125,10 @@ export default function HeaderBar({
       setSearchActive(false);
       setSearchQuery(""); // <-- Reset the search text
       setFilteredSuggestions([]);
-      console.log(searchQuery,"Search closed, fading in hamburger and recipes");
+      console.log(
+        searchQuery,
+        "Search closed, fading in hamburger and recipes"
+      );
       // Optionally blur the input
       if (searchInputRef.current) {
         searchInputRef.current.blur();
@@ -104,7 +138,8 @@ export default function HeaderBar({
 
   // Fade and width animation styles for left side (hamburger/logo/title)
   const fadeStyle = {
-    transition: "opacity 0.4s cubic-bezier(.4,0,.2,1), width 0.4s cubic-bezier(.4,0,.2,1)",
+    transition:
+      "opacity 0.4s cubic-bezier(.4,0,.2,1), width 0.4s cubic-bezier(.4,0,.2,1)",
     opacity: searchActive ? 0 : 1,
     width: searchActive ? 0 : "auto",
     pointerEvents: searchActive ? "none" : "auto",
@@ -177,7 +212,7 @@ export default function HeaderBar({
             {/* Show input if desktop or mobile search expanded */}
             <Autocomplete
               freeSolo
-              options={translatedTitles}
+              options={translatedOptions.map((opt) => opt.title)}
               onInputChange={handleSearchChange}
               onChange={handleSelect}
               renderInput={(params) => (
