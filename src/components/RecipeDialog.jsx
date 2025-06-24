@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 const BASE_URL = "https://be-tan-theta.vercel.app";
 
@@ -39,6 +40,11 @@ const RecipeDialog = ({
 
   const [isLoadingImage, setIsLoadingImage] = useState(false);
   const [isFillingAI, setIsFillingAI] = useState(false);
+  const [isTranslating, setIsTranslating] = useState({
+    title: false,
+    ingredients: false,
+    preparation: false,
+  });
 
   useEffect(() => {
     if (recipe) {
@@ -61,6 +67,7 @@ const RecipeDialog = ({
     if (!recipe || !targetLang || !open || targetLang === "en") return;
     const doTranslate = async () => {
       try {
+        setIsTranslating({ title: true, ingredients: true, preparation: true });
         const [title, ingredients, preparation] = await Promise.all([
           translateDirectly(recipe.title, targetLang),
           translateDirectly(recipe.ingredients, targetLang),
@@ -74,6 +81,8 @@ const RecipeDialog = ({
         }));
       } catch (error) {
         console.error("Error during translation:", error);
+      } finally {
+        setIsTranslating({ title: false, ingredients: false, preparation: false });
       }
     };
     doTranslate();
@@ -195,23 +204,48 @@ const RecipeDialog = ({
       onClose={onClose}
       dir={isRTL ? "rtl" : "ltr"}
       PaperProps={{
-        style: { maxWidth: "95%", width: "95%" },
+        style: {
+          maxWidth: "98vw",
+          width: "98vw",
+          maxHeight: "98vh",
+          height: "98vh",
+          borderRadius: "24px",
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+          background: "rgb(247, 241, 227)",
+          overflow: "auto",
+        },
       }}
     >
       <DialogTitle
         style={{
           backgroundColor: "#f7f1e3",
           textAlign: "center",
-          padding: "10px 0 0 0",
-          fontSize: "20px",
+          padding: "10px",
+          fontSize: "2.8rem", // Enlarged title text
+          fontWeight: "bold",
+          borderTopLeftRadius: "24px",
+          borderTopRightRadius: "24px",
+          position: "relative",
         }}
       >
         {editableRecipe.title}
         <IconButton
           onClick={onClose}
-          style={{ position: "absolute", right: 8, top: 8 }}
+          style={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+          }}
         >
-          <span style={{ fontSize: "24px", fontWeight: "bold" }}>×</span>
+          <span style={{ fontSize: "24px", fontWeight: "bold", lineHeight: 1 }}>×</span>
         </IconButton>
       </DialogTitle>
 
@@ -244,6 +278,7 @@ const RecipeDialog = ({
             justifyContent="center"
             alignItems="center"
             marginBottom={2}
+            style={{ minHeight: "180px" }}
           >
             <img
               src={
@@ -264,37 +299,145 @@ const RecipeDialog = ({
             <IconButton
               onClick={() => handleRecreateImage(editableRecipe.title)}
               title={t("recreate image")}
-              style={{ position: "absolute", right: 10, top: 10 }}
+              style={{
+                position: "absolute",
+                top: 12,
+                background: "#fff",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2,
+              }}
             >
-              <span style={{ fontSize: "24px" }}>✏️</span>
+              <AutorenewIcon sx={{ fontSize: 40 }} />
             </IconButton>
           </Box>
 
-          <TextField
-            label={t("recipeName")}
-            value={editableRecipe.title}
-            onChange={handleChange("title")}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label={t("ingredients")}
-            value={editableRecipe.ingredients}
-            onChange={handleChange("ingredients")}
-            fullWidth
-            multiline
-            rows={4}
-            margin="normal"
-          />
-          <TextField
-            label={t("preparation")}
-            value={editableRecipe.preparation}
-            onChange={handleChange("preparation")}
-            fullWidth
-            multiline
-            rows={4}
-            margin="normal"
-          />
+          <Box position="relative">
+            <TextField
+              label={t("recipeName")}
+              value={editableRecipe.title}
+              onChange={handleChange("title")}
+              fullWidth
+              margin="normal"
+              InputProps={{
+                style: {
+                  fontSize: "2rem",
+                  fontWeight: "bold",
+                },
+                readOnly: isTranslating.title,
+              }}
+              InputLabelProps={{
+                style: {
+                  fontSize: "1.2rem",
+                  fontWeight: "bold",
+                },
+              }}
+            />
+            {isTranslating.title && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  pointerEvents: "none",
+                  zIndex: 2,
+                  background: "rgba(255,255,255,0.7)",
+                }}
+              >
+                <CircularProgress size={32} />
+                <span style={{ marginTop: 8, fontWeight: "bold", fontSize: "1rem" }}>
+                  {t("loading")}
+                </span>
+              </Box>
+            )}
+          </Box>
+
+          <Box position="relative">
+            <TextField
+              label={t("ingredients")}
+              value={editableRecipe.ingredients}
+              onChange={handleChange("ingredients")}
+              fullWidth
+              multiline
+              rows={4}
+              margin="normal"
+              InputProps={{
+                readOnly: isTranslating.ingredients,
+              }}
+            />
+            {isTranslating.ingredients && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  pointerEvents: "none",
+                  zIndex: 2,
+                  background: "rgba(255,255,255,0.7)",
+                }}
+              >
+                <CircularProgress size={32} />
+                <span style={{ marginTop: 8, fontWeight: "bold", fontSize: "1rem" }}>
+                  {t("loading")}
+                </span>
+              </Box>
+            )}
+          </Box>
+
+          <Box position="relative">
+            <TextField
+              label={t("preparation")}
+              value={editableRecipe.preparation}
+              onChange={handleChange("preparation")}
+              fullWidth
+              multiline
+              rows={4}
+              margin="normal"
+              InputProps={{
+                readOnly: isTranslating.preparation,
+              }}
+            />
+            {isTranslating.preparation && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  pointerEvents: "none",
+                  zIndex: 2,
+                  background: "rgba(255,255,255,0.7)",
+                }}
+              >
+                <CircularProgress size={32} />
+                <span style={{ marginTop: 8, fontWeight: "bold", fontSize: "1rem" }}>
+                  {t("loading")}
+                </span>
+              </Box>
+            )}
+          </Box>
         </DialogContent>
       </Box>
 
@@ -304,29 +447,44 @@ const RecipeDialog = ({
           gap: 2,
           width: "100%",
           justifyContent: "center",
+          background: "rgb(247, 241, 227)", // Set background color for actions area
           "& > button": {
             flex: 1,
             minWidth: 0,
             maxWidth: "100%",
             paddingLeft: 2,
             paddingRight: 2,
-            height: "48px", // Ensures all buttons have the same height
-            fontWeight: "bold", // Matches nav button style
-            borderRadius: "4px",
+            height: "48px",
+            fontWeight: "bold",
+            borderRadius: "10px",
           },
         }}
       >
         <Button onClick={handleFillAI} variant="contained" color="secondary">
           {t("AI")}
         </Button>
-        <Button onClick={handleDelete} variant="contained" color="error">
+        <Button
+          onClick={handleDelete}
+          variant="contained"
+          color="error"
+          sx={{
+            background: "#fff",
+            color: "#d32f2f",
+            border: "1px solid #d32f2f",
+            "&:hover": {
+              background: "#f7f1e3",
+              color: "#b71c1c",
+              border: "1px solid #b71c1c",
+            },
+          }}
+        >
           {t("delete")}
         </Button>
         <Button onClick={handleSave} variant="contained">
           {t("save")}
         </Button>
         <Button onClick={onClose} variant="contained" color="primary">
-          Close
+          {t("close")}
         </Button>
       </DialogActions>
     </Dialog>

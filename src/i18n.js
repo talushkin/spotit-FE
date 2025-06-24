@@ -37,6 +37,7 @@ i18n
           addRecipe: "Add Recipe",
           editOrder: "Reorder",
           delete: "Delete",
+          deleteAll: "Delete All",
           recipeName: "Recipe Name",
           ingredients: "Ingredients",
           preparation: "Preparation",
@@ -69,6 +70,8 @@ i18n
           recipes: "מתכונים",
           loading: "מתרגם...",
           search: "חיפוש",
+          delete: "מחק",
+          deleteAll: "מחק הכל",
         },
       },
       fr: {
@@ -89,6 +92,8 @@ i18n
           recipes: "recettes",
           loading: "Traduction...",
           search: "Rechercher",
+          delete: "Supprimer",
+          deleteAll: "Tout supprimer",
         },
       },
       ar: {
@@ -109,6 +114,8 @@ i18n
           recipes: "وصفات",
           loading: "جارٍ الترجمة...",
           search: "بحث",
+          delete: "حذف",
+          deleteAll: "حذف الكل",
         },
       },
       de: {
@@ -129,6 +136,8 @@ i18n
           recipes: "Rezepte",
           loading: "Übersetzen...",
           search: "Suche",
+          delete: "Löschen",
+          deleteAll: "Alle löschen",
         },
       },
       es: {
@@ -149,6 +158,8 @@ i18n
           recipes: "recetas",
           loading: "Traduciendo...",
           search: "Buscar",
+          delete: "Eliminar",
+          deleteAll: "Eliminar todo",
         },
       },
       it: {
@@ -169,6 +180,8 @@ i18n
           recipes: "ricette",
           loading: "Traduzione...",
           search: "Cerca",
+          delete: "Elimina",
+          deleteAll: "Elimina tutto",
         },
       },
       pt: {
@@ -189,6 +202,8 @@ i18n
           recipes: "receitas",
           loading: "Traduzindo...",
           search: "Procurar",
+          delete: "Excluir",
+          deleteAll: "Excluir tudo",
         },
       },
       ru: {
@@ -209,6 +224,8 @@ i18n
           recipes: "рецепты",
           loading: "Перевод...",
           search: "Поиск",
+          delete: "Удалить",
+          deleteAll: "Удалить все",
         },
       },
       zh: {
@@ -229,6 +246,8 @@ i18n
           recipes: "食谱",
           loading: "翻译中...",
           search: "搜索",
+          delete: "删除",
+          deleteAll: "全部删除",
         },
       },
       ja: {
@@ -249,6 +268,8 @@ i18n
           recipes: "レシピ",
           loading: "翻訳中...",
           search: "検索",
+          delete: "削除",
+          deleteAll: "すべて削除",
         },
       },
       ko: {
@@ -269,6 +290,8 @@ i18n
           recipes: "레시피",
           loading: "번역 중...",
           search: "검색",
+          delete: "삭제",
+          deleteAll: "전체 삭제",
         },
       },
       pl: {
@@ -289,6 +312,8 @@ i18n
           recipes: "przepisy",
           loading: "Tłumaczenie...",
           search: "Szukaj",
+          delete: "Usuń",
+          deleteAll: "Usuń wszystko",
         },
       },
       tr: {
@@ -309,6 +334,8 @@ i18n
           recipes: "Tarifler",
           loading: "Çevriliyor...",
           search: "Ara",
+          delete: "Sil",
+          deleteAll: "Hepsini sil",
         },
       },
       nl: {
@@ -329,6 +356,8 @@ i18n
           recipes: "recepten",
           loading: "Vertalen...",
           search: "Zoeken",
+          delete: "Verwijderen",
+          deleteAll: "Alles verwijderen",
         },
       },
     },

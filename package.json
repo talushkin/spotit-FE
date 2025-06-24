@@ -50,5 +50,6 @@
     "@babel/preset-env": "^7.21.0",
     "@babel/preset-react": "^7.21.0",
     "cross-env": "^7.0.3"
-  }
+  },
+  "license": "MIT"
 }

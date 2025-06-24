@@ -70,6 +70,7 @@ export default function Main(props) {
               style={{ width: desktop ? '270px' : '100%' }}
             >
               <NavMenu
+                isDarkMode={isDarkMode}
                 toggleDarkMode={toggleDarkMode}
                 pages={recipes?.site?.pages}
                 isOpen={menuOpen || desktop}

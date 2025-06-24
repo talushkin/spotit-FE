@@ -23,7 +23,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useNavigate } from "react-router-dom";
-
+import AddIcon from "@mui/icons-material/Add";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 
 
 
@@ -254,44 +255,73 @@ const handleSelectRecipe = (recipe) => {
           {translatedCategory}
         </div>
 
-        <div style={{
-  display: "flex",
-  gap: "1rem",
-  justifyContent: "center",
-  width: "100%",
-  maxWidth: "800px",
-  margin: "0 auto"
-}}>
-  <Button
-    variant="contained"
-    color="primary"
-    onClick={() => setOpenAdd(true)}
-    sx={{
-      flex: 1,
-      minWidth: 0,
-      alignItems: "center",
-      textAlign: "center",
-    }}
-  >
-    {t("addRecipe")}
-  </Button>
-  <Button
-    variant="contained"
-    color="secondary"
-    onClick={() => {
-      setOpenFill(true);
-      setOpenAdd(true);
-    }}
-    sx={{
-      flex: 1,
-      minWidth: 0,
-      alignItems: "center",
-      textAlign: "center",
-    }}
-  >
-    AI {t("addRecipe")}
-  </Button>
-</div>
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            justifyContent: "center",
+            width: "100%",
+            maxWidth: "800px",
+            margin: "0 auto"
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setOpenAdd(true)}
+            sx={{
+              minWidth: "56px",
+              minHeight: "56px",
+              width: "56px",
+              height: "56px",
+              borderRadius: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              p: 0,
+              fontWeight: "bold",
+              fontSize: "0.85rem",
+              gap: "0.25rem",
+              backgroundColor: "darkgreen", // <-- dark green background
+              "&:hover": {
+                backgroundColor: "#145214",
+              },
+            }}
+            title={t("addRecipe")}
+          >
+            <AddIcon sx={{ fontSize: 28 }} />
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => {
+              setOpenFill(true);
+              setOpenAdd(true);
+            }}
+            sx={{
+              minWidth: "56px",
+              minHeight: "56px",
+              width: "56px",
+              height: "56px",
+              borderRadius: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              p: 0,
+              fontWeight: "bold",
+              fontSize: "0.85rem",
+              gap: "0.25rem",
+              backgroundColor: "darkgreen",
+              "&:hover": {
+                backgroundColor: "#145214",
+              },
+            }}
+            title={`AI ${t("addRecipe")}`}
+          >
+            <AddIcon sx={{ fontSize: 20, mr: 0.5 }} />
+            <SmartToyIcon sx={{ fontSize: 24 }} />
+          </Button>
+        </div>
       </div>
       <p style={{ flexBasis: "100%", textAlign: "center" }}>
         {t("page")} {page}, {t("recipes")} {startIndex + 1}–{endIndex} {t("of")} {totalItems}
@@ -320,7 +350,17 @@ const handleSelectRecipe = (recipe) => {
           </SortableContext>
         </DndContext>
       ) : (
-        <div className="row d-flex justify-content-left">
+        <div
+          className="row d-flex"
+          style={{
+            justifyContent:
+              window.innerWidth <= 650
+                ? "center"
+                : (i18n.dir && i18n.dir() === "rtl")
+                ? "flex-end"
+                : "flex-start",
+          }}
+        >
           {currentItems.map((item, index) => {
             let colClass = "col-12 col-sm-8 col-md-6 col-lg-3";
             if (currentItems.length === 1) {
@@ -328,14 +368,18 @@ const handleSelectRecipe = (recipe) => {
             } else if (currentItems.length === 2) {
               colClass = "col-sm-6";
             }
-            // Determine alignment based on direction
             const isRTL = i18n.dir && i18n.dir() === "rtl";
             return (
               <div
                 key={index}
                 className={`${colClass} mb-4 d-flex`}
                 style={{
-                  justifyContent: isRTL ? "flex-end" : "flex-start",
+                  justifyContent:
+                    window.innerWidth <= 650
+                      ? "center"
+                      : isRTL
+                      ? "flex-end"
+                      : "flex-start",
                 }}
                 onClick={() => handleSelectRecipe(item)}
               >

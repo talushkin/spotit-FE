@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import ThemeModeButton from "./ThemeModeButton.jsx";
 import LanguageSelector from "./LanguageSelector.jsx";
 
-export default function NavMenu({ pages, onSelect, isOpen, language, desktop, toggleDarkMode }) {
+export default function NavMenu({ pages, onSelect, isOpen, language, desktop, isDarkMode, toggleDarkMode }) {
   const { t, i18n } = useTranslation();
   const [editCategories, setEditCategories] = useState(false);
   const [reorder, setReorder] = useState(false);
@@ -65,7 +65,7 @@ export default function NavMenu({ pages, onSelect, isOpen, language, desktop, to
       <div style={{ marginTop: "0rem", marginBottom: "0rem" }}>
         <LanguageSelector language={language} handleLanguageChange={handleLanguageChange} />
       </div>
-      <ThemeModeButton toggleDarkMode={toggleDarkMode} />
+      <ThemeModeButton isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { translateDirectly } from "./translateAI";
 import dayjs from "dayjs";
 import * as storage from "../utils/storage";
 
-export default function CaseCard({ item, category, index , isDarkMode }) {
+export default function CaseCard({ item, category, index, isDarkMode }) {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
 
@@ -12,7 +12,9 @@ export default function CaseCard({ item, category, index , isDarkMode }) {
     title: "",
     description: "",
   });
-  const [imageUrl, setImageUrl] = useState("C:\\FE-code\\recipes\\BE\\images\\1747127810600-generated-image.png");
+  const [imageUrl, setImageUrl] = useState(
+    "C:\\FE-code\\recipes\\BE\\images\\1747127810600-generated-image.png"
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -45,14 +47,28 @@ export default function CaseCard({ item, category, index , isDarkMode }) {
   )}/${encodeURIComponent(item.title)}`;
 
   return (
-    <div className="case" style={{ backgroundColor: isDarkMode ? "#333" : "#fffce8" }}>
+    <div
+      className="case"
+      style={{
+        backgroundColor: isDarkMode ? "#333" : "#fffce8",
+        border: isDarkMode
+          ? "1px solid rgb(71, 69, 69)"
+          : "1px solid rgb(234, 227, 227)",
+        borderRadius: "18px",
+        transition: "border 0.2s",
+      }}
+    >
       <img
-        src={item.imageUrl || imageUrl} 
+        src={item.imageUrl || imageUrl}
         alt={translated.title || item.title}
-        onError={(e) => {e.target.src=`https://placehold.co/100x100?text=${item.title}`;}}
+        onError={(e) => {
+          e.target.src = `https://placehold.co/100x100?text=${item.title}`;
+        }}
       />
       <h2>{isLoading ? t("loading") : translated.title}</h2>
-      <p style={{color:isDarkMode?"#fff":"#333"}}>{item.createdAt ? ` ${dayjs(item.createdAt).format("DD-MM-YYYY")}` : ""}</p>
+      <p style={{ color: isDarkMode ? "#fff" : "#333" }}>
+        {item.createdAt ? ` ${dayjs(item.createdAt).format("DD-MM-YYYY")}` : ""}
+      </p>
     </div>
   );
 }

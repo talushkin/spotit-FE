@@ -5,6 +5,7 @@ import RecipeDialog from "./RecipeDialog";
 import cardboardTexture from "../assets/cardboard-texture.jpg";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
+import { translateDirectly } from "./translateAI";
 
 export default function HeaderBar({
   logo,
@@ -33,25 +34,57 @@ export default function HeaderBar({
   }, [searchQuery]);
 
   const allRecipes = pages?.flatMap((category) => category.itemPage);
+  const [translatedTitles, setTranslatedTitles] = useState([]);
 
+  useEffect(() => {
+    let isMounted = true;
+    const translateTitles = async () => {
+      if (!allRecipes) return;
+      if (i18n.language === "en") {
+        if (isMounted) setTranslatedTitles(allRecipes.map(r => r.title));
+        return;
+      }
+      const translated = await Promise.all(
+        allRecipes.map(r =>
+          r.title ? translateDirectly(r.title, i18n.language) : ""
+        )
+      );
+      if (isMounted) setTranslatedTitles(translated);
+    };
+    translateTitles();
+    return () => { isMounted = false; };
+  }, [allRecipes, i18n.language]);
 
   const handleSearchChange = (event, value) => {
+    setShowMobileSearch(false); // Reset mobile search when input is cleared
     setSearchQuery(value);
     if (!value) {
       setFilteredSuggestions([]);
+      
       return;
+     
     }
-    const filtered = allRecipes?.filter((recipe) =>
-      recipe.title?.toLowerCase().includes(value.toLowerCase())
+    const filtered = allRecipes?.filter((recipe, idx) =>
+      translatedTitles[idx]?.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredSuggestions(filtered);
   };
 
   const handleSelect = (event, value) => {
-    const recipe = allRecipes.find((page) => page.title === value);
+    // Find the recipe by translated title
+    const idx = translatedTitles.findIndex(title => title === value);
+    const recipe = allRecipes[idx];
     if (recipe) {
       setSelectedRecipe(recipe);
       setDialogOpen(true);
+      setSearchActive(false);
+       setShowMobileSearch(false); // Reset mobile search when input is cleared
+      setSearchQuery(""); // <-- Reset the search text
+      setFilteredSuggestions([]);
+      console.log(searchQuery,"Search closed, fading in hamburger and recipes");
+            if (searchInputRef.current) {
+        searchInputRef.current.blur();
+      }
     }
   };
 
@@ -121,7 +154,7 @@ export default function HeaderBar({
           <div className="SiteName">{t("appName")}</div>
         </div>
         {/* Search input or icon */}
-        <div style={{ flex: 0, maxWidth: "95%" }}>
+        <div style={{ flex: 0, maxWidth: "100%" }}>
           {/* Show magnifier on small screens, input on desktop or when expanded */}
           <div style={{ display: "flex", alignItems: "center" }}>
             {/* Mobile: show icon if not expanded */}
@@ -144,7 +177,7 @@ export default function HeaderBar({
             {/* Show input if desktop or mobile search expanded */}
             <Autocomplete
               freeSolo
-              options={filteredSuggestions.map((page) => page.title)}
+              options={translatedTitles}
               onInputChange={handleSearchChange}
               onChange={handleSelect}
               renderInput={(params) => (
@@ -154,7 +187,7 @@ export default function HeaderBar({
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e, e.target.value)}
                   label={t("search")}
-                  placeholder="keywords"
+                  placeholder="recipe name"
                   variant="outlined"
                   sx={{
                     minWidth: "50px",
@@ -180,12 +213,12 @@ export default function HeaderBar({
                     },
                     display:
                       desktop || showMobileSearch ? "block" : "none",
-                    width:
-                      !desktop && showMobileSearch
-                        ? "90vw"
-                        : desktop
-                        ? "200px"
-                        : "0",
+                    // width:
+                    //   !desktop && showMobileSearch
+                    //     ? "100vw"
+                    //     : desktop
+                    //     ? "200px"
+                    //     : "0",
                     transition: "width 0.3s",
                   }}
                   InputProps={{
@@ -194,8 +227,8 @@ export default function HeaderBar({
                   onFocus={() => setSearchActive(true)}
                   onBlur={() => {
                     setTimeout(() => {
-                      if (!searchQuery) setSearchActive(false);
-                      if (!desktop) setShowMobileSearch(false);
+                       setSearchActive(false);
+                      setShowMobileSearch(false);
                     }, 100);
                   }}
                   onKeyDown={handleKeyDown}
