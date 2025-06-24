@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import HomePage from "./HomePage";
 
 export default function RecipeDetail(props) {
-  const { selectedRecipe, newRecipe, recipes, setRecipes, selected, setSelected } = props;
+  const { selectedRecipe, newRecipe, recipes, setRecipes, setSelectedCategory, selectedCategory } = props;
   const { category, title } = useParams();
 
   const pages = recipes?.site?.pages || [];
@@ -27,11 +27,10 @@ export default function RecipeDetail(props) {
     return (
       <HomePage
         selectedCategory={selectedCategoryData}
+        setSelectedCategory={setSelectedCategory}
         selectedRecipe={selectedRecipeData}
         recipes={recipes}
         setRecipes={setRecipes}
-        selected={selected}
-        setSelected={setSelected}
         newRecipe={!selectedRecipeData}
         />
     );

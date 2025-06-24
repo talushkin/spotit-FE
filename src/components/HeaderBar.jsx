@@ -6,6 +6,7 @@ import cardboardTexture from "../assets/cardboard-texture.jpg";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import { translateDirectly } from "./translateAI";
+import { useNavigate } from "react-router-dom"; // <-- Add this line
 
 export default function HeaderBar({
   logo,
@@ -13,11 +14,14 @@ export default function HeaderBar({
   pages,
   desktop,
   setSelectedCategory, // <-- Add prop for setting selected category
+  setSelectedRecipe,
+  selectedRecipe, // <-- Add prop for selected recipe
+
 }) {
+  const navigate = useNavigate(); // <-- Add this line
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [language, setLanguage] = useState(i18n.language);
 
@@ -92,29 +96,25 @@ export default function HeaderBar({
 
   const handleSelect = (event, value) => {
     // Find the option object by title
-    console.log("Selected value:", value);
-
     const option = translatedOptions.find((opt) => opt.title === value);
-    console.log("Found option:", option);
     if (option) {
       // Find the original recipe object by originalTitle
       const recipe = allRecipes.find(
         (r) => r.title === option.originalTitle
       );
-      console.log("Found recipe:", recipe);
       if (recipe) {
-        setSelectedRecipe(recipe);
         setDialogOpen(true);
         setSearchActive(false);
         setShowMobileSearch(false);
         setSearchQuery("");
         setFilteredSuggestions([]);
-        if (option?.category) {
-          setSelectedCategory(option?.category);
-        }
         if (searchInputRef.current) {
           searchInputRef.current.blur();
         }
+        navigate(
+          `/recipes/${encodeURIComponent(recipe.category)}/${encodeURIComponent(recipe.title)}`
+        );
+        window.location.reload(); // <-- Reload after navigation
       }
     }
   };
@@ -262,7 +262,7 @@ export default function HeaderBar({
                   onFocus={() => setSearchActive(true)}
                   onBlur={() => {
                     setTimeout(() => {
-                       setSearchActive(false);
+                      setSearchActive(false);
                       setShowMobileSearch(false);
                     }, 100);
                   }}
@@ -315,14 +315,7 @@ export default function HeaderBar({
           </div>
         </div>
       </div>
-      {selectedRecipe && (
-        <RecipeDialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          recipe={selectedRecipe}
-          targetLang={i18n.language}
-        />
-      )}
+
     </>
   );
 }

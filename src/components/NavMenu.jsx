@@ -23,7 +23,6 @@ export default function NavMenu({ pages, onSelect, isOpen, language, desktop, is
   };
 
   const handleSelectCategory = (item) => {
-    onSelect(item);
     setEditCategories(false);
     setReorder(false);
 

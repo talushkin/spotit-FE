@@ -215,6 +215,13 @@ const RecipeDialog = ({
           overflow: "auto",
         },
       }}
+      disableEscapeKeyDown={false} // Allow ESC to close
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          e.stopPropagation();
+          onClose();
+        }
+      }}
     >
       <DialogTitle
         style={{

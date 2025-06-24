@@ -4,7 +4,7 @@ import HomePage from "./HomePage";
 import data from "../data/recipes.json";
 
 export default function RecipeCategory(props) {
-  const { selectedRecipe, newRecipe, recipes, setRecipes, selected, setSelected } = props;
+  const { selectedRecipe, newRecipe, recipes, setRecipes, selectedCategory, setSelectedCategory} = props;
   const { category, title } = useParams();
   console.log('trying to find category:', useParams());
   const pages = recipes?.site?.pages || [];
@@ -18,11 +18,12 @@ export default function RecipeCategory(props) {
      console.warn("Category recipes not found, adding first one now:", category)
   }
    
-
+  setSelectedCategory(category);
   // console.log("Found category:", selectedCategoryData);
   return <HomePage
     recipes={recipes}
     setRecipes={setRecipes}
-    setSelected={setSelected}
-    selected={selectedCategoryData} />;
+    selectedCategory={selectedCategoryData}
+    setSelectedCategory={setSelectedCategory}
+    />;
 }

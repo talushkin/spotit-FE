@@ -8,13 +8,15 @@ import { ThemeProvider } from "styled-components";
 import { lightTheme, darkTheme } from "../components/themes";
 import GlobalStyle from "../components/GlobalStyle";
 import * as store from "../utils/storage"; // adjust path if needed
+import { useNavigate } from "react-router-dom";
 
 export default function Main(props) {
-  const { selectedRecipe, newRecipe, recipes, setRecipes, selected, setSelected } = props;
+  const { setSelectedRecipe, selectedRecipe, newRecipe, recipes, setRecipes, selectedCategory, setSelectedCategory } = props;
   const [menuOpen, setMenuOpen] = useState(false);
   const { i18n } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [desktop, setDesktop] = useState(window.innerWidth > 768); // Check if desktop
+  const navigate = useNavigate();
 
   // Add toggleDarkMode function
   const toggleDarkMode = () => {
@@ -35,6 +37,7 @@ export default function Main(props) {
       console.log("Should show the menu", menuOpen);
     }
   };
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -60,7 +63,11 @@ export default function Main(props) {
             pages={recipes?.site?.pages}
             isDarkMode={isDarkMode}
             data={recipes}
-            toggleDarkMode={toggleDarkMode} // Pass down the function
+            toggleDarkMode={toggleDarkMode}
+            setSelectedCategory={setSelectedCategory}
+            setSelectedRecipe={setSelectedRecipe}
+            selectedRecipe={selectedRecipe}
+            selectedCategory={selectedCategory}
           />
         </div>
         <div className="container-fluid ps-0 pe-0">
@@ -74,27 +81,26 @@ export default function Main(props) {
                 toggleDarkMode={toggleDarkMode}
                 pages={recipes?.site?.pages}
                 isOpen={menuOpen || desktop}
-                onSelect={(item) => {
-                  console.log("Selected item:", item);
-                  setSelected(item);
-                  if (!desktop) setMenuOpen(false);
-                }}
+                onSelect={setSelectedCategory}
                 editCategories={false}
                 data={recipes}
                 desktop={desktop}
                 language={i18n.language}
+                setSelectedRecipe={setSelectedRecipe}
+                selectedRecipe={selectedRecipe}
               />
             </div>
 
             <div className="main-content col">
-              {selected && (
+              {selectedCategory && (
                 <MainContent
-                  selected={selected}
+                  selected={selectedCategory}
                   selectedRecipe={selectedRecipe}
                   addRecipe={newRecipe}
                   data={recipes}
                   desktop={desktop}
                   isDarkMode={isDarkMode}
+                  setSelectedRecipe={setSelectedRecipe}
                 />
               )}
             </div>

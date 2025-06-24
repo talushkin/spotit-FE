@@ -73,6 +73,13 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe,
     preparation: "",
   });
   const [editOrder, setEditOrder] = useState(false);
+  const [rowJustify, setRowJustify] = useState(
+    window.innerWidth <= 650
+      ? "center"
+      : (i18n.dir && i18n.dir() === "rtl")
+      ? "flex-end"
+      : "flex-start"
+  );
 
   // Assume recipes are stored in selected.itemPage
   const [recipes, setRecipes] = useState(selected?.itemPage || []);
@@ -84,6 +91,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe,
 
 
   useEffect(() => {
+    console.log("Selected category changed:", selected);
     setRecipes(selected?.itemPage || []);
   }, [selected]);
 
@@ -220,6 +228,32 @@ const handleSelectRecipe = (recipe) => {
   }
 };
 
+  useEffect(() => {
+    const handleResize = () => {
+      setRowJustify(
+        window.innerWidth <= 650
+          ? "center"
+          : (i18n.dir && i18n.dir() === "rtl")
+          ? "flex-end"
+          : "flex-start"
+      );
+    };
+    window.addEventListener("resize", handleResize);
+    // Also update on language direction change
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, [i18n.language]);
+
+  // Add this function inside MainContent, above the return:
+  const handleCloseDialog = () => {
+    setOpenView(false);
+    setOpenAdd(false);
+    if (selected?.category) {
+      const categoryEncoded = encodeURIComponent(selected.category);
+      navigate(`/recipes/${categoryEncoded}`);
+    }
+  };
+
   return (
     <div className="main">
       <div
@@ -327,7 +361,7 @@ const handleSelectRecipe = (recipe) => {
         {t("page")} {page}, {t("recipes")} {startIndex + 1}–{endIndex} {t("of")} {totalItems}
       </p>
       {totalPages > 1 && (
-        <div className="pagination-container">
+        <div className="pagination-container" style={{ direction: i18n.dir && i18n.dir() === "rtl" ? "rtl" : "ltr" }}>
           <Pagination
             count={totalPages}
             page={page}
@@ -336,8 +370,10 @@ const handleSelectRecipe = (recipe) => {
             sx={{
               "& .MuiPaginationItem-root": {
                 color: (theme) => theme.mode === "dark" ? "white" : "inherit",
+                direction: i18n.dir && i18n.dir() === "rtl" ? "ltr" : "ltr", // Ensure correct direction
               },
             }}
+            dir={i18n.dir && i18n.dir() === "rtl" ? "ltr" : "ltr"} // For MUI v5+
           />
         </div>
       )}
@@ -349,37 +385,22 @@ const handleSelectRecipe = (recipe) => {
             ))}
           </SortableContext>
         </DndContext>
-      ) : (
-        <div
+      ) : ( window.innerWidth && (
+                <div
           className="row d-flex"
           style={{
-            justifyContent:
-              window.innerWidth <= 650
-                ? "center"
-                : (i18n.dir && i18n.dir() === "rtl")
-                ? "flex-end"
-                : "flex-start",
+            justifyContent: rowJustify,
           }}
         >
           {currentItems.map((item, index) => {
             let colClass = "col-12 col-sm-8 col-md-6 col-lg-3";
-            if (currentItems.length === 1) {
-              colClass = "col-12";
-            } else if (currentItems.length === 2) {
-              colClass = "col-sm-6";
-            }
             const isRTL = i18n.dir && i18n.dir() === "rtl";
             return (
               <div
                 key={index}
                 className={`${colClass} mb-4 d-flex`}
                 style={{
-                  justifyContent:
-                    window.innerWidth <= 650
-                      ? "center"
-                      : isRTL
-                      ? "flex-end"
-                      : "flex-start",
+                  justifyContent: rowJustify,
                 }}
                 onClick={() => handleSelectRecipe(item)}
               >
@@ -393,10 +414,12 @@ const handleSelectRecipe = (recipe) => {
             );
           })}
         </div>
+      )
+
       )}
       <RecipeDialog
         open={openView}
-        onClose={() => setOpenView(false)}
+        onClose={handleCloseDialog}
         type="view"
         recipe={viewedItem}
         onSave={(recipe) => {
@@ -412,7 +435,7 @@ const handleSelectRecipe = (recipe) => {
       <RecipeDialog
         open={openAdd}
         autoFill={openFill}
-        onClose={() => setOpenAdd(false)}
+        onClose={handleCloseDialog}
         type="add"
         recipe={newRecipe}
         categoryName={selected?.category}

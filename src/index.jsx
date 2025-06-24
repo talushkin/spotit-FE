@@ -3,7 +3,7 @@ import i18n from "./i18n.js";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import ReactDOM from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom"; // <-- add useNavigate
 import RecipeCategory from "./Pages/RecipeCategory.jsx";
 import RecipeDetail from "./Pages/RecipeDetail";
 import AddRecipe from "./Pages/AddRecipe";
@@ -21,6 +21,10 @@ const root = ReactDOM.createRoot(rootElement);
 function App() {
   const [recipes, setRecipes] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const navigate = useNavigate(); // <-- add this line
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,49 +38,69 @@ function App() {
   }, []);
 
   useEffect(() => {
-    console.log("recipes", recipes);
+    //console.log("recipes", recipes);
   }, [recipes]);
 
-    useEffect(() => {
+  useEffect(() => {
     document.body.dir = i18n.language === "he" || i18n.language === "ar" ? "rtl" : "ltr";
   }, [i18n.language]);
 
+  // Add this effect to navigate to the recipe URL when selectedRecipe changes
+  useEffect(() => {
+    console.log("selectedRecipe changed:", selectedRecipe);
+    if (selectedRecipe && selectedRecipe.title && selectedRecipe.category) {
+      navigate(
+        `/recipes/${encodeURIComponent(selectedRecipe.category)}/${encodeURIComponent(selectedRecipe.title)}`
+      );
+    }
+  }, [selectedRecipe, navigate]);
+
   return (
     <>
-    { recipes && (
-      <Routes>
-        <Route path="/"
-          element={<HomePage
-            recipes={recipes}
-            setRecipes={setRecipes}
-            selected={selected}
-            setSelected={setSelected}
-          />} />
-        <Route path="/recipes/:category"
-          element={<RecipeCategory
-            recipes={recipes}
-            setRecipes={setRecipes}
-            selected={selected}
-            setSelected={setSelected}
-          />} />
-        <Route path="/recipes/:category/:title"
-          element={<RecipeDetail
-            recipes={recipes}
-            setRecipes={setRecipes}
-            selected={selected}
-            setSelected={setSelected}
-          />} />
-        <Route path="/recipes/:category/add"
-          element={<AddRecipe
-            recipes={recipes}
-            setRecipes={setRecipes}
-            selected={selected}
-            setSelected={setSelected}
-          />} />
-      </Routes>
-    )}
+      {recipes && (
+        <Routes>
+          <Route path="/"
+            element={<HomePage
+              recipes={recipes}
+              setRecipes={setRecipes}
+              selected={selected}
+              setSelected={setSelected}
+              selectedRecipe={selectedRecipe}
+              setSelectedRecipe={setSelectedRecipe}
+              setSelectedCategory={setSelectedCategory}
+              selectedCategory={selectedCategory}
+            />} />
+          <Route path="/recipes/:category"
+            element={<RecipeCategory
+              recipes={recipes}
+              setRecipes={setRecipes}
+              selectedRecipe={selectedRecipe}
+              setSelectedRecipe={setSelectedRecipe}
+              setSelectedCategory={setSelectedCategory}
+              selectedCategory={selectedCategory}
+            />} />
+          <Route path="/recipes/:category/:title"
+            element={<RecipeDetail
+              recipes={recipes}
+              setSelectedCategory={setSelectedCategory}
+              selectedCategory={selectedCategory}
+              setSelected={setSelected}
+              selectedRecipe={selectedRecipe}
+              setSelectedRecipe={setSelectedRecipe}
+            />} />
+          <Route path="/recipes/:category/add"
+            element={<AddRecipe
+              recipes={recipes}
+              setRecipes={setRecipes}
+              setSelectedCategory={setSelectedCategory}
+              selectedCategory={selectedCategory}
+              selectedRecipe={selectedRecipe}
+              setSelectedRecipe={setSelectedRecipe}
+            />} />
+        </Routes>
+      )}
     </>
-)
+  )
 }
 
 root.render(
