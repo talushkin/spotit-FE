@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import ThemeModeButton from "./ThemeModeButton.jsx";
 import LanguageSelector from "./LanguageSelector.jsx";
 
-export default function NavMenu({ pages, onSelect, isOpen, language, desktop, isDarkMode, toggleDarkMode }) {
+export default function NavMenu({ pages, onSelect, isOpen, language, desktop, isDarkMode, toggleDarkMode, onHamburgerClick }) {
   const { t, i18n } = useTranslation();
   const [editCategories, setEditCategories] = useState(false);
   const [reorder, setReorder] = useState(false);
@@ -30,6 +30,9 @@ export default function NavMenu({ pages, onSelect, isOpen, language, desktop, is
       const categoryEncoded = encodeURIComponent(item.category);
       navigate(`/recipes/${categoryEncoded}`);
     }
+      onHamburgerClick(); // Call the parent function to handle hamburger click
+      onSelect(item);
+    console.log("Selected category:", item);
   };
 
   const handleLanguageChange = (event) => {
@@ -61,10 +64,15 @@ export default function NavMenu({ pages, onSelect, isOpen, language, desktop, is
       >
         {t("changeOrder")}
       </Button>
-      <div style={{ marginTop: "0rem", marginBottom: "0rem" }}>
-        <LanguageSelector language={language} handleLanguageChange={handleLanguageChange} />
-      </div>
-      <ThemeModeButton isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+      {/* Only show language and theme buttons on desktop */}
+      {desktop && (
+        <>
+          <div style={{ marginTop: "0rem", marginBottom: "0rem" }}>
+            <LanguageSelector language={language} handleLanguageChange={handleLanguageChange} />
+          </div>
+          <ThemeModeButton isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+        </>
+      )}
     </div>
   );
 }

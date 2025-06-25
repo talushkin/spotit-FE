@@ -74,7 +74,7 @@ export default function MainContent({ data, selected, selectedRecipe, addRecipe,
   });
   const [editOrder, setEditOrder] = useState(false);
   const [rowJustify, setRowJustify] = useState(
-    window.innerWidth <= 650
+    window.innerWidth <= 770
       ? "center"
       : (i18n.dir && i18n.dir() === "rtl")
       ? "flex-end"
@@ -231,7 +231,7 @@ const handleSelectRecipe = (recipe) => {
   useEffect(() => {
     const handleResize = () => {
       setRowJustify(
-        window.innerWidth <= 650
+        window.innerWidth <= 770
           ? "center"
           : (i18n.dir && i18n.dir() === "rtl")
           ? "flex-end"
@@ -370,7 +370,11 @@ const handleSelectRecipe = (recipe) => {
             sx={{
               "& .MuiPaginationItem-root": {
                 color: (theme) => theme.mode === "dark" ? "white" : "inherit",
-                direction: i18n.dir && i18n.dir() === "rtl" ? "ltr" : "ltr", // Ensure correct direction
+                direction: i18n.dir && i18n.dir() === "rtl" ? "ltr" : "ltr",
+              },
+              "& .Mui-selected": {
+                backgroundColor: isDarkMode ? "#fff" : "", // White background for selected page on dark mode
+                color: isDarkMode ? "#222" : "",           // Dark text for contrast
               },
             }}
             dir={i18n.dir && i18n.dir() === "rtl" ? "ltr" : "ltr"} // For MUI v5+

@@ -30,8 +30,12 @@ function App() {
     const fetchData = async () => {
       const data = await storage.loadData();
       setRecipes(data);
-      if (!selected) {
-        setSelected(data?.site?.pages[0]);
+      if (!selectedCategory && data?.site?.pages && data.site.pages.length > 0) {
+        console.log("Setting initial selectedCategory to:", data?.site?.pages[0]);
+        setSelectedCategory(data?.site?.pages[0]);
+              navigate(
+        `/recipes/${encodeURIComponent(data?.site?.pages[0].category)}`
+      );
       }
     };
     fetchData();
@@ -63,8 +67,6 @@ function App() {
             element={<HomePage
               recipes={recipes}
               setRecipes={setRecipes}
-              selected={selected}
-              setSelected={setSelected}
               selectedRecipe={selectedRecipe}
               setSelectedRecipe={setSelectedRecipe}
               setSelectedCategory={setSelectedCategory}

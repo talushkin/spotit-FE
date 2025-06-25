@@ -139,9 +139,11 @@ export default function NavItemList({
   useEffect(() => {
     const translateCategories = async () => {
       if (pages.length === 0) return;
+      console.log("Translating categories for language:", i18n.language);
       const translations = await Promise.all(
         pages.map((item) => translateDirectly(item.category, i18n.language))
       );
+      console.log("Translations:", translations);
       setTranslatedCategories(translations);
     };
     translateCategories();

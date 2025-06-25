@@ -346,28 +346,56 @@ const RecipeDialog = ({
             marginBottom={2}
             style={{ minHeight: "180px" }}
           >
-            {/* Left button: ENGLISH */}
-            <Button
-              variant={showTranslated ? "outlined" : "contained"}
-              size="small"
+            {/* Stack language buttons vertically on the left */}
+            <Box
               sx={{
                 position: "absolute",
                 left: 0,
                 top: 16,
                 zIndex: 3,
-                background: showTranslated ? "#fff" : "darkgreen",
-                color: showTranslated ? "inherit" : "#fff",
-                borderRadius: "16px",
-                fontWeight: "bold",
-                minWidth: "90px",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-              }}
-              onClick={() => {
-                if (showTranslated) handleLangButton();
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
               }}
             >
-              ENGLISH
-            </Button>
+              <Button
+                variant={showTranslated ? "outlined" : "contained"}
+                size="small"
+                sx={{
+                  background: showTranslated ? "#fff" : "darkgreen",
+                  color: showTranslated ? "inherit" : "#fff",
+                  borderRadius: "16px",
+                  fontWeight: "bold",
+                  minWidth: "90px",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                }}
+                onClick={() => {
+                  if (showTranslated) handleLangButton();
+                }}
+              >
+                ENGLISH
+              </Button>
+              <Button
+                variant={showTranslated ? "contained" : "outlined"}
+                size="small"
+                sx={{
+                  background: showTranslated ? "darkgreen" : "#fff",
+                  color: showTranslated ? "#fff" : "inherit",
+                  borderRadius: "16px",
+                  fontWeight: "bold",
+                  minWidth: "90px",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                }}
+                onClick={() => {
+                  if (!showTranslated) handleLangButton();
+                }}
+                disabled={targetLang === "en"}
+              >
+                {targetLang === "en"
+                  ? "ENGLISH"
+                  : t(targetLang.charAt(0).toUpperCase() + targetLang.slice(1))}
+              </Button>
+            </Box>
 
             <img
               src={
@@ -377,6 +405,7 @@ const RecipeDialog = ({
               alt={editableRecipe.title}
               style={{ maxHeight: "300px", borderRadius: "28px" }}
             />
+
             {isLoadingImage && (
               <CircularProgress
                 size={48}
@@ -404,32 +433,6 @@ const RecipeDialog = ({
             >
               <AutorenewIcon sx={{ fontSize: 40 }} />
             </IconButton>
-
-            {/* Right button: Current language name */}
-            <Button
-              variant={showTranslated ? "contained" : "outlined"}
-              size="small"
-              sx={{
-                position: "absolute",
-                right: 0,
-                top: 16,
-                zIndex: 3,
-                background: showTranslated ? "darkgreen" : "#fff",
-                color: showTranslated ? "#fff" : "inherit",
-                borderRadius: "16px",
-                fontWeight: "bold",
-                minWidth: "90px",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-              }}
-              onClick={() => {
-                if (!showTranslated) handleLangButton();
-              }}
-              disabled={targetLang === "en"}
-            >
-              {targetLang === "en"
-                ? "ENGLISH"
-                : t(targetLang.charAt(0).toUpperCase() + targetLang.slice(1))}
-            </Button>
           </Box>
 
           <Box position="relative">

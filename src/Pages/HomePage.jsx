@@ -9,6 +9,7 @@ import { lightTheme, darkTheme } from "../components/themes";
 import GlobalStyle from "../components/GlobalStyle";
 import * as store from "../utils/storage"; // adjust path if needed
 import { useNavigate } from "react-router-dom";
+import FooterBar from "../components/FooterBar.jsx"; // <-- Add this import
 
 export default function Main(props) {
   const { setSelectedRecipe, selectedRecipe, newRecipe, recipes, setRecipes, selectedCategory, setSelectedCategory } = props;
@@ -38,7 +39,6 @@ export default function Main(props) {
     }
   };
 
-
   useEffect(() => {
     const handleResize = () => {
       setDesktop(window.innerWidth > 768); // Update desktop state based on window width
@@ -47,8 +47,8 @@ export default function Main(props) {
     window.addEventListener("resize", handleResize); // Add event listener for window resize
   }, [window.innerWidth]);
 
-  if (!recipes) return null; // Wait until recipes are loaded
-  if (!recipes?.site?.pages) return null;
+  // Helper to detect mobile
+  const isMobile = !desktop;
 
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
@@ -68,6 +68,7 @@ export default function Main(props) {
             setSelectedRecipe={setSelectedRecipe}
             selectedRecipe={selectedRecipe}
             selectedCategory={selectedCategory}
+            showLangAndTheme={!isMobile} // Pass prop to hide on mobile
           />
         </div>
         <div className="container-fluid ps-0 pe-0">
@@ -88,6 +89,8 @@ export default function Main(props) {
                 language={i18n.language}
                 setSelectedRecipe={setSelectedRecipe}
                 selectedRecipe={selectedRecipe}
+                showLangAndTheme={!isMobile} // Hide from menu on mobile
+                onHamburgerClick={handleHamburgerClick}
               />
             </div>
 
@@ -106,6 +109,15 @@ export default function Main(props) {
             </div>
           </div>
         </div>
+        {/* Sticky FooterBar only on mobile */}
+        {isMobile && (
+          <FooterBar
+            isDarkMode={isDarkMode}
+            toggleDarkMode={toggleDarkMode}
+            language={i18n.language}
+            i18n={i18n}
+          />
+        )}
       </div>
     </ThemeProvider>
   );

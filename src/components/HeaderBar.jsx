@@ -150,10 +150,10 @@ export default function HeaderBar({
           }}
         >
           {!desktop && (
-            <button className="hamburger" onClick={onHamburgerClick}>
-              ☰
-            </button>
-          )}
+  <button className="hamburger" onClick={onHamburgerClick}>
+    ☰
+  </button>
+)}
           <img
             src="https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"
             alt="Logo"
