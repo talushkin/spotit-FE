@@ -54,6 +54,27 @@ function SortableSongRow({ song, idx, isSelected, onClick, isDarkMode }: any) {
     background: isSelected ? (isDarkMode ? "#444" : "#e0ffe0") : "transparent",
     cursor: "grab"
   };
+  // Scrolling logic for long titles
+  const [scrollIndex, setScrollIndex] = React.useState(0);
+  const shouldScroll = song.title && song.title.length > 30;
+  React.useEffect(() => {
+    if (!shouldScroll || !isSelected) {
+      setScrollIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setScrollIndex((prev) => (prev + 1) % (song.title.length - 29));
+    }, 500); // 0.5 sec per letter
+    return () => clearInterval(interval);
+  }, [shouldScroll, isSelected, song.title]);
+
+  let displayTitle = song.title;
+  if (shouldScroll && isSelected) {
+    displayTitle = song.title.slice(scrollIndex, scrollIndex + 30);
+  } else if (shouldScroll) {
+    displayTitle = song.title.slice(0, 30) + '...';
+  }
+
   return (
     <tr
       ref={setNodeRef}
@@ -65,8 +86,8 @@ function SortableSongRow({ song, idx, isSelected, onClick, isDarkMode }: any) {
       <td style={{ width: 32, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
         {idx + 1}
       </td>
-      <td style={{ padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#fff" : "#222"), fontWeight: isSelected ? 700 : 400 }}>
-        {song.title}
+      <td style={{ padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#fff" : "#222"), fontWeight: isSelected ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", maxWidth: 180 }}>
+        {displayTitle}
       </td>
       <td style={{ width: 60, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
         {song.duration || ""}
