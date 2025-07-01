@@ -8,10 +8,12 @@ interface AddRecipeProps {
   setRecipes: (recipes: any) => void;
   selected: any;
   setSelected: (selected: any) => void;
+  songList: any[];
+  setSongList: (songs: any[]) => void;
+  onAddSongToList: (song: any) => void;
 }
 
-export default function AddRecipe(props: AddRecipeProps) {
-  const { recipes, setRecipes, selected, setSelected } = props;
+  const { recipes, setRecipes, selected, setSelected, songList, setSongList, onAddSongToList } = props;
   const { category, title } = useParams<{ category?: string; title?: string }>();
   console.log(useParams());
   const pages = data?.site?.pages || [];
@@ -31,10 +33,14 @@ export default function AddRecipe(props: AddRecipeProps) {
         setRecipes={setRecipes}
         selected={selected}
         setSelected={setSelected}
+        selectedRecipe={null}
+        setSelectedRecipe={() => {}}
+        songList={songList}
+        setSongList={setSongList}
+        onAddSongToList={onAddSongToList}
       />
     );
-  } else {
-    console.warn("Category not found:", category);
-    return <div>Category not found.</div>;
   }
+  console.warn("Category not found:", category);
+  return <div>Category not found.</div>;
 }

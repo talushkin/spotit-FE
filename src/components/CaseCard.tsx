@@ -4,15 +4,17 @@ import { translateDirectly } from "./translateAI";
 import dayjs from "dayjs";
 import type { Recipe } from "../utils/storage";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import AddIcon from "@mui/icons-material/Add";
 
 interface CaseCardProps {
   item: Recipe;
   category: string;
   index?: number;
   isDarkMode?: boolean;
+  onAddSongToList?: (song: any) => void;
 }
 
-export default function CaseCard({ item, category, index, isDarkMode = true }: CaseCardProps) {
+export default function CaseCard({ item, category, index, isDarkMode = true, onAddSongToList }: CaseCardProps) {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
 
@@ -51,6 +53,16 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
 
   const isNewRecipe = item.title === "ADD NEW RECEPY";
   const linkHref = `/spotit/${encodeURIComponent(category)}/${encodeURIComponent(item.title)}`;
+
+  // Handler for add-to-song-list button (to be implemented by parent via prop or context)
+  const handleAddToSongList = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (onAddSongToList) {
+      onAddSongToList(item);
+    } else {
+      alert(`Add to song list: ${item.title}`);
+    }
+  };
 
   return (
     <div
@@ -100,7 +112,8 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
       >
         {isLoading ? t("loading") : translated.title}
       </h2>
-      <p
+      {/* Remove date display */}
+      {/* <p
         style={{
           color: isDarkMode ? "#aaa" : "#333",
           fontSize: "0.85rem",
@@ -113,7 +126,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
         }}
       >
         {item.createdAt ? ` ${dayjs(item.createdAt).format("DD-MM-YYYY")}` : ""}
-      </p>
+      </p> */}
       {/* Green play button on hover */}
       <a
         href={linkHref}
@@ -123,7 +136,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
           background: "#1db954",
           borderRadius: "50%",
           left: "18px",
-          bottom: "18px",
+          bottom: "50px",
           width: "48px",
           height: "48px",
           display: "flex",
@@ -135,28 +148,58 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
           zIndex: 2,
           textDecoration: "none",
           pointerEvents: "none",
-          transform: "translateY(40px)",
         }}
         tabIndex={-1}
       >
         <PlayArrowIcon style={{ color: "#fff", fontSize: 32 }} />
       </a>
+      {/* Add to song list button */}
+      <button
+        className="case-add-btn"
+        onClick={handleAddToSongList}
+        style={{
+          position: "absolute",
+          right: "18px",
+          bottom: "50px",
+          width: "32px",
+          height: "32px",
+          borderRadius: "50%",
+          background: isDarkMode ? "#222" : "#e0ffe0",
+          border: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+          cursor: "pointer",
+          zIndex: 2,
+          opacity: 0,
+          transition: "opacity 0.3s, transform 0.3s",
+          pointerEvents: "none",
+        }}
+        tabIndex={-1}
+        aria-label="Add to song list"
+      >
+        <AddIcon style={{ color: isDarkMode ? "#fff" : "#1db954", fontSize: 20 }} />
+      </button>
       {/* Overlay for hover effect */}
       <style>
         {`
-          .case .case-play-btn {
+          .case .case-play-btn,
+          .case .case-add-btn {
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s, transform 0.3s;
             transform: translateY(40px);
           }
-          .case:hover .case-play-btn {
+          .case:hover .case-play-btn,
+          .case:hover .case-add-btn {
             opacity: 1 !important;
             pointer-events: auto !important;
             animation: fadeInPlayBtn 0.3s;
             transform: translateY(0);
           }
-          .case:not(:hover) .case-play-btn {
+          .case:not(:hover) .case-play-btn,
+          .case:not(:hover) .case-add-btn {
             animation: fadeOutPlayBtn 0.3s;
             transform: translateY(40px);
           }

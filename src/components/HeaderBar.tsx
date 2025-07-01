@@ -154,7 +154,7 @@ export default function HeaderBar({
             ...fadeStyle,
           }}
         >
-          {!desktop && (
+          {!desktop && !searchActive  && (
   <button className="hamburger" onClick={onHamburgerClick}>
     ☰
   </button>

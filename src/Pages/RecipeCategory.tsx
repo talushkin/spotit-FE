@@ -10,10 +10,13 @@ interface RecipeCategoryProps {
   setRecipes: (recipes: any) => void;
   selectedCategory: any;
   setSelectedCategory: (cat: any) => void;
+  songList: any[];
+  setSongList: (songs: any[]) => void;
+  onAddSongToList: (song: any) => void;
 }
 
 export default function RecipeCategory(props: RecipeCategoryProps) {
-  const { selectedRecipe, newRecipe, recipes, setRecipes, selectedCategory, setSelectedCategory } = props;
+  const { selectedRecipe, newRecipe, recipes, setRecipes, selectedCategory, setSelectedCategory, songList, setSongList, onAddSongToList } = props;
   const { category, title } = useParams<{ category?: string; title?: string }>();
   console.log('trying to find category:', useParams());
   const pages = recipes?.site?.pages || [];
@@ -34,5 +37,11 @@ export default function RecipeCategory(props: RecipeCategoryProps) {
     setRecipes={setRecipes}
     selectedCategory={selectedCategoryData}
     setSelectedCategory={setSelectedCategory}
+    selectedRecipe={selectedRecipe}
+    setSelectedRecipe={() => {}}
+    newRecipe={newRecipe}
+    songList={songList}
+    setSongList={setSongList}
+    onAddSongToList={onAddSongToList}
   />;
 }

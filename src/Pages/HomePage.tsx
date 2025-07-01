@@ -19,10 +19,13 @@ interface HomePageProps {
   setRecipes: (recipes: any) => void;
   selectedCategory: any;
   setSelectedCategory: (cat: any) => void;
+  songList: any[];
+  setSongList: (songs: any[]) => void;
+  onAddSongToList: (song: any) => void;
 }
 
 export default function Main(props: HomePageProps) {
-  const { setSelectedRecipe, selectedRecipe, newRecipe, recipes, setRecipes, selectedCategory, setSelectedCategory } = props;
+  const { setSelectedRecipe, selectedRecipe, newRecipe, recipes, setRecipes, selectedCategory, setSelectedCategory, songList, setSongList, onAddSongToList } = props;
   const [menuOpen, setMenuOpen] = useState(false);
   const { i18n } = useTranslation();
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -78,7 +81,7 @@ export default function Main(props: HomePageProps) {
             setSelectedRecipe={setSelectedRecipe}
             selectedRecipe={selectedRecipe}
             selectedCategory={selectedCategory}
-            showLangAndTheme={!isMobile} // Pass prop to hide on mobile
+            showLangAndTheme={false} // Pass prop to hide on mobile
           />
         </div>
         <div className="container-fluid ps-0 pe-0">
@@ -114,20 +117,25 @@ export default function Main(props: HomePageProps) {
                   desktop={desktop}
                   isDarkMode={isDarkMode}
                   setSelectedRecipe={setSelectedRecipe}
+                  songList={songList}
+                  setSongList={setSongList}
+                  onAddSongToList={onAddSongToList}
                 />
               )}
             </div>
           </div>
         </div>
         {/* Sticky FooterBar only on mobile */}
-        {isMobile && (
+        {/* {isMobile && ( */}
           <FooterBar
             isDarkMode={isDarkMode}
             toggleDarkMode={toggleDarkMode}
             language={i18n.language}
             i18n={i18n}
+            setSelectedRecipe={setSelectedRecipe}
+            selectedRecipe={selectedRecipe}
           />
-        )}
+        {/* )} */}
       </div>
     </ThemeProvider>
   );

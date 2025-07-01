@@ -36,15 +36,20 @@ interface MainContentProps {
   addRecipe: any;
   desktop: boolean;
   isDarkMode: boolean;
+  songList: any[];
+  setSongList: (songs: any[]) => void;
+  onAddSongToList: (song: any) => void;
 }
+
 
 interface SortableRecipeProps {
   recipe: Recipe;
   index: number;
   onSelect: (recipe: Recipe) => void;
+  onAddSongToList: (song: any) => void;
 }
 
-function SortableRecipe({ recipe, index, onSelect }: SortableRecipeProps) {
+function SortableRecipe({ recipe, index, onSelect, onAddSongToList }: SortableRecipeProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: recipe._id!,
   });
@@ -67,7 +72,12 @@ function SortableRecipe({ recipe, index, onSelect }: SortableRecipeProps) {
       {...listeners}
       onClick={() => onSelect(recipe)}
     >
-      <CaseCard item={recipe} category={recipe.category || ""} index={index + 1} />
+      <CaseCard
+        item={recipe}
+        category={recipe.category || ""}
+        index={index + 1}
+        onAddSongToList={onAddSongToList}
+      />
     </div>
   );
 }
@@ -79,6 +89,9 @@ const MainContent: React.FC<MainContentProps> = ({
   addRecipe,
   desktop,
   isDarkMode,
+  songList,
+  setSongList,
+  onAddSongToList,
 }) => {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
@@ -323,73 +336,7 @@ const MainContent: React.FC<MainContentProps> = ({
           {translatedCategory}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "1rem",
-            justifyContent: "center",
-            width: "100%",
-            maxWidth: "800px",
-            margin: "0 auto"
-          }}
-        >
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setOpenAdd(true)}
-            sx={{
-              minWidth: "56px",
-              minHeight: "56px",
-              width: "56px",
-              height: "56px",
-              borderRadius: "16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              p: 0,
-              fontWeight: "bold",
-              fontSize: "0.85rem",
-              gap: "0.25rem",
-              backgroundColor: "darkgreen",
-              "&:hover": {
-                backgroundColor: "#145214",
-              },
-            }}
-            title={t("addRecipe")}
-          >
-            <AddIcon sx={{ fontSize: 28 }} />
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => {
-              setOpenFill(true);
-              setOpenAdd(true);
-            }}
-            sx={{
-              minWidth: "56px",
-              minHeight: "56px",
-              width: "56px",
-              height: "56px",
-              borderRadius: "16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              p: 0,
-              fontWeight: "bold",
-              fontSize: "0.85rem",
-              gap: "0.25rem",
-              backgroundColor: "darkgreen",
-              "&:hover": {
-                backgroundColor: "#145214",
-              },
-            }}
-            title={`AI ${t("addRecipe")}`}
-          >
-            <AddIcon sx={{ fontSize: 20, mr: 0.5 }} />
-            <SmartToyIcon sx={{ fontSize: 24 }} />
-          </Button>
-        </div>
+        {/* Removed Add Recipe and Add Recipe AI buttons */}
       </div>
       <p style={{ flexBasis: "100%", textAlign: "center" }}>
         {t("page")} {page}, {t("recipes")} {startIndex + 1}–{endIndex} {t("of")} {totalItems}
@@ -419,7 +366,13 @@ const MainContent: React.FC<MainContentProps> = ({
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleRecipeDragEnd}>
           <SortableContext items={recipes.map((r) => r._id!)} strategy={verticalListSortingStrategy}>
             {recipes.map((recipe, index) => (
-              <SortableRecipe key={recipe._id} recipe={recipe} index={index} onSelect={handleSelectRecipe} />
+              <SortableRecipe
+                key={recipe._id}
+                recipe={recipe}
+                index={index}
+                onSelect={handleSelectRecipe}
+                onAddSongToList={onAddSongToList}
+              />
             ))}
           </SortableContext>
         </DndContext>
@@ -446,6 +399,7 @@ const MainContent: React.FC<MainContentProps> = ({
                   item={item}
                   category={selectedCategory?.category}
                   isDarkMode={isDarkMode}
+                  onAddSongToList={onAddSongToList}
                 />
               </div>
             );
@@ -453,32 +407,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
       )
       )}
-      <RecipeDialog
-        open={openView}
-        onClose={handleCloseDialog}
-        type="view"
-        recipe={viewedItem ? { ...viewedItem, ingredients: viewedItem.ingredients ?? "", preparation: viewedItem.preparation ?? "" } : { ...newRecipe, ingredients: newRecipe.ingredients ?? "", preparation: newRecipe.preparation ?? "" }}
-        onSave={(recipe: Recipe) => {
-          // If editing an existing recipe, call update; otherwise, add new.
-          viewedItem?._id ? handleUpdateRecipe(recipe) : handleAddRecipe(recipe);
-        }}
-        onDelete={(recipe: Recipe) => {
-          handleDeleteRecipe(recipe);
-        }}
-        targetLang={i18n.language}
-      />
-      <RecipeDialog
-        open={openAdd}
-        autoFill={openFill}
-        onClose={handleCloseDialog}
-        type="add"
-        recipe={{ ...newRecipe, ingredients: newRecipe.ingredients ?? "", preparation: newRecipe.preparation ?? "" }}
-        categoryName={selectedCategory?.category}
-        onSave={(recipe: Recipe) => {
-          handleAddRecipe(recipe);
-        }}
-        targetLang={i18n.language}
-      />
+
     </div>
   );
 };

@@ -9,28 +9,32 @@ interface RecipeDetailProps {
   setRecipes: (recipes: any) => void;
   setSelectedCategory: (cat: any) => void;
   selectedCategory: any;
+  songList: any[];
+  setSongList: (songs: any[]) => void;
+  onAddSongToList: (song: any) => void;
 }
 
-export default function RecipeDetail(props: RecipeDetailProps) {
-  const { selectedRecipe, newRecipe, recipes, setRecipes, setSelectedCategory, selectedCategory } = props;
+
+const RecipeDetail: React.FC<RecipeDetailProps> = (props) => {
+  const { selectedRecipe, newRecipe, recipes, setRecipes, setSelectedCategory, selectedCategory, songList, setSongList, onAddSongToList } = props;
   const { category, title } = useParams();
   console.log('RecipeDetail params:', useParams());
   const pages = recipes?.site?.pages || [];
 
+
   // Normalize category (lowercase) for comparison
   const selectedCategoryData = pages.find(
-    (page) => page?.category?.toLowerCase() === category?.toLowerCase()
+    (page: any) => page?.category?.toLowerCase() === category?.toLowerCase()
   );
 
-  const selectedRecipeData = selectedCategoryData.itemPage.find(
-    (recipe) => recipe?.title?.toLowerCase() === title?.toLowerCase()
+  const selectedRecipeData = selectedCategoryData?.itemPage?.find(
+    (recipe: any) => recipe?.title?.toLowerCase() === title?.toLowerCase()
   );
 
   if (selectedCategoryData) {
-   // console.log("Found category:", selectedCategoryData, selectedRecipeData);
     if (!selectedRecipeData) {
       console.warn("Recipe not found:", title);
-      // return <div>Recipe not found.</div>;
+      // Optionally render a not found message
     }
     console.log("Found recipe:", selectedRecipeData);
     return (
@@ -38,13 +42,18 @@ export default function RecipeDetail(props: RecipeDetailProps) {
         selectedCategory={selectedCategoryData}
         setSelectedCategory={setSelectedCategory}
         selectedRecipe={selectedRecipeData}
+        setSelectedRecipe={() => {}}
         recipes={recipes}
         setRecipes={setRecipes}
         newRecipe={!selectedRecipeData}
-        />
+        songList={songList}
+        setSongList={setSongList}
+        onAddSongToList={onAddSongToList}
+      />
     );
-  }  else {
-    console.warn("Category not found:", category);
-    return <div>Category not found.</div>;
   }
-}
+  console.warn("Category not found:", category);
+  return <div>Category not found.</div>;
+};
+
+export default RecipeDetail;

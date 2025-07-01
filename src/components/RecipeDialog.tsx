@@ -14,16 +14,9 @@ import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import YouTube from "react-youtube"; // Add this at the top if you have react-youtube installed
+import type { Recipe } from "../utils/storage";
 
 const BASE_URL = "https://be-tan-theta.vercel.app";
-
-interface Recipe {
-  _id?: string;
-  title: string;
-  ingredients: string;
-  preparation: string;
-  imageUrl?: string;
-}
 
 interface RecipeDialogProps {
   open: boolean;
@@ -51,12 +44,14 @@ const RecipeDialog = ({
   const { i18n, t } = useTranslation();
   const isRTL = i18n.language === "he" || i18n.language === "ar";
 
-  const [editableRecipe, setEditableRecipe] = useState({
+  const [editableRecipe, setEditableRecipe] = useState<Recipe>({
     title: recipe?.title || "",
-    ingredients: recipe?.ingredients || "",
-    preparation: recipe?.preparation || "",
+    ingredients: recipe?.ingredients || recipe?.artist || "",
+    preparation: recipe?.preparation || recipe?.lyrics || "",
     imageUrl: recipe?.imageUrl || "",
-    _id: recipe?._id || "",
+    url: recipe?.url || "",
+    artist: recipe?.artist || "",
+    _id: recipe?._id ?? "",
   });
 
   const [isLoadingImage, setIsLoadingImage] = useState(false);
@@ -79,25 +74,32 @@ const RecipeDialog = ({
     setShowTranslated(false);
     setEditableRecipe({
       title: recipe?.title || "",
-      ingredients: recipe?.ingredients || "",
-      preparation: recipe?.preparation || "",
+      ingredients: recipe?.ingredients || recipe?.artist || "",
+      preparation: recipe?.preparation || recipe?.lyrics || "",
       imageUrl: recipe?.imageUrl || "",
-      _id: recipe?._id || "",
+      url: recipe?.url || "",
+      artist: recipe?.artist || "",
+      _id: recipe?._id ?? "",
     });
     setTranslatedRecipe({
       title: "",
       ingredients: "",
       preparation: "",
     });
+    // Auto-show player if there is a url
+    setShowPlayer(!!recipe?.url);
   }, [recipe, open]);
 
   useEffect(() => {
     if (recipe) {
       setEditableRecipe({
         title: recipe.title || "",
-        ingredients: recipe.ingredients || "",
-        preparation: recipe.preparation || "",
+         ingredients: recipe?.ingredients ||recipe?.artist || "",
+    preparation: recipe?.preparation ||recipe?.lyrics || "",
         imageUrl: recipe.imageUrl || "",
+        url: recipe.url || "",
+        artist: recipe.artist || "",
+        _id: recipe._id ?? "",
       });
     }
   }, [recipe]);
@@ -133,7 +135,7 @@ const RecipeDialog = ({
   //   doTranslate();
   // }, [recipe, targetLang, open]);
 
-  const handleChange = (field) => (event) => {
+  const handleChange = (field: keyof Recipe) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setEditableRecipe((prev) => ({
       ...prev,
       [field]: event.target.value,
@@ -183,7 +185,7 @@ const RecipeDialog = ({
         try {
           [translatedTitle, translatedIngredients, translatedPreparation] =
             await Promise.all([
-              translateDirectly(data.title , i18n.language),
+              translateDirectly(data.title, i18n.language),
               translateDirectly(data.ingredients, i18n.language),
               translateDirectly(data.preparation, i18n.language),
             ]);
@@ -237,7 +239,7 @@ const RecipeDialog = ({
 
   const handleDelete = () => {
     if (onDelete) {
-      editableRecipe._id = recipe?._id;
+      editableRecipe._id = recipe?._id ?? "";
       onDelete(editableRecipe);
       onClose();
     }
@@ -249,8 +251,8 @@ const RecipeDialog = ({
       try {
         const [title, ingredients, preparation] = await Promise.all([
           translateDirectly(recipe.title, targetLang),
-          translateDirectly(recipe.ingredients, targetLang),
-          translateDirectly(recipe.preparation, targetLang),
+          translateDirectly(recipe.ingredients ?? "", targetLang),
+          translateDirectly(recipe.preparation ?? "", targetLang),
         ]);
         setTranslatedRecipe({ title, ingredients, preparation });
         setEditableRecipe((prev) => ({
@@ -272,7 +274,9 @@ const RecipeDialog = ({
         ingredients: recipe?.ingredients || "",
         preparation: recipe?.preparation || "",
         imageUrl: recipe?.imageUrl || "",
-        _id: recipe?._id || "",
+        url: recipe?.url || "",
+        artist: recipe?.artist || "",
+        _id: recipe?._id ?? "",
       });
       setShowTranslated(false);
     }
@@ -280,7 +284,7 @@ const RecipeDialog = ({
 
   return (
     <Dialog
-      open={open||false}
+      open={open || false}
       onClose={onClose}
       dir={isRTL ? "rtl" : "ltr"}
       PaperProps={{
@@ -482,7 +486,24 @@ const RecipeDialog = ({
             {/* YouTube Player with Play Button */}
             {editableRecipe.url && (
               <div style={{ marginBottom: "16px", textAlign: "center" }}>
-                {!showPlayer ? (
+                {showPlayer ? (
+                  <div style={{ maxWidth: 400 }}>
+                    <YouTube
+                      videoId={
+                        editableRecipe.url.includes("youtube.com")
+                          ? editableRecipe.url.split("v=")[1]?.split("&")[0]
+                          : editableRecipe.url.includes("youtu.be")
+                            ? editableRecipe.url.split("/").pop()
+                            : ""
+                      }
+                      opts={{
+                        width: "100%",
+                        height: "220",
+                        playerVars: { autoplay: 1 },
+                      }}
+                    />
+                  </div>
+                ) : (
                   <Button
                     variant="contained"
                     color="success"
@@ -500,23 +521,6 @@ const RecipeDialog = ({
                   >
                     {t("play")}
                   </Button>
-                ) : (
-                  <div style={{ maxWidth: 400 }}>
-                    <YouTube
-                      videoId={
-                        editableRecipe.url.includes("youtube.com")
-                          ? editableRecipe.url.split("v=")[1]?.split("&")[0]
-                          : editableRecipe.url.includes("youtu.be")
-                          ? editableRecipe.url.split("/").pop()
-                          : ""
-                      }
-                      opts={{
-                        width: "100%",
-                        height: "220",
-                        playerVars: { autoplay: 1 },
-                      }}
-                    />
-                  </div>
                 )}
               </div>
             )}
@@ -608,7 +612,7 @@ const RecipeDialog = ({
 
           <Box position="relative">
             <TextField
-              label={t("preparation")}
+              label={t("lyrics")}
               value={editableRecipe.preparation}
               onChange={handleChange("preparation")}
               fullWidth

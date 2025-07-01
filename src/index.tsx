@@ -12,7 +12,6 @@ import {
 } from "react-router-dom";
 import RecipeCategory from "./Pages/RecipeCategory";
 import RecipeDetail from "./Pages/RecipeDetail";
-import AddRecipe from "./Pages/AddRecipe";
 import HomePage from "./Pages/HomePage";
 import "./styles.css";
 import { CircularProgress, Box } from "@mui/material";
@@ -49,6 +48,8 @@ function App() {
     ingredients: "",
     preparation: "",
   });
+  // Song list state (array of songs)
+  const [songList, setSongList] = useState<any[]>([]);
 
   const navigate = useNavigate();
   const params = useParams();
@@ -99,6 +100,14 @@ function App() {
     }
   }, [selectedRecipe, navigate]);
 
+  // Handler to add a song to the song list (to be passed to CaseCard)
+  const handleAddSongToList = (song: any) => {
+    setSongList((prev) => {
+      if (prev.some((s) => s.title === song.title && s.artist === song.artist)) return prev;
+      return [...prev, song];
+    });
+  };
+
   return (
     <>
       {loading && (
@@ -113,7 +122,7 @@ function App() {
             left: 0,
             top: 0,
             zIndex: 2000,
-            background: isDarkMode ? "#333" : "#fffce8", // Use dark background if dark mode
+            background: isDarkMode ? "#333" : "#fffce8",
           }}
         >
           <CircularProgress size={64} />
@@ -132,6 +141,9 @@ function App() {
                 setSelectedCategory={setSelectedCategory}
                 selectedCategory={selectedCategory}
                 newRecipe={newRecipe}
+                songList={songList}
+                setSongList={setSongList}
+                onAddSongToList={handleAddSongToList}
               />
             }
           />
@@ -145,6 +157,9 @@ function App() {
                 selectedCategory={selectedCategory}
                 newRecipe={newRecipe}
                 setSelectedCategory={setSelectedCategory}
+                songList={songList}
+                setSongList={setSongList}
+                onAddSongToList={handleAddSongToList}
               />
             }
           />
@@ -158,17 +173,9 @@ function App() {
                 newRecipe={newRecipe}
                 setRecipes={setRecipes}
                 setSelectedCategory={setSelectedCategory}
-              />
-            }
-          />
-          <Route
-            path="/spotit/:category/add"
-            element={
-              <AddRecipe
-                recipes={recipes}
-                setRecipes={setRecipes}
-                selected={selected}
-                setSelected={setSelected}
+                songList={songList}
+                setSongList={setSongList}
+                onAddSongToList={handleAddSongToList}
               />
             }
           />

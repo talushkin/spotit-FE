@@ -60,6 +60,7 @@
   max-height: 0;
   opacity: 0;
   max-height: 0px;
+  height: 0px
 }
 
 .nav a {
@@ -126,7 +127,7 @@
 .main {
   padding: 10px;
   /* Remove or adjust the background properties if they duplicate the body's */
-  min-height: 100vh;
+  //min-height: 100vh;
 }
 
 /* ======================= */
@@ -134,8 +135,9 @@
 /* ======================= */
 
 .case {
-  width: 180px;
+  min-width: 120px;
   height: 220px;
+  min-height: 220px;
   background-size: cover;
   background-position: center;
   background-repeat: repeat;

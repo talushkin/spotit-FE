@@ -10,7 +10,7 @@ interface ThemeModeButtonProps {
 
 export default function ThemeModeButton({ isDarkMode, toggleDarkMode }: ThemeModeButtonProps) {
   return (
-    <div style={{ display: "flex", gap: "0.5rem", width: "100%" }}>
+    <div style={{ display: "flex", gap: "0.5rem", width: "100px" }}>
       <Button
         variant={isDarkMode ? "contained" : "outlined"}
         onClick={() => !isDarkMode && toggleDarkMode()}
@@ -21,6 +21,7 @@ export default function ThemeModeButton({ isDarkMode, toggleDarkMode }: ThemeMod
           flex: 1,
           fontWeight: "bold",
           gap: "0.5rem",
+          width: "100px",
           "&:hover": {
             backgroundColor: "#222",
             color: "white",
@@ -28,11 +29,10 @@ export default function ThemeModeButton({ isDarkMode, toggleDarkMode }: ThemeMod
         }}
         startIcon={
           <Brightness4Icon
-            sx={{ color: "white" }}
+            sx={{ color: "white", margin: "0 auto", display: "block" }}
           />
         }
       >
-        Dark
       </Button>
       <Button
         variant={!isDarkMode ? "contained" : "outlined"}
@@ -44,6 +44,7 @@ export default function ThemeModeButton({ isDarkMode, toggleDarkMode }: ThemeMod
           flex: 1,
           fontWeight: "bold",
           gap: "0.5rem",
+          width: "100px",
           "&:hover": {
             backgroundColor: "#eee",
             color: "black",
@@ -51,11 +52,10 @@ export default function ThemeModeButton({ isDarkMode, toggleDarkMode }: ThemeMod
         }}
         startIcon={
           <Brightness7Icon
-            sx={{ color: "black" }}
+            sx={{ color: "black", margin: "0 auto", display: "block" }}
           />
         }
       >
-        Light
       </Button>
     </div>
   );
