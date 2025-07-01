@@ -3,8 +3,6 @@ import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
 import dayjs from "dayjs";
 import type { Recipe } from "../utils/storage";
-
-// Add MUI icon
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
 interface CaseCardProps {
@@ -22,7 +20,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
     title: "",
     description: "",
   });
-  const [imageUrl, setImageUrl] = useState(
+  const [imageUrl] = useState(
     "C:\\FE-code\\recipes\\BE\\images\\1747127810600-generated-image.png"
   );
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +31,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
       try {
         const [title, description] = await Promise.all([
           translateDirectly(item.title, currentLang),
-          translateDirectly(item.preparation, currentLang),
+          translateDirectly(item.preparation ?? "", currentLang),
         ]);
         setTranslated({ title, description });
       } catch (error) {
@@ -77,7 +75,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
       }}
     >
       <img
-        src={item.imageUrl || imageUrl}
+        src={item.imageUrl || item.image || imageUrl}
         alt={translated.title || item.title}
         style={{
           width: "180px",
@@ -126,8 +124,8 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
           position: "absolute",
           background: "#1db954",
           borderRadius: "50%",
-          left: "5%",
-          top: "40%",
+          left: "18px",
+          bottom: "18px",
           width: "48px",
           height: "48px",
           display: "flex",
@@ -139,6 +137,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
           zIndex: 2,
           textDecoration: "none",
           pointerEvents: "none",
+          transform: "translateY(40px)",
         }}
         tabIndex={-1}
       >
