@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
 import CaseCard from "./CaseCard";
 import Pagination from "@mui/material/Pagination";
-import Button from "@mui/material/Button";
-import RecipeDialog from "./RecipeDialog";
 import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
-import { generateImage } from "./imageAI";
 import { useDispatch } from "react-redux";
 import { addRecipeThunk, delRecipeThunk, updateRecipeThunk } from "../store/dataSlice";
 import {
@@ -23,8 +20,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useNavigate } from "react-router-dom";
-import AddIcon from "@mui/icons-material/Add";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
 import type { Recipe, Category } from "../utils/storage";
 
 // --- Types ---

@@ -316,7 +316,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, language, i18n, 
           </div>
         )}
       </div>
-      <div style={{ width: "30%", display: "flex", justifyContent: "flex-end" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <ThemeModeButton isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
       </div>
     </Box>
