@@ -7,9 +7,18 @@ import ThemeModeButton from "./ThemeModeButton";
 import LanguageSelector from "./LanguageSelector";
 import type { Category } from "../utils/storage";
 
+interface CategoryItem {
+  _id: string;
+  category: string;
+  createdAt?: string;
+  itemPage?: any[];
+  priority?: number;
+  translatedCategory?: { [lang: string]: string } | Array<{ lang: string; value: string; _id?: string }>;
+}
+
 interface NavMenuProps {
   pages: Category[];
-  onSelect: (item: Category) => void;
+  onSelect: (item: CategoryItem) => void;
   isOpen: boolean;
   language: string;
   desktop: boolean;
@@ -18,23 +27,35 @@ interface NavMenuProps {
   onHamburgerClick: () => void;
 }
 
+function toCategoryItem(cat: Category): CategoryItem {
+  return {
+    _id: cat._id,
+    category: cat.category,
+    itemPage: cat.itemPage,
+    // Only assign if present
+    ...(cat as any).createdAt && { createdAt: (cat as any).createdAt },
+    ...(cat as any).priority && { priority: (cat as any).priority },
+    translatedCategory: cat.translatedCategory as CategoryItem["translatedCategory"],
+  };
+}
+
 export default function NavMenu({ pages, onSelect, isOpen, language, desktop, isDarkMode, toggleDarkMode, onHamburgerClick }: NavMenuProps) {
   const { t, i18n } = useTranslation();
   const [editCategories, setEditCategories] = useState(false);
   const [reorder, setReorder] = useState(false);
-  const [orderedPages, setOrderedPages] = useState<Category[]>(pages);
+  const [orderedPages, setOrderedPages] = useState<CategoryItem[]>(pages.map(toCategoryItem));
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    setOrderedPages(pages);
+    setOrderedPages(pages.map(toCategoryItem));
   }, [pages]);
 
-  const handleOrderChange = (newOrder: Category[]) => {
+  const handleOrderChange = (newOrder: CategoryItem[]) => {
     setOrderedPages(newOrder);
   };
 
-  const handleSelectCategory = (item: Category) => {
+  const handleSelectCategory = (item: CategoryItem) => {
     setEditCategories(false);
     setReorder(false);
 
@@ -42,7 +63,7 @@ export default function NavMenu({ pages, onSelect, isOpen, language, desktop, is
       const categoryEncoded = encodeURIComponent(item.category);
       navigate(`/spotit/${categoryEncoded}`);
     }
-    onHamburgerClick(); // Call the parent function to handle hamburger click
+    onHamburgerClick();
     onSelect(item);
     console.log("Selected category:", item);
   };

@@ -19,6 +19,13 @@ interface HeaderBarProps {
   isDarkMode: boolean;
 }
 
+// Add type for search/autocomplete options
+interface RecipeOption {
+  title: string;
+  category: string;
+  originalTitle: string;
+}
+
 export default function HeaderBar({
   logo,
   onHamburgerClick,
@@ -32,44 +39,38 @@ export default function HeaderBar({
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<RecipeOption[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [language, setLanguage] = useState(i18n.language);
-
-  // Track if search is active (focused or has value)
   const [searchActive, setSearchActive] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const [translatedOptions, setTranslatedOptions] = useState<RecipeOption[]>([]);
 
-  // Reset the input value in the DOM when searchQuery is reset
+  // Build allRecipes as before
+  const allRecipes = pages?.flatMap((category) =>
+    category.itemPage.map((r) => ({ ...r, category: category.category }))
+  ) || [];
+
+  useEffect(() => {
+    if (!allRecipes) return;
+    setTranslatedOptions(
+      allRecipes.map((r) => ({
+        title: r.title,
+        category: r.category,
+        originalTitle: r.title,
+      }))
+    );
+  }, [allRecipes, i18n.language]);
+
   useEffect(() => {
     if (searchInputRef.current && searchQuery === "") {
       searchInputRef.current.value = "";
     }
   }, [searchQuery]);
 
-  // Replace the translatedTitles state with an array of objects: { title, category }
-  const [translatedOptions, setTranslatedOptions] = useState([]);
-
-  // Build allRecipes as before
-  const allRecipes = pages?.flatMap((category) =>
-    category.itemPage.map((r) => ({ ...r, category: category.category }))
-  );
-
-  useEffect(() => {
-          if (!allRecipes) return;
-          setTranslatedOptions(
-            allRecipes.map((r) => ({
-              title: r.title, // Displayed (English) title
-              category: r.category,
-              originalTitle: r.title, // Save original English title
-            }))
-          );  
-  }, [allRecipes, i18n.language]);
-
-  const handleSearchChange = (event, value) => {
-    setShowMobileSearch(false); // Reset mobile search when input is cleared
+  const handleSearchChange = (_event: React.SyntheticEvent, value: string) => {
+    setShowMobileSearch(false);
     setSearchQuery(value);
     if (!value) {
       setFilteredSuggestions([]);
@@ -81,14 +82,11 @@ export default function HeaderBar({
     setFilteredSuggestions(filtered);
   };
 
-  const handleSelect = (event, value) => {
-    // Find the option object by title
+  const handleSelect = (_event: React.SyntheticEvent, value: string | null) => {
+    if (!value) return;
     const option = translatedOptions.find((opt) => opt.title === value);
     if (option) {
-      // Find the original recipe object by originalTitle
-      const recipe = allRecipes.find(
-        (r) => r.title === option.originalTitle
-      );
+      const recipe = allRecipes.find((r) => r.title === option.originalTitle);
       if (recipe) {
         setDialogOpen(true);
         setSearchActive(false);
@@ -101,39 +99,34 @@ export default function HeaderBar({
         navigate(
           `/spotit/${encodeURIComponent(recipe.category)}/${encodeURIComponent(recipe.title)}`
         );
-        window.location.reload(); // <-- Reload after navigation
+        window.location.reload();
       }
     }
   };
 
-  // Handle ESC key to exit search and fade in ham/recipes
-  const handleKeyDown = (event) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Escape" && searchActive) {
       setSearchActive(false);
-      setSearchQuery(""); // <-- Reset the search text
+      setSearchQuery("");
       setFilteredSuggestions([]);
-      console.log(
-        searchQuery,
-        "Search closed, fading in hamburger and recipes"
-      );
-      // Optionally blur the input
       if (searchInputRef.current) {
         searchInputRef.current.blur();
       }
     }
   };
 
-  // Fade and width animation styles for left side (hamburger/logo/title)
-  const fadeStyle = {
+  const fadeStyle: React.CSSProperties = {
     transition:
       "opacity 0.4s cubic-bezier(.4,0,.2,1), width 0.4s cubic-bezier(.4,0,.2,1)",
     opacity: searchActive ? 0 : 1,
     width: searchActive ? 0 : "auto",
-    pointerEvents: searchActive ? "none" : "auto",
+    pointerEvents: searchActive ? ("none" as React.CSSProperties["pointerEvents"]) : ("auto" as React.CSSProperties["pointerEvents"]),
     willChange: "opacity,width",
     overflow: "hidden",
     minWidth: 0,
-    display: searchActive ? "none" : "flex", // Hide completely when faded out
+    display: searchActive ? "none" : "flex",
+    alignItems: "center",
+    gap: "8px",
   };
 
   return (

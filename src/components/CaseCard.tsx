@@ -20,10 +20,10 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
     title: "",
     description: "",
   });
-  const [imageUrl] = useState(
+  const [imageUrl] = useState<string>(
     "C:\\FE-code\\recipes\\BE\\images\\1747127810600-generated-image.png"
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const translateFields = async () => {
@@ -50,9 +50,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
   }, [item, currentLang]);
 
   const isNewRecipe = item.title === "ADD NEW RECEPY";
-  const linkHref = `/recipies/${encodeURIComponent(
-    category
-  )}/${encodeURIComponent(item.title)}`;
+  const linkHref = `/spotit/${encodeURIComponent(category)}/${encodeURIComponent(item.title)}`;
 
   return (
     <div
@@ -75,7 +73,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true }: C
       }}
     >
       <img
-        src={item.imageUrl || item.image || imageUrl}
+        src={item.image || item.imageUrl || imageUrl}
         alt={translated.title || item.title}
         style={{
           width: "180px",

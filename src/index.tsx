@@ -19,7 +19,7 @@ import { CircularProgress, Box } from "@mui/material";
 import { Provider } from "react-redux";
 import * as storage from "./utils/storage";
 import store from "./store/store";
-import type { Recipe, Category } from "../utils/storage"; // adjust path as needed
+import type { Recipe, Category } from "./utils/storage"; // adjust path as needed
 
 const rootElement = document.getElementById("root") as HTMLElement;
 const root = ReactDOM.createRoot(rootElement);
@@ -44,6 +44,11 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(true); // Set initial theme to dark
+  const [newRecipe, setNewRecipe] = useState<Recipe>({
+    title: "",
+    ingredients: "",
+    preparation: "",
+  });
 
   const navigate = useNavigate();
   const params = useParams();
@@ -126,6 +131,7 @@ function App() {
                 setSelectedRecipe={setSelectedRecipe}
                 setSelectedCategory={setSelectedCategory}
                 selectedCategory={selectedCategory}
+                newRecipe={newRecipe}
               />
             }
           />
@@ -136,9 +142,9 @@ function App() {
                 recipes={recipes}
                 setRecipes={setRecipes}
                 selectedRecipe={selectedRecipe}
-                setSelectedRecipe={setSelectedRecipe}
-                setSelectedCategory={setSelectedCategory}
                 selectedCategory={selectedCategory}
+                newRecipe={newRecipe}
+                setSelectedCategory={setSelectedCategory}
               />
             }
           />
@@ -147,10 +153,11 @@ function App() {
             element={
               <RecipeDetail
                 recipes={recipes}
-                setSelectedCategory={setSelectedCategory}
                 selectedCategory={selectedCategory}
                 selectedRecipe={selectedRecipe}
-                setSelectedRecipe={setSelectedRecipe}
+                newRecipe={newRecipe}
+                setRecipes={setRecipes}
+                setSelectedCategory={setSelectedCategory}
               />
             }
           />
@@ -160,10 +167,8 @@ function App() {
               <AddRecipe
                 recipes={recipes}
                 setRecipes={setRecipes}
-                setSelectedCategory={setSelectedCategory}
-                selectedCategory={selectedCategory}
-                selectedRecipe={selectedRecipe}
-                setSelectedRecipe={setSelectedRecipe}
+                selected={selected}
+                setSelected={setSelected}
               />
             }
           />

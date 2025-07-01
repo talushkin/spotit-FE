@@ -55,7 +55,7 @@ function SortableRecipe({ recipe, index, onSelect }: SortableRecipeProps) {
     cursor: "grab",
     display: "flex",
     justifyContent: "center",
-    flexWrap: "wrap",
+    flexWrap: "wrap" as const,
     gap: "1rem",
   };
 
@@ -103,7 +103,7 @@ const MainContent: React.FC<MainContentProps> = ({
       : "flex-start"
   );
 
-  // Assume recipes are stored in selectedCategory.itemPage
+  // Assume recipes are stored in selectedCategory?.itemPage
   const [recipes, setRecipes] = useState<Recipe[]>(selectedCategory?.itemPage || []);
   const navigate = useNavigate();
 
@@ -122,9 +122,11 @@ const MainContent: React.FC<MainContentProps> = ({
       if (selectedCategory?.category && lang !== "en") {
         // Check if translation already exists in translatedCategory array
         if (
-          Array.isArray(selectedCategory.translatedCategory)
+          Array.isArray(selectedCategory.translatedCategory) &&
+          selectedCategory.translatedCategory.length > 0 &&
+          typeof selectedCategory.translatedCategory[0] === "object"
         ) {
-          const found = selectedCategory.translatedCategory.find(
+          const found = (selectedCategory.translatedCategory as unknown as { lang: string; value: string }[]).find(
             (t) => t.lang === lang && t.value
           );
           if (found) {
@@ -182,9 +184,9 @@ const MainContent: React.FC<MainContentProps> = ({
     if (i18n.language !== "en") {
       try {
         const [titleEn, ingredientsEn, preparationEn] = await Promise.all([
-          translateDirectly(newRecipeData.title, "en"),
-          translateDirectly(newRecipeData.ingredients, "en"),
-          translateDirectly(newRecipeData.preparation, "en"),
+          translateDirectly(newRecipeData.title ?? "", "en"),
+          translateDirectly(newRecipeData.ingredients ?? "", "en"),
+          translateDirectly(newRecipeData.preparation ?? "", "en"),
         ]);
         newRecipeData = {
           ...newRecipeData,
@@ -198,9 +200,7 @@ const MainContent: React.FC<MainContentProps> = ({
     }
 
     try {
-      const response = await dispatch(
-        addRecipeThunk({ recipe: newRecipeData, category: selectedCategory })
-      ).unwrap();
+      const response = await ( (dispatch as any)(addRecipeThunk({ recipe: newRecipeData, category: selectedCategory })) ).unwrap();
       setRecipes([...recipes, newRecipeData]);
     } catch (error: any) {
       console.error("Error adding recipe:", error.response?.data || error.message);
@@ -217,7 +217,7 @@ const MainContent: React.FC<MainContentProps> = ({
     updatedRecipe.categoryId = selectedCategory?._id; // Ensure we have the correct category ID
     updatedRecipe.category = selectedCategory?.category; // Ensure we have the correct category name
     try {
-      const response = await dispatch(updateRecipeThunk(updatedRecipe)).unwrap();
+      const response = await ( (dispatch as any)(updateRecipeThunk(updatedRecipe)) ).unwrap();
       setRecipes((prevRecipes) =>
         prevRecipes.map((r) => (r._id === updatedRecipe._id ? updatedRecipe : r))
       );
@@ -230,7 +230,7 @@ const MainContent: React.FC<MainContentProps> = ({
   // Function to delete a recipe using Redux and update local state
   const handleDeleteRecipe = (recipe: Recipe) => {
     if (window.confirm(t("Are you sure you want to delete this recipe? ID:" + recipe._id + " " + recipe.title))) {
-      dispatch(delRecipeThunk(recipe._id))
+      ( (dispatch as any)(delRecipeThunk(recipe._id!)) )
         .unwrap()
         .then(() => {
           setRecipes((prevRecipes) =>
@@ -457,7 +457,7 @@ const MainContent: React.FC<MainContentProps> = ({
         open={openView}
         onClose={handleCloseDialog}
         type="view"
-        recipe={viewedItem}
+        recipe={viewedItem ? { ...viewedItem, ingredients: viewedItem.ingredients ?? "", preparation: viewedItem.preparation ?? "" } : { ...newRecipe, ingredients: newRecipe.ingredients ?? "", preparation: newRecipe.preparation ?? "" }}
         onSave={(recipe: Recipe) => {
           // If editing an existing recipe, call update; otherwise, add new.
           viewedItem?._id ? handleUpdateRecipe(recipe) : handleAddRecipe(recipe);
@@ -472,7 +472,7 @@ const MainContent: React.FC<MainContentProps> = ({
         autoFill={openFill}
         onClose={handleCloseDialog}
         type="add"
-        recipe={newRecipe}
+        recipe={{ ...newRecipe, ingredients: newRecipe.ingredients ?? "", preparation: newRecipe.preparation ?? "" }}
         categoryName={selectedCategory?.category}
         onSave={(recipe: Recipe) => {
           handleAddRecipe(recipe);
