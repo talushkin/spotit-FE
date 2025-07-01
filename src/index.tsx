@@ -49,7 +49,38 @@ function App() {
     preparation: "",
   });
   // Song list state (array of songs)
-  const [songList, setSongList] = useState<any[]>([]);
+  const [songList, setSongList] = useState<any[]>([
+    {
+      title: "Bohemian Rhapsody",
+      artist: "Queen",
+      duration: "5:55",
+      url: "https://www.youtube.com/watch?v=fJ9rUzIMcZQ"
+    },
+    {
+      title: "Stairway to Heaven",
+      artist: "Led Zeppelin",
+      duration: "8:02",
+      url: "https://www.youtube.com/watch?v=QkF3oxziUI4"
+    },
+    {
+      title: "Hotel California",
+      artist: "Eagles",
+      duration: "6:30",
+      url: "https://www.youtube.com/watch?v=EqPtz5qN7HM"
+    },
+    {
+      title: "Sweet Child O' Mine",
+      artist: "Guns N' Roses",
+      duration: "5:56",
+      url: "https://www.youtube.com/watch?v=1w7OgIMMRc4"
+    },
+    {
+      title: "Smoke on the Water",
+      artist: "Deep Purple",
+      duration: "5:40",
+      url: "https://www.youtube.com/watch?v=zUwEIt9ez7M"
+    }
+  ]);
 
   const navigate = useNavigate();
   const params = useParams();

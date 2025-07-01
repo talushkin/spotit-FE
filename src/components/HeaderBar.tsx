@@ -135,6 +135,8 @@ export default function HeaderBar({
         className="HeaderBar"
         style={{
           display: "flex",
+          position: "sticky",
+          top: 0,
           alignItems: "center",
           justifyContent: "space-between",
           padding: "8px",

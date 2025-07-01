@@ -13,16 +13,19 @@
 /* ======================= */
 
 .HeaderBar {
+  position: sticky;
   top: 0;
-  z-index: 1000;
-  /* Make sure it stays above other elements */
+  left: 0;
+  right: 0;
+  z-index: 2000;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #474847;
-  /* padding: 10px 20px 10px 20px; */
-  position: sticky;
   color: white;
+  width: 100vw;
+  min-height: 60px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .SiteName {
@@ -39,7 +42,7 @@
 /* ======================= */
 
 .nav {
-  background-color:darkgrey;
+  background-color: darkgrey;
   color: white;
   flex-direction: column;
   font-size: 20px;
@@ -178,8 +181,10 @@
   flex: 0 0 100%;
   padding-left: 8px;
   padding-right: 8px;
-  justify-content: center !important; /* Center on small screens */
+  justify-content: center !important;
+  /* Center on small screens */
 }
+
 @media (min-width: 651px) {
   .case-col {
     max-width: 50%;
@@ -187,6 +192,7 @@
     justify-content: center !important;
   }
 }
+
 /* ======================= */
 /*      RESPONSIVE         */
 /* ======================= */
@@ -212,16 +218,6 @@
 /*      MEDIA QUERIES      */
 /* ======================= */
 
-@media (max-width: 764px) {
-
-  .TOP {
-    max-height: 60px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    /* Make sure it stays above other elements */
-  }
-}
 
 .SiteName {
   padding: 10px;
@@ -241,6 +237,10 @@
   margin: 0;
   padding: 0;
   max-height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  /* Make sure it stays above other elements */
 }
 
 .nav-menu {

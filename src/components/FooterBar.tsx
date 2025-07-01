@@ -62,16 +62,11 @@ function SortableSongRow({ song, idx, isSelected, onClick, isDarkMode }: any) {
       {...attributes}
       {...listeners}
     >
-      <td style={{ width: 48, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
-        {idx + 1}.
+      <td style={{ width: 32, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
+        {idx + 1}
       </td>
       <td style={{ padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#fff" : "#222"), fontWeight: isSelected ? 700 : 400 }}>
         {song.title}
-        {song.artist && (
-          <span style={{ fontWeight: 400, fontSize: "0.95em", color: isDarkMode ? "#bbb" : "#333" }}>
-            {" / "}{song.artist}
-          </span>
-        )}
       </td>
       <td style={{ width: 60, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
         {song.duration || ""}
@@ -291,12 +286,25 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, language, i18n, 
                         idx={idx}
                         isSelected={idx === currentSongIndex}
                         onClick={() => {
-                          // Play the selected song
-                          setIsPlaying(false);
-                          setTimeout(() => {
-                            setIsPlaying(true);
-                          }, 100);
-                          // Optionally, update selectedRecipe if needed
+                          // Play and select the clicked song
+                          if (idx !== currentSongIndex) {
+                            setIsPlaying(false);
+                            setTimeout(() => {
+                              setIsPlaying(true);
+                            }, 100);
+                          }
+                          // Update selectedRecipe and currentSongIndex if possible
+                          if (typeof window !== 'undefined') {
+                            // Try to update via navigation (simulate selection)
+                            if (song.title) {
+                              // Try to find category if available
+                              let category = (selectedRecipe && (selectedRecipe as any).category) || '';
+                              if (category && song.title) {
+                                const url = `/spotit/${encodeURIComponent(category)}/${encodeURIComponent(song.title)}`;
+                                window.location.href = url;
+                              }
+                            }
+                          }
                         }}
                         isDarkMode={isDarkMode}
                       />
