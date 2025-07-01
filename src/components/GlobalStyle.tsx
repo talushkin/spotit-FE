@@ -1,7 +1,9 @@
-// src/GlobalStyle.js
+// src/GlobalStyle.ts
 import { createGlobalStyle } from "styled-components";
+import type { DefaultTheme } from "styled-components";
+import { useState } from "react";
 
-const GlobalStyle = createGlobalStyle`
+const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
   body {
     background-color: ${({ theme }) => theme.background};
     color: ${({ theme }) => theme.color};

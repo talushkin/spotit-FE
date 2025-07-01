@@ -2,17 +2,7 @@
 /*        GLOBALS          */
 /* ======================= */
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-image: url('./assets/leaf-left.png'), url('./assets/leaf-right.png');
-  background-position: left center, right center;
-  background-repeat: repeat-y;
-  background-size:  auto 40%, auto 40%;
-    background-position: 
-    calc(0% - 1rem) center,  /* Left image slightly inward */
-    calc(100% + 1rem) center; /* Right image slightly inward */
-}
+
 
 * {
   box-sizing: border-box;
@@ -29,7 +19,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #024803;
+  background-color: #474847;
   /* padding: 10px 20px 10px 20px; */
   position: sticky;
   color: white;
@@ -49,10 +39,9 @@ body {
 /* ======================= */
 
 .nav {
-  background-color: #024803;
+  background-color:darkgrey;
   color: white;
   flex-direction: column;
-  gap: 15px;
   font-size: 20px;
   overflow: hidden;
   opacity: 0;
@@ -64,7 +53,6 @@ body {
   display: flex;
   /* was block – change to flex */
   opacity: 1;
-  max-height: 1000px;
   border-bottom-left-radius: 10px;
 }
 
@@ -77,15 +65,14 @@ body {
 .nav a {
   color: white;
   text-decoration: none;
-  padding: 5px 20px
 }
 
 .nav a:hover {
-  background-color: #416641;
+  background-color: #636363;
 }
 
 .nav-item {
-  background-color: #024803;
+  background-color: #2f2f2f;
   /* light cream background */
   color: white;
   /* dark green text */
@@ -130,7 +117,7 @@ body {
   width: 100%;
   font-size: 4rem;
   font-weight: bold;
-  color: rgb(3, 50, 3);
+  color: rgb(49, 49, 49);
   /* Set text color to dark green */
   margin-bottom: 20px;
   padding-bottom: 10px;
@@ -147,8 +134,8 @@ body {
 /* ======================= */
 
 .case {
-  width: 300px;
-  height: 350px;
+  width: 180px;
+  height: 220px;
   background-size: cover;
   background-position: center;
   background-repeat: repeat;
@@ -224,13 +211,6 @@ body {
 /* ======================= */
 
 @media (max-width: 764px) {
-  body {
-     background-image: url('./assets/leaf-left.png'), url('./assets/leaf-right.png');
-  background-position: left center, right center;
-  background-repeat: repeat-y;
-  background-size:  auto 40%, auto 40%;
-    background-position: calc(0% - 180px) center, calc(100% + 180px) center;
-  }
 
   .TOP {
     max-height: 60px;

@@ -9,13 +9,23 @@ import { lightTheme, darkTheme } from "../components/themes";
 import GlobalStyle from "../components/GlobalStyle";
 import * as store from "../utils/storage"; // adjust path if needed
 import { useNavigate } from "react-router-dom";
-import FooterBar from "../components/FooterBar.jsx"; // <-- Add this import
+import FooterBar from "../components/FooterBar";
 
-export default function Main(props) {
+interface HomePageProps {
+  setSelectedRecipe: (recipe: any) => void;
+  selectedRecipe: any;
+  newRecipe: any;
+  recipes: any;
+  setRecipes: (recipes: any) => void;
+  selectedCategory: any;
+  setSelectedCategory: (cat: any) => void;
+}
+
+export default function Main(props: HomePageProps) {
   const { setSelectedRecipe, selectedRecipe, newRecipe, recipes, setRecipes, selectedCategory, setSelectedCategory } = props;
   const [menuOpen, setMenuOpen] = useState(false);
   const { i18n } = useTranslation();
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [desktop, setDesktop] = useState(window.innerWidth > 768); // Check if desktop
   const navigate = useNavigate();
 
@@ -55,7 +65,7 @@ export default function Main(props) {
       <div className="App">
         <GlobalStyle />
 
-        <div className="TOP">
+        <div className="TOP" style={{ background: isDarkMode ? '#000' : undefined }}>
           <HeaderBar
             desktop={desktop}
             logo={"https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"}
@@ -97,7 +107,7 @@ export default function Main(props) {
             <div className="main-content col">
               {selectedCategory && (
                 <MainContent
-                  selected={selectedCategory}
+                  selectedCategory={selectedCategory}
                   selectedRecipe={selectedRecipe}
                   addRecipe={newRecipe}
                   data={recipes}

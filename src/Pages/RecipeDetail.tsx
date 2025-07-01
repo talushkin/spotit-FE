@@ -2,10 +2,19 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import HomePage from "./HomePage";
 
-export default function RecipeDetail(props) {
+interface RecipeDetailProps {
+  selectedRecipe: any;
+  newRecipe: any;
+  recipes: any;
+  setRecipes: (recipes: any) => void;
+  setSelectedCategory: (cat: any) => void;
+  selectedCategory: any;
+}
+
+export default function RecipeDetail(props: RecipeDetailProps) {
   const { selectedRecipe, newRecipe, recipes, setRecipes, setSelectedCategory, selectedCategory } = props;
   const { category, title } = useParams();
-
+  console.log('RecipeDetail params:', useParams());
   const pages = recipes?.site?.pages || [];
 
   // Normalize category (lowercase) for comparison
@@ -23,7 +32,7 @@ export default function RecipeDetail(props) {
       console.warn("Recipe not found:", title);
       // return <div>Recipe not found.</div>;
     }
-   // console.log("Found recipe:", selectedRecipeData);
+    console.log("Found recipe:", selectedRecipeData);
     return (
       <HomePage
         selectedCategory={selectedCategoryData}

@@ -3,15 +3,22 @@ import { useParams } from "react-router-dom";
 import HomePage from "./HomePage";
 import data from "../data/recipes.json";
 
-export default function RecipeDetail(props) {
+interface AddRecipeProps {
+  recipes: any;
+  setRecipes: (recipes: any) => void;
+  selected: any;
+  setSelected: (selected: any) => void;
+}
+
+export default function AddRecipe(props: AddRecipeProps) {
   const { recipes, setRecipes, selected, setSelected } = props;
-  const { category, title } = useParams();
+  const { category, title } = useParams<{ category?: string; title?: string }>();
   console.log(useParams());
   const pages = data?.site?.pages || [];
 
   // Normalize category (lowercase) for comparison
   const selectedCategoryData = pages.find(
-    (page) => page?.category?.toLowerCase() === category?.toLowerCase()
+    (page: any) => page?.category?.toLowerCase() === category?.toLowerCase()
   );
 
   if (selectedCategoryData) {

@@ -16,6 +16,26 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 const BASE_URL = "https://be-tan-theta.vercel.app";
 
+interface Recipe {
+  _id?: string;
+  title: string;
+  ingredients: string;
+  preparation: string;
+  imageUrl?: string;
+}
+
+interface RecipeDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (recipe: Recipe) => void;
+  onDelete?: (recipe: Recipe) => void;
+  recipe: Recipe;
+  targetLang?: string;
+  type?: string;
+  categoryName?: string;
+  autoFill?: boolean;
+}
+
 const RecipeDialog = ({
   open,
   onClose,
@@ -26,7 +46,7 @@ const RecipeDialog = ({
   type,
   categoryName,
   autoFill = false,
-}) => {
+}: RecipeDialogProps) => {
   const { i18n, t } = useTranslation();
   const isRTL = i18n.language === "he" || i18n.language === "ar";
 
@@ -258,7 +278,7 @@ const RecipeDialog = ({
 
   return (
     <Dialog
-      open={open}
+      open={open||false}
       onClose={onClose}
       dir={isRTL ? "rtl" : "ltr"}
       PaperProps={{

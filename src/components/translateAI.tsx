@@ -3,7 +3,7 @@ import axios from "axios";
 
 const BASE_URL = "https://be-tan-theta.vercel.app";
 
-export const translateDirectly = async (text, toLang = "en") => {
+export const translateDirectly = async (text: string, toLang: string = "en"): Promise<string> => {
   if (!text || !toLang) {
     console.warn("Text or target language is missing");
     return text;
@@ -24,7 +24,7 @@ export const translateDirectly = async (text, toLang = "en") => {
       }
     );
     return res?.data?.translatedText || text;
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error translating text:", err.response?.data || err.message);
     return text;
   }

@@ -31,7 +31,7 @@ export default function LanguageSelector({ language, handleLanguageChange }) {
                     value={language}
                     onChange={handleChange}
                     sx={{
-                        backgroundColor: "darkgreen",
+                        backgroundColor: "darkgrey",
                         color: "white",
                         width: "100%",
                         borderRadius: "4px",
@@ -52,18 +52,18 @@ export default function LanguageSelector({ language, handleLanguageChange }) {
                     MenuProps={{
                         PaperProps: {
                             sx: {
-                                backgroundColor: "darkgreen",
+                                backgroundColor: "darkgrey",
                                 color: "white",
                                 "& .MuiMenuItem-root": {
                                     color: "white",
                                     fontWeight: "bold",
                                     fontSize: "1rem",
-                                    backgroundColor: "darkgreen",
+                                    backgroundColor: "darkgrey",
                                     "&:hover": {
-                                        backgroundColor: "#145214",
+                                        backgroundColor: "#333",
                                     },
                                     "&.Mui-selected": {
-                                        backgroundColor: "#145214",
+                                        backgroundColor: "#111",
                                         color: "white",
                                     },
                                 },
@@ -76,14 +76,14 @@ export default function LanguageSelector({ language, handleLanguageChange }) {
                             key={lang.code}
                             value={lang.code}
                             sx={{
-                                backgroundColor: "darkgreen",
+                                backgroundColor: "darkgrey",
                                 color: "white",
                                 fontWeight: "bold",
                                 "&:hover": {
-                                    backgroundColor: "#145214",
+                                    backgroundColor: "#333",
                                 },
                                 "&.Mui-selected": {
-                                    backgroundColor: "#145214",
+                                    backgroundColor: "#111",
                                     color: "white",
                                 },
                                 textAlign: "center", // Center text in dropdown

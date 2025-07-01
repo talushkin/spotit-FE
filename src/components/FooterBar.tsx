@@ -3,10 +3,17 @@ import { Box } from "@mui/material";
 import LanguageSelector from "./LanguageSelector";
 import ThemeModeButton from "./ThemeModeButton";
 
-export default function FooterBar({ isDarkMode, toggleDarkMode, language, i18n }) {
+interface FooterBarProps {
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+  language: string;
+  i18n: any;
+}
+
+export default function FooterBar({ isDarkMode, toggleDarkMode, language, i18n }: FooterBarProps) {
   // Handler for language change
-  const handleLanguageChange = (event) => {
-    const newLang = event.target.value;
+  const handleLanguageChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const newLang = event.target.value as string;
     i18n.changeLanguage(newLang);
   };
 

@@ -23,6 +23,25 @@ import { CSS } from "@dnd-kit/utilities";
 import i18n from "../i18n";
 
 const isRTL = i18n.dir() === "rtl";
+
+interface CategoryItem {
+  _id: string;
+  category: string;
+  createdAt?: string;
+  itemPage?: any[];
+  priority?: number;
+  translatedCategory?: { [lang: string]: string } | Array<{ lang: string; value: string; _id?: string }>;
+}
+
+interface SortableItemProps {
+  item: CategoryItem;
+  index: number;
+  onSelect: (item: CategoryItem) => void;
+  editCategories: boolean;
+  translatedCategory: string;
+  delCategoryCallback: (id: string) => void;
+}
+
 // A sortable item component using dnd‑kit
 function SortableItem({
   item,
@@ -31,13 +50,24 @@ function SortableItem({
   editCategories,
   translatedCategory,
   delCategoryCallback,
-}) {
+}: SortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: item._id,
   });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    backgroundColor: "#222", // dark grey always (you can add theme logic if needed)
+    color: "#fff",
+    borderRadius: "8px",
+    margin: "4px 0",
+    transitionProperty: "background, color, box-shadow",
+    transitionDuration: "0.3s",
+    cursor: "pointer",
+    listStyle: "none",
+    display: "flex",
+    alignItems: "center",
+    ...(editCategories && { border: "2px dashed #444" }),
   };
 
   // Compute recipe count for this category
@@ -54,7 +84,7 @@ function SortableItem({
       ref={setNodeRef}
       style={style}
       dir={isRTL ? "rtl" : "ltr"}
-      className="nav-item flex items-center justify-start nowrap" // added "nav-item" class
+      className="nav-item flex items-center justify-start nowrap sortable-li"
       {...attributes}
       {...listeners}
     >
@@ -81,30 +111,32 @@ function SortableItem({
           onSelect(item);
         }}
         className="flex-1 flex items-center"
+        style={{ color: "#fff", textDecoration: "none" }}
       >
         {editCategories && index + 1 + ". "}
-        <img
-          src={firstRecipeImage}
-          alt="Category"
-          style={{
-            width: "40px",
-            height: "40px",
-            marginRight: "0.5rem",
-            marginLeft: "0.5rem",
-            borderRadius: "50%",
-            objectFit: "cover",
-          }}
-        />
         {translatedCategory || item.category}{" "}
-        <span
-          className="text-gray-500 ml-2"
-        >
+        <span className="text-gray-500 ml-2" style={{ color: "#bbb" }}>
           ({recipeCount})
         </span>
       </a>
-
+      <style>
+        {`
+          .sortable-li:hover {
+            background: #333 !important;
+            color: #fff !important;
+          }
+        `}
+      </style>
     </li>
   );
+}
+
+interface NavItemListProps {
+  pages: CategoryItem[];
+  onSelect: (item: CategoryItem) => void;
+  editCategories: boolean;
+  onOrderChange?: (items: CategoryItem[]) => void;
+  setReorder: (val: boolean) => void;
 }
 
 export default function NavItemList({
@@ -113,7 +145,7 @@ export default function NavItemList({
   editCategories,
   onOrderChange,
   setReorder,
-}) {
+}: NavItemListProps) {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
 
@@ -125,8 +157,12 @@ export default function NavItemList({
       priority: item.priority !== undefined ? item.priority : index + 1,
     }));
 
+  const getTranslatedCategory = (item, lang) => {
+    if (!item.translatedCategory) return null;
+    return item.translatedCategory[lang] || null;
+  };
+
   const [items, setItems] = useState(initializeItems());
-  const [translatedCategories, setTranslatedCategories] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [newCat, setNewCat] = useState(false);
 
@@ -135,18 +171,52 @@ export default function NavItemList({
     setItems(initializeItems());
   }, [pages]);
 
-  // Translate category names
+  // Translate category names and cache them per language
   useEffect(() => {
     const translateCategories = async () => {
       if (pages.length === 0) return;
-      console.log("Translating categories for language:", i18n.language);
-      const translations = await Promise.all(
-        pages.map((item) => translateDirectly(item.category, i18n.language))
+      const lang = i18n.language;
+      const newItems = await Promise.all(
+        pages.map(async (item) => {
+          // If translatedCategory is an array, look for the lang object
+          if (Array.isArray(item.translatedCategory)) {
+            const found = item.translatedCategory.find(
+              (t) => t.lang === lang && t.value
+            );
+            if (found) {
+              return {
+                ...item,
+                translatedCategory: {
+                  ...item.translatedCategory,
+                  [lang]: found.value,
+                },
+              };
+            }
+          }
+          // If already translated for this lang in object format, use it
+          if (item.translatedCategory && item.translatedCategory[lang]) {
+            return item;
+          }
+          // Otherwise, translate and save
+          const translated = await translateDirectly(item.category, lang);
+          return {
+            ...item,
+            translatedCategory: {
+              ...(item.translatedCategory || {}),
+              [lang]: translated,
+            },
+          };
+        })
       );
-      console.log("Translations:", translations);
-      setTranslatedCategories(translations);
+      setItems(
+        initializeItems().map((item, idx) => ({
+          ...item,
+          translatedCategory: newItems[idx].translatedCategory,
+        }))
+      );
     };
     translateCategories();
+    // eslint-disable-next-line
   }, [pages, i18n.language]);
 
   const handleAddItem = async () => {
@@ -213,7 +283,11 @@ export default function NavItemList({
               index={index}
               onSelect={onSelect}
               editCategories={editCategories}
-              translatedCategory={translatedCategories[index]}
+              translatedCategory={
+                item.translatedCategory && item.translatedCategory[i18n.language]
+                  ? item.translatedCategory[i18n.language]
+                  : item.category
+              }
               delCategoryCallback={handleDelCategory}
             />
           ))}
@@ -224,11 +298,12 @@ export default function NavItemList({
           variant="contained"
           onClick={() => setNewCat(true)}
           sx={{
-            backgroundColor: "darkgreen",
+            backgroundColor: (theme) => theme.palette.mode === "dark" ? "#222" : "#222", // dark grey on dark theme
+            color: (theme) => theme.palette.mode === "dark" ? "#fff" : "#fff",
             "&:hover": {
-              backgroundColor: "green",
+              backgroundColor: (theme) => theme.palette.mode === "dark" ? "#333" : "#333",
               "& .MuiSvgIcon-root": {
-                color: "black",
+                color: "white",
               },
             },
           }}
@@ -272,7 +347,7 @@ export default function NavItemList({
           width: "20%",
           minWidth: "40px",
           maxWidth: "60px",
-          background: "darkgreen",
+          background: "#333",
           color: "white",
           border: "none",
           borderRadius: "4px",

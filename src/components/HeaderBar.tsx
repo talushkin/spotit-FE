@@ -2,23 +2,34 @@ import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Autocomplete, TextField, InputAdornment } from "@mui/material";
 import RecipeDialog from "./RecipeDialog";
-import cardboardTexture from "../assets/cardboard-texture.jpg";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import { translateDirectly } from "./translateAI";
-import { useNavigate } from "react-router-dom"; // <-- Add this line
+import { useNavigate } from "react-router-dom";
+import type { Category, Recipe } from "../utils/storage";
+
+interface HeaderBarProps {
+  logo: string;
+  onHamburgerClick: () => void;
+  pages: Category[];
+  desktop: boolean;
+  setSelectedCategory: (cat: Category) => void;
+  setSelectedRecipe: (recipe: Recipe) => void;
+  selectedRecipe: Recipe | null;
+  isDarkMode: boolean;
+}
 
 export default function HeaderBar({
   logo,
   onHamburgerClick,
   pages,
   desktop,
-  setSelectedCategory, // <-- Add prop for setting selected category
+  setSelectedCategory,
   setSelectedRecipe,
-  selectedRecipe, // <-- Add prop for selected recipe
-
-}) {
-  const navigate = useNavigate(); // <-- Add this line
+  selectedRecipe,
+  isDarkMode,
+}: HeaderBarProps) {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
@@ -29,7 +40,7 @@ export default function HeaderBar({
   const [searchActive, setSearchActive] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
-  const searchInputRef = useRef(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   // Reset the input value in the DOM when searchQuery is reset
   useEffect(() => {
@@ -88,7 +99,7 @@ export default function HeaderBar({
           searchInputRef.current.blur();
         }
         navigate(
-          `/recipes/${encodeURIComponent(recipe.category)}/${encodeURIComponent(recipe.title)}`
+          `/spotit/${encodeURIComponent(recipe.category)}/${encodeURIComponent(recipe.title)}`
         );
         window.location.reload(); // <-- Reload after navigation
       }
@@ -138,6 +149,7 @@ export default function HeaderBar({
           width: "100%",
           boxSizing: "border-box",
           maxHeight: "80px",
+          background: isDarkMode ? "#000" : undefined, // Set dark background if dark mode
         }}
       >
         {/* Left side: Hamburger and Site Name */}
@@ -162,7 +174,7 @@ export default function HeaderBar({
               borderRadius: "50%",
             }}
           />
-          <div className="SiteName">{t("appName")}</div>
+          <div className="SiteName">spotIt</div>
         </div>
         {/* Search input or icon */}
         <div style={{ flex: 0, maxWidth: "100%" }}>
@@ -205,9 +217,10 @@ export default function HeaderBar({
                     maxWidth: "100%",
                     borderRadius: "8px",
                     borderWidth: "0px",
-                    backgroundImage: `url(${cardboardTexture})`,
-                    backgroundSize: "cover",
-                    backgroundRepeat: "repeat",
+                    backgroundColor: isDarkMode ? "#222" : "#f5f5f5", // dark grey for dark mode, light for light mode
+                    backgroundImage: "none",
+                    backgroundSize: undefined,
+                    backgroundRepeat: undefined,
                     "& .MuiInputBase-input": { color: "white" },
                     "& .MuiInputLabel-root": { color: "white" },
                     "& .MuiOutlinedInput-notchedOutline": { borderWidth: 0 },
@@ -224,12 +237,6 @@ export default function HeaderBar({
                     },
                     display:
                       desktop || showMobileSearch ? "block" : "none",
-                    // width:
-                    //   !desktop && showMobileSearch
-                    //     ? "100vw"
-                    //     : desktop
-                    //     ? "200px"
-                    //     : "0",
                     transition: "width 0.3s",
                   }}
                   InputProps={{
@@ -252,9 +259,10 @@ export default function HeaderBar({
                     : "0",
                 maxWidth: "95%",
                 transition: "width 0.3s ease",
-                backgroundImage: `url(${cardboardTexture})`,
-                backgroundSize: "fit",
-                backgroundRepeat: "repeat",
+                backgroundColor: isDarkMode ? "#222" : "#f5f5f5", // dark grey for dark mode, light for light mode
+                backgroundImage: "none",
+                backgroundSize: undefined,
+                backgroundRepeat: undefined,
                 borderRadius: "8px",
                 position: "relative",
                 "& .MuiInputBase-input": {

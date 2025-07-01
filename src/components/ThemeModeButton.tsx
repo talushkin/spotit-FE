@@ -3,7 +3,12 @@ import Button from "@mui/material/Button";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 
-export default function ThemeModeButton({ isDarkMode, toggleDarkMode }) {
+interface ThemeModeButtonProps {
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+}
+
+export default function ThemeModeButton({ isDarkMode, toggleDarkMode }: ThemeModeButtonProps) {
   return (
     <div style={{ display: "flex", gap: "0.5rem", width: "100%" }}>
       <Button

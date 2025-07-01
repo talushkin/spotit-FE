@@ -1,9 +1,7 @@
-// utils/storage.js
+// utils/storage.ts
 import axios from "axios";
-import { useTranslation } from "react-i18next";
-import dayjs from "dayjs";
+import data from "../data/recipes.json";
 
-// Base URL and Authorization token
 const LOCAL_URL = "http://localhost:5000";
 const BASE_URL = "https://be-tan-theta.vercel.app";
 
@@ -11,33 +9,73 @@ const AUTH_HEADER = {
   Authorization: `Bearer 1234`,
 };
 
+// --- Types ---
+export interface Recipe {
+  _id?: string;
+  title: string;
+  ingredients: string;
+  preparation: string;
+  imageUrl?: string;
+  createdAt?: string;
+  categoryId?: string;
+  category?: string;
+}
+
+export interface Category {
+  _id: string;
+  category: string;
+  translatedCategory?: string[];
+  itemPage: Recipe[];
+}
+
+export interface SiteData {
+  header: { logo: string };
+  pages: Category[];
+}
+
+export interface SiteResponse {
+  success: boolean;
+  message: string;
+  site: SiteData;
+}
+
 // Load categories and recipes from the server
-export const loadData = async () => {
+export const loadData = async (loadFromMemory = false): Promise<SiteResponse | { site: { pages: Category[] } }> => {
   try {
-    // Fetch categories and recipes using direct axios calls
+    if (loadFromMemory) {
+      const cached = localStorage.getItem("recipeSiteData");
+      if (cached) {
+        const site = JSON.parse(cached);
+        console.log("Loaded site from localStorage cache:", site);
+        return site;
+      }
+
+    }
+                if (data) {
+        const site = data;
+        console.log("Loaded site from songs.json file:", site);
+        return site;
+      }
     const categoriesRes = await axios.get(`${BASE_URL}/api/categories`, {
       headers: AUTH_HEADER,
     });
     const recipesRes = await axios.get(`${BASE_URL}/api/recipes`, {
       headers: AUTH_HEADER,
     });
-
-    console.log("categoriesRes", categoriesRes.data);
-    console.log("recipesRes", recipesRes.data);
-
-    // Construct the site object
-    const site = {
+    const site: SiteResponse = {
       success: true,
       message: "Data loaded successfully",
       site: {
         header: {
-          logo: "https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"},
-        pages: categoriesRes.data.map((cat) => ({
+          logo: "https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"
+        },
+        pages: categoriesRes.data.map((cat: any) => ({
           category: cat.category || "unknown category",
+          translatedCategory: cat.translatedCategory || [],
           _id: cat._id,
           itemPage: recipesRes.data
-            .filter((r) => r.categoryId?._id === cat._id)
-            .map((r) => ({
+            .filter((r: any) => r.categoryId?._id === cat._id)
+            .map((r: any) => ({
               title: r.title,
               ingredients: r.ingredients.join(","),
               preparation: r.preparation,
@@ -48,25 +86,22 @@ export const loadData = async () => {
         })),
       },
     };
+    localStorage.setItem("recipeSiteData", JSON.stringify(site));
     console.log("Data loaded successfully:", site);
     return site;
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error loading data from API:", err);
     return { site: { pages: [] } };
   }
 };
 
-// Add a new recipe
-export const addRecipe = async (recipe, category) => {
+export const addRecipe = async (recipe: Recipe, category: Category): Promise<any> => {
   console.log("addRecipe api", recipe, category);
   if (!recipe.title || !category?._id) {
     console.error("Missing recipe or category ID");
     return null;
   }
-
   try {
-    console.log("category", category);
-    console.log("recipe", recipe);
     const res = await axios.post(
       `${BASE_URL}/api/recipes`,
       {
@@ -81,21 +116,20 @@ export const addRecipe = async (recipe, category) => {
     );
     console.log("Recipe added:", res.data);
     return res.data;
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error adding recipe:", err.response?.data || err.message);
     return null;
   }
 };
 
-// Update a recipe
-export const updateRecipe = async (updatedRecipe) => {
+export const updateRecipe = async (updatedRecipe: Recipe): Promise<any> => {
   if (!updatedRecipe._id) {
     console.error("Missing recipe ID for update.");
     return null;
   }
   try {
     const res = await axios.put(
-      `${BASE_URL}/api/recipes/${updatedRecipe._id}`,
+      `${BASE_URL}/api/spotit/${updatedRecipe._id}`,
       {
         title: updatedRecipe.title,
         ingredients: updatedRecipe.ingredients,
@@ -107,31 +141,28 @@ export const updateRecipe = async (updatedRecipe) => {
     );
     console.log("Recipe updated:", res.data);
     return res.data;
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error updating recipe:", err.response?.data || err.message);
     return null;
   }
 };
 
-// Delete a recipe
-export const delRecipe = async (recipeId) => {
+export const delRecipe = async (recipeId: string): Promise<void> => {
   try {
-    await axios.delete(`${BASE_URL}/api/recipes/${recipeId}`, {
+    await axios.delete(`${BASE_URL}/api/spotit/${recipeId}`, {
       headers: AUTH_HEADER,
     });
     console.log("Recipe deleted:", recipeId);
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error deleting recipe:", err.response?.data || err.message);
   }
 };
 
-// Add a new category
-export const addCategory = async (categoryName) => {
+export const addCategory = async (categoryName: string): Promise<any> => {
   if (!categoryName?.trim()) {
     console.warn("Category name is empty");
     return;
   }
-
   try {
     const res = await axios.post(
       `${BASE_URL}/api/categories`,
@@ -140,26 +171,24 @@ export const addCategory = async (categoryName) => {
     );
     console.log("Category added:", res.data);
     return res.data;
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error adding category:", err.response?.data || err.message);
     return null;
   }
 };
 
-// Delete a category
-export const delCategory = async (categoryId, categoryName) => {
+export const delCategory = async (categoryId: string, categoryName?: string): Promise<void> => {
   try {
     await axios.delete(`${BASE_URL}/api/categories/${categoryId}`, {
       headers: AUTH_HEADER,
     });
     console.log("Category deleted:", categoryId, categoryName);
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error deleting category:", err.response?.data || err.message);
   }
 };
 
-// Handle reordering of categories
-export const handleItemsChangeOrder = async (orderedCategories) => {
+export const handleItemsChangeOrder = async (orderedCategories: Category[]): Promise<void> => {
   try {
     const updates = orderedCategories.map((cat, index) =>
       axios.put(
@@ -170,7 +199,29 @@ export const handleItemsChangeOrder = async (orderedCategories) => {
     );
     await Promise.all(updates);
     console.log("Categories reordered successfully");
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error updating category order:", err.response?.data || err.message);
+  }
+};
+
+export const updateCategory = async (updatedCategory: Category): Promise<any> => {
+  if (!updatedCategory._id) {
+    console.error("Missing category ID for update.");
+    return null;
+  }
+  try {
+    const res = await axios.put(
+      `${BASE_URL}/api/categories/${updatedCategory._id}`,
+      {
+        category: updatedCategory.category,
+        // Add other fields to update as needed
+      },
+      { headers: AUTH_HEADER }
+    );
+    console.log("Category updated:", res.data);
+    return res.data;
+  } catch (err: any) {
+    console.error("Error updating category:", err.response?.data || err.message);
+    return null;
   }
 };
