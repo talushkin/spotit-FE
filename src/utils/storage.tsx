@@ -13,12 +13,17 @@ const AUTH_HEADER = {
 export interface Recipe {
   _id?: string;
   title: string;
-  ingredients: string;
-  preparation: string;
+  ingredients?: string; // optional for music
+  preparation?: string; // optional for music
   imageUrl?: string;
+  image?: string; // for compatibility with JSON data
   createdAt?: string;
   categoryId?: string;
   category?: string;
+  artist?: string;
+  url?: string;
+  lyrics?: string;
+  duration?: string;
 }
 
 export interface Category {

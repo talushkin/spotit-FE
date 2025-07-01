@@ -13,6 +13,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { translateDirectly } from "./translateAI";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
+import YouTube from "react-youtube"; // Add this at the top if you have react-youtube installed
 
 const BASE_URL = "https://be-tan-theta.vercel.app";
 
@@ -71,6 +72,7 @@ const RecipeDialog = ({
     ingredients: "",
     preparation: "",
   });
+  const [showPlayer, setShowPlayer] = useState(false);
 
   useEffect(() => {
     // Reset to English when dialog opens or recipe changes
@@ -453,6 +455,71 @@ const RecipeDialog = ({
             >
               <AutorenewIcon sx={{ fontSize: 40 }} />
             </IconButton>
+          </Box>
+
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            sx={{ mb: 2 }}
+          >
+            {/* Artist Name */}
+            {editableRecipe.artist && (
+              <div
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "1.2rem",
+                  marginBottom: "8px",
+                  color: "#333",
+                  textAlign: "center",
+                }}
+              >
+                {t("artist")}: {editableRecipe.artist}
+              </div>
+            )}
+
+            {/* YouTube Player with Play Button */}
+            {editableRecipe.url && (
+              <div style={{ marginBottom: "16px", textAlign: "center" }}>
+                {!showPlayer ? (
+                  <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<span style={{ fontSize: 24 }}>▶</span>}
+                    onClick={() => setShowPlayer(true)}
+                    sx={{
+                      borderRadius: "24px",
+                      fontWeight: "bold",
+                      fontSize: "1.1rem",
+                      background: "#1db954",
+                      color: "#fff",
+                      "&:hover": { background: "#169c43" },
+                      mb: 1,
+                    }}
+                  >
+                    {t("play")}
+                  </Button>
+                ) : (
+                  <div style={{ maxWidth: 400 }}>
+                    <YouTube
+                      videoId={
+                        editableRecipe.url.includes("youtube.com")
+                          ? editableRecipe.url.split("v=")[1]?.split("&")[0]
+                          : editableRecipe.url.includes("youtu.be")
+                          ? editableRecipe.url.split("/").pop()
+                          : ""
+                      }
+                      opts={{
+                        width: "100%",
+                        height: "220",
+                        playerVars: { autoplay: 1 },
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </Box>
 
           <Box position="relative">
