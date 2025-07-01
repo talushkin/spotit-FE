@@ -2,6 +2,7 @@
 import axios from "axios";
 
 const BASE_URL = "https://be-tan-theta.vercel.app";
+const API_KEY = process.env.REACT_APP_TRANSLATE_API_KEY; // Read from .env
 
 export const translateDirectly = async (text: string, toLang: string = "en"): Promise<string> => {
   if (!text || !toLang) {
@@ -18,7 +19,7 @@ export const translateDirectly = async (text: string, toLang: string = "en"): Pr
       },
       {
         headers: {
-          Authorization: `Bearer 1234`,
+          Authorization: `Bearer ${API_KEY}`,
           "Content-Type": "application/json",
         },
       }
