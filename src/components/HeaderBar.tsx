@@ -97,10 +97,7 @@ export default function HeaderBar({
         if (searchInputRef.current) {
           searchInputRef.current.blur();
         }
-        navigate(
-          `/spotit/${encodeURIComponent(song.genre)}/${encodeURIComponent(song.title)}`
-        );
-        window.location.reload();
+
       }
     }
   };

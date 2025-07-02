@@ -70,8 +70,8 @@ const MainContent: React.FC<MainContentProps> = ({
             <div
               key={genre.genre || idx}
               style={{
-                display: 'flex',
-                flexDirection: 'row',
+                // display: 'flex',
+                // flexDirection: 'row',
                 justifyContent: 'flex-start',
                 alignItems: 'center',
                 width: '100%',
