@@ -66,8 +66,18 @@ function App() {
       setLoading(true);
       const data = await storage.loadData(false);
       setSongs(data);
-      if (data?.site?.genres && data.site.genres.length > 0) {
-        let initialGenre = data.site.genres[0];
+      // Support both { site: { genres: Genre[] } } and { site: { site: { genres: Genre[] } } }
+      let genres: Genre[] | undefined = undefined;
+      if (data && 'site' in data && data.site) {
+        // If data.site.site exists, use that
+        if ('site' in data.site && data.site.site && 'genres' in data.site.site) {
+          genres = (data.site.site as any).genres;
+        } else if ('genres' in data.site) {
+          genres = (data.site as any).genres;
+        }
+      }
+      if (genres && genres.length > 0) {
+        let initialGenre = genres[0];
         setSelectedGenre(initialGenre);
         setSelectedSong(initialGenre.songs[0] || null); // Set initial selected song if available
       }

@@ -71,14 +71,13 @@ function HomePage(props: HomePageProps) {
             desktop={desktop}
             logo={"https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"}
             onHamburgerClick={handleHamburgerClick}
-            genres={songs?.genres}
+            genres={songs?.site?.genres}
             isDarkMode={isDarkMode}
             setSelectedGenre={setSelectedGenre}
             setSelectedSong={setSelectedSong}
             selectedSong={selectedSong}
             songList={songList}
             setSongList={setSongList}
-            
           />
         </div>
         <div className="container-fluid ps-0 pe-0">
@@ -93,8 +92,6 @@ function HomePage(props: HomePageProps) {
                 isOpen={menuOpen || desktop}
                 desktop={desktop}
                 onSelect={setSelectedGenre}
-                setSelectedSong={setSelectedSong}
-                selectedSong={selectedSong}
               />
             </div>
 
@@ -109,7 +106,6 @@ function HomePage(props: HomePageProps) {
                   setSongList={setSongList}
                   onAddSongToList={onAddSongToList}
                   setSelectedSong={setSelectedSong}
-                  setSelectedGenre={setSelectedGenre} 
                 />
               )}
             </div>
