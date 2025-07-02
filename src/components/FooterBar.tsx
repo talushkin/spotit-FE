@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from "react";
 import {
   DndContext,
@@ -42,6 +43,11 @@ interface FooterBarExtendedProps extends FooterBarProps {
   setSongList?: (list: Song[]) => void;
   currentSongIndex?: number;
 }
+
+
+
+
+
 
 function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDarkMode }: any) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: idx.toString() });
@@ -90,7 +96,7 @@ function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDar
       {...attributes}
       {...listeners}
     >
-      <td style={{ width: 32, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
+      <td style={{ width: 38, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
         {hovered ? <PlayArrowIcon fontSize="small" style={{ verticalAlign: "middle", color: isDarkMode ? "#90caf9" : "#1976d2" }} /> : idx + 1}
       </td>
       <td style={{ padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#fff" : "#222"), fontWeight: isSelected ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", maxWidth: 180, display: "flex", alignItems: "center", gap: 4 }}>
@@ -104,12 +110,20 @@ function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDar
 }
 
 export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, setSelectedSong, songList: propSongList = [], setSongList: setAppSongList, currentSongIndex = 0 }: FooterBarExtendedProps) {
-  // Volume state
-  const [volume, setVolume] = React.useState(100);
-  // Crossfade state (seconds)
-  const [crossfade, setCrossfade] = React.useState(5);
   // Next song highlight state
-  const [nextSongToHighlight, setNextSongToHighlight] = React.useState<Song | null>(null);
+  const [nextSongToHighlight, setNextSongToHighlight] = useState<Song | null>(null);
+
+  // YouTube player state
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [totalDuration, setTotalDuration] = useState(0);
+  const playerRef = useRef<YouTubePlayer | null>(null);
+
+
+  // Volume state
+  const [volume, setVolume] = React.useState(10);
+  // Next song highlight state (no crossfade)
+  // (removed crossfade and next player state)
 
   // Update YouTube player volume when changed
   React.useEffect(() => {
@@ -142,7 +156,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
   };
 
   // Inner next/prev song logic
-  const getCurrentSongIndex  = () => {
+  const getCurrentSongIndex = () => {
     if (!selectedSong) return 0;
     //console.log('Current song:', selectedSong);
     return songList.findIndex(
@@ -154,7 +168,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     const idx = getCurrentSongIndex();
     if (idx >= 0 && idx < songList.length - 1) {
       const nextSong = songList[idx + 1];
-      //setSelectedSong(nextSong);
+      setSelectedSong(nextSong);
       setTimeout(() => {
         // Update duration for new song
         if (playerRef.current) {
@@ -170,7 +184,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     const idx = getCurrentSongIndex();
     if (idx > 0) {
       const prevSong = songList[idx - 1];
-      //setSelectedSong(prevSong);
+      setSelectedSong(prevSong);
       setTimeout(() => {
         // Update duration for new song
         if (playerRef.current) {
@@ -183,11 +197,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
   };
   // Language support removed: only English
 
-  // YouTube player state
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [totalDuration, setTotalDuration] = useState(0);
-  const playerRef = useRef<YouTubePlayer | null>(null);
+  // (removed duplicate declarations)
 
   const handlePlayPause = () => {
     if (!playerRef.current) return;
@@ -202,7 +212,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     }
   };
 
-  // Update current time every 0.2s for slider and log, check for song end, and highlight next song
+  // Update current time every 0.1s for slider, highlight next song 20s before end, and switch to next song at end
   React.useEffect(() => {
     let intervalId: NodeJS.Timeout | undefined;
     if (isPlaying && playerRef.current) {
@@ -210,71 +220,52 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
         const time = playerRef.current?.getCurrentTime?.() || 0;
         const duration = playerRef.current?.getDuration?.() || 0;
         setCurrentTime(time);
-        // Highlight next song crossfade seconds before end
         const idx = getCurrentSongIndex();
+        // Highlight next song 20 seconds before end
         if (
           duration > 0 &&
-          time >= duration - crossfade &&
+          time >= duration - 20 &&
           idx < songList.length - 1
         ) {
           setNextSongToHighlight(songList[idx + 1]);
         } else {
           setNextSongToHighlight(null);
         }
-
-        // Show crossfade message for next song
-        if (
-          duration > 0 &&
-          time >= duration - crossfade &&
-          idx < songList.length - 1
-        ) {
-          // Optionally, you could set a state to display a message or UI
-          // For now, just log to console
-          // You can display this in the UI if you want
-          // Example: setCrossfadeMessage(`Crossfading to next song in ${Math.ceil(duration - time)} sec`);
-          // For now, just log:
-          // console.log(`Crossfade of ${crossfade} sec to next song!`);
-        }
         // Switch to next song at end
-        if (
-          duration > 0 &&
-          time >= duration - 0.3 &&
-          songList.length > 1
-        ) {
+        if (duration > 0 && time >= duration && songList.length > 1) {
           if (idx < songList.length - 1) {
-           // handleNextSong();
+            setSelectedSong(songList[idx + 1]);
           }
         }
-      }, 200);
-      console.log("Player is playing, starting 0.2s interval time update loop");
+      }, 100);
     }
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isPlaying, playerRef.current, selectedSong, songList]);
+  }, [isPlaying, playerRef.current, selectedSong, songList, volume, setSelectedSong]);
 
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
     playerRef.current = event.target;
-    event.target.setVolume(100);
+    event.target.setVolume(volume);
     event.target.playVideo();
     setIsPlaying(true);
-    // Add to song list when player is ready (autoplay)
-    //addSongToList(selectedSong);
     // Set total duration
     const duration = event.target.getDuration?.() || 0;
     setTotalDuration(duration);
   };
 
+
   // Extract YouTube video ID (declare only once, above all uses)
-  const videoId = React.useMemo(() => {
-    if (!selectedSong?.url) return "";
-    if (selectedSong.url.includes("youtube.com")) {
-      return selectedSong.url.split("v=")[1]?.split("&")[0] || "";
-    } else if (selectedSong.url.includes("youtu.be")) {
-      return selectedSong.url.split("/").pop() || "";
+  const getVideoId = (url?: string) => {
+    if (!url) return "";
+    if (url.includes("youtube.com")) {
+      return url.split("v=")[1]?.split("&")[0] || "";
+    } else if (url.includes("youtu.be")) {
+      return url.split("/").pop() || "";
     }
     return "";
-  }, [selectedSong?.url]);
+  };
+  const videoId = React.useMemo(() => getVideoId(selectedSong?.url), [selectedSong?.url]);
 
   // When video changes, update total duration
   React.useEffect(() => {
@@ -282,7 +273,6 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
       const duration = playerRef.current.getDuration?.() || 0;
       setTotalDuration(duration);
     }
-    setCurrentTime(0);
   }, [videoId]);
 
   // Format seconds to mm:ss
@@ -327,44 +317,28 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
       }}
     >
       <div style={{ width: "40%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: 'relative' }}>
-            {/* Vertical Volume Slider and Crossfade */}
-            <div style={{ position: 'absolute', left: 0, top: 0, height: 100, display: 'flex', flexDirection: 'row', alignItems: 'center', zIndex: 2 }}>
-              <Slider
-                orientation="vertical"
-                min={0}
-                max={100}
-                value={volume}
-                onChange={(_, value) => setVolume(Array.isArray(value) ? value[0] : value)}
-                sx={{
-                  height: 64,
-                  color: '#1976d2', // blue
-                  '& .MuiSlider-thumb': {
-                    backgroundColor: '#1976d2',
-                    border: '2px solid #fff',
-                  },
-                  ml: 1,
-                }}
-              />
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: 16 }}>
-                <GraphicEqIcon style={{ color: '#1976d2', marginBottom: 4 }} />
-                <Slider
-                  min={0}
-                  max={30}
-                  step={1}
-                  value={crossfade}
-                  onChange={(_, value) => setCrossfade(Array.isArray(value) ? value[0] : value)}
-                  sx={{
-                    width: 60,
-                    color: '#1976d2',
-                    '& .MuiSlider-thumb': {
-                      backgroundColor: '#1976d2',
-                      border: '2px solid #fff',
-                    },
-                  }}
-                />
-                <span style={{ fontSize: 12, color: isDarkMode ? '#bbb' : '#1976d2', marginTop: 2 }}>Crossfade: {crossfade}s</span>
-              </div>
-            </div>
+        {/* Vertical Volume Slider and Crossfade */}
+        <div style={{ position: 'absolute', left: 0, top: 0, height: 100, display: 'flex', flexDirection: 'row', alignItems: 'center', zIndex: 2 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Slider
+              orientation="vertical"
+              min={0}
+              max={100}
+              value={volume}
+              onChange={(_, value) => setVolume(Array.isArray(value) ? value[0] : value)}
+              sx={{
+                height: 64,
+                color: '#1976d2', // blue
+                '& .MuiSlider-thumb': {
+                  backgroundColor: '#1976d2',
+                  border: '2px solid #fff',
+                },
+                ml: 1,
+              }}
+            />
+            <span style={{ fontSize: 12, color: '#1976d2', marginTop: 4 }}>{volume}</span>
+          </div>
+        </div>
         {videoId && (
           <>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
@@ -385,6 +359,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
                 <SkipNextIcon />
               </IconButton>
             </div>
+            {/* Main YouTube player (current song) */}
             <YouTube
               videoId={videoId}
               opts={{
@@ -417,8 +392,9 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
                 </span>
               )}
               {/* Song location display and progress bar */}
-              {(1===1) && (
+              {(1 === 1) && (
                 <div style={{ marginTop: 8, width: 240, marginLeft: "auto", marginRight: "auto" }}>
+                  {/* Main player time slider */}
                   <Slider
                     min={0}
                     max={totalDuration || 1}

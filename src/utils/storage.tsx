@@ -11,6 +11,7 @@ const AUTH_HEADER = {
 
 // --- Types ---
 
+
 export interface Song {
   _id?: string;
   title: string;
@@ -18,24 +19,32 @@ export interface Song {
   url?: string;
   duration?: string;
   lyrics?: string;
-  imageUrl?: string;
   image?: string;
+  imageUrl?: string;
   createdAt?: string;
   genreId?: string;
   genre?: string;
 }
 
 
+
 export interface Genre {
-  _id: string;
+  _id?: string;
   genre: string;
-  translatedGenre?: string[];
+  priority?: number;
+  createdAt?: string;
   songs: Song[];
 }
 
+
+// Strictly matches the example JSON structure for site data
 export interface SiteData {
-  header: { logo: string };
-  genres: Genre[];
+  site: {
+    header: {
+      logo: string;
+    };
+    genres: Genre[];
+  };
 }
 
 export interface SiteResponse {

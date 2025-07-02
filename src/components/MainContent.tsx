@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CaseCard from "./CaseCard";
+import SongSlider from "./SongSlider";
 import { useNavigate } from "react-router-dom";
 // Update this import to only include exported members from "../utils/storage"
 import type { Genre, Song } from "../utils/storage";
@@ -62,70 +63,37 @@ const MainContent: React.FC<MainContentProps> = ({
 
   return (
     <div className="main">
-      <div
-        className="main-title"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: "1rem",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            flexBasis: "100%",
-            textAlign: "center",
-            color: isDarkMode ? "white" : "inherit",
-            fontSize: "2rem",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100vw",
-            lineHeight: "2rem",
-                marginTop: "1rem",
-          }}
-          title={selectedGenre?.genre}
-        >
-          {selectedGenre?.genre}
-        </div>
-      </div>
 
-
-      {/* DnD and editOrder logic omitted for brevity; only show song list */}
-      <div
-        className="row d-flex"
-        style={{
-          justifyContent: rowJustify,
-        }}
-      >
-        {songs.map((item, index) => {
-          let colClass = "col-2";
-          return (
+      {/* Song sliders for all genres, stacked vertically */}
+      {Array.isArray(require('../data/songs.json').site.genres)
+        ? require('../data/songs.json').site.genres.map((genre: Genre, idx: number) => (
             <div
-              key={index}
-              className={`${colClass} mb-4 d-flex`}
+              key={genre.genre || idx}
               style={{
-                justifyContent: rowJustify,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                width: '100%',
+                marginBottom: '1.5rem',
+                marginTop: '1.5rem',
+                overflowX: 'hidden',
               }}
-              onClick={() => handleSelectSong(item)}
             >
-              <CaseCard
-                index={index + 1}
-                item={item}
-                category={selectedGenre?.genre}
+              <SongSlider
+                songs={genre.songs || []}
+                selectedGenre={genre}
                 isDarkMode={isDarkMode}
                 onAddSongToList={onAddSongToList}
                 onSelectSong={handleSelectSong}
               />
             </div>
-          );
-        })}
-      </div>
-
+          ))
+        : null}
     </div>
   );
-};
+
+
 
 /**
  * MainContent component.
@@ -137,4 +105,6 @@ const MainContent: React.FC<MainContentProps> = ({
  * @component
  * @returns {JSX.Element} The rendered main content of the application.
  */
+}
+
 export default MainContent;
