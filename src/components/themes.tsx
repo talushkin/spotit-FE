@@ -1,5 +1,3 @@
-// src/themes.js
-
 export const lightTheme = {
     background: "#fffce8",
     color: "#333",

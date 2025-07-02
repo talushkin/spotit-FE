@@ -1,6 +1,6 @@
 // utils/storage.ts
 import axios from "axios";
-import data from "../data/recipes.json";
+import data from "../data/songs.json";
 
 const LOCAL_URL = "http://localhost:5000";
 const BASE_URL = "https://be-tan-theta.vercel.app";
@@ -10,32 +10,32 @@ const AUTH_HEADER = {
 };
 
 // --- Types ---
-export interface Recipe {
+
+export interface Song {
   _id?: string;
   title: string;
-  ingredients?: string; // optional for music
-  preparation?: string; // optional for music
-  imageUrl?: string;
-  image?: string; // for compatibility with JSON data
-  createdAt?: string;
-  categoryId?: string;
-  category?: string;
   artist?: string;
   url?: string;
-  lyrics?: string;
   duration?: string;
+  lyrics?: string;
+  imageUrl?: string;
+  image?: string;
+  createdAt?: string;
+  genreId?: string;
+  genre?: string;
 }
 
-export interface Category {
+
+export interface Genre {
   _id: string;
-  category: string;
-  translatedCategory?: string[];
-  itemPage: Recipe[];
+  genre: string;
+  translatedGenre?: string[];
+  songs: Song[];
 }
 
 export interface SiteData {
   header: { logo: string };
-  pages: Category[];
+  genres: Genre[];
 }
 
 export interface SiteResponse {
@@ -44,8 +44,8 @@ export interface SiteResponse {
   site: SiteData;
 }
 
-// Load categories and recipes from the server
-export const loadData = async (loadFromMemory = false): Promise<SiteResponse | { site: { pages: Category[] } }> => {
+// Load genres and songs from the server
+export const loadData = async (loadFromMemory = false): Promise<SiteResponse | { site: { genres: Genre[] } }> => {
   try {
     if (loadFromMemory) {
       const cached = localStorage.getItem("recipeSiteData");
@@ -56,15 +56,39 @@ export const loadData = async (loadFromMemory = false): Promise<SiteResponse | {
       }
 
     }
-                if (data) {
-        const site = data;
-        console.log("Loaded site from songs.json file:", site);
-        return site;
-      }
-    const categoriesRes = await axios.get(`${BASE_URL}/api/categories`, {
+    if (data) {
+      // Map local data to new Genre/Song structure
+      const mappedSite = {
+        ...data,
+        site: {
+          ...data.site,
+          genres: (data.site.genres || []).map((cat: any) => ({
+            _id: cat._id || cat.category || cat.genre || Math.random().toString(36).slice(2),
+            genre: cat.genre || cat.genre || "unknown genre",
+            translatedGenre: cat.translatedCategory || cat.translatedGenre || [],
+            songs: (cat.songs || cat.itemPage || []).map((song: any) => ({
+              _id: song._id || song.title || Math.random().toString(36).slice(2),
+              title: song.title,
+              artist: song.artist,
+              url: song.url,
+              duration: song.duration,
+              lyrics: song.lyrics,
+              imageUrl: song.imageUrl,
+              image: song.image,
+              createdAt: song.createdAt,
+              genreId: song.categoryId || cat._id || cat.category,
+              genre: cat.category || cat.genre || "unknown genre",
+            }))
+          }))
+        }
+      };
+      //console.log("Loaded site from songs.json file (mapped):", mappedSite);
+      return mappedSite;
+    }
+    const genresRes = await axios.get(`${BASE_URL}/api/categories`, {
       headers: AUTH_HEADER,
     });
-    const recipesRes = await axios.get(`${BASE_URL}/api/recipes`, {
+    const songsRes = await axios.get(`${BASE_URL}/api/recipes`, {
       headers: AUTH_HEADER,
     });
     const site: SiteResponse = {
@@ -74,19 +98,24 @@ export const loadData = async (loadFromMemory = false): Promise<SiteResponse | {
         header: {
           logo: "https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"
         },
-        pages: categoriesRes.data.map((cat: any) => ({
-          category: cat.category || "unknown category",
-          translatedCategory: cat.translatedCategory || [],
-          _id: cat._id,
-          itemPage: recipesRes.data
-            .filter((r: any) => r.categoryId?._id === cat._id)
+        genres: genresRes.data.map((genre: any) => ({
+          genre: genre.category || "unknown genre",
+          translatedGenre: genre.translatedCategory || [],
+          _id: genre._id,
+          songs: songsRes.data
+            .filter((r: any) => r.categoryId?._id === genre._id)
             .map((r: any) => ({
               title: r.title,
-              ingredients: r.ingredients.join(","),
-              preparation: r.preparation,
+              artist: r.artist,
+              url: r.url,
+              duration: r.duration,
+              lyrics: r.lyrics,
               imageUrl: r.imageUrl,
+              image: r.image,
               createdAt: r.createdAt,
               _id: r._id,
+              genreId: r.categoryId?._id,
+              genre: genre.category || "unknown genre",
             })),
         })),
       },
@@ -96,137 +125,7 @@ export const loadData = async (loadFromMemory = false): Promise<SiteResponse | {
     return site;
   } catch (err: any) {
     console.error("Error loading data from API:", err);
-    return { site: { pages: [] } };
+    return { site: { genres: [] } };
   }
 };
 
-export const addRecipe = async (recipe: Recipe, category: Category): Promise<any> => {
-  console.log("addRecipe api", recipe, category);
-  if (!recipe.title || !category?._id) {
-    console.error("Missing recipe or category ID");
-    return null;
-  }
-  try {
-    const res = await axios.post(
-      `${BASE_URL}/api/recipes`,
-      {
-        title: recipe.title,
-        ingredients: recipe.ingredients,
-        preparation: recipe.preparation,
-        categoryId: category._id,
-        categoryName: category.category,
-        imageUrl: recipe.imageUrl || "https://placehold.co/100x100?text=No+Image",
-      },
-      { headers: AUTH_HEADER }
-    );
-    console.log("Recipe added:", res.data);
-    return res.data;
-  } catch (err: any) {
-    console.error("Error adding recipe:", err.response?.data || err.message);
-    return null;
-  }
-};
-
-export const updateRecipe = async (updatedRecipe: Recipe): Promise<any> => {
-  if (!updatedRecipe._id) {
-    console.error("Missing recipe ID for update.");
-    return null;
-  }
-  try {
-    const res = await axios.put(
-      `${BASE_URL}/api/spotit/${updatedRecipe._id}`,
-      {
-        title: updatedRecipe.title,
-        ingredients: updatedRecipe.ingredients,
-        preparation: updatedRecipe.preparation,
-        imageUrl: updatedRecipe.imageUrl || "https://placehold.co/100x100?text=No+Image",
-        categoryId: updatedRecipe.categoryId,
-      },
-      { headers: AUTH_HEADER }
-    );
-    console.log("Recipe updated:", res.data);
-    return res.data;
-  } catch (err: any) {
-    console.error("Error updating recipe:", err.response?.data || err.message);
-    return null;
-  }
-};
-
-export const delRecipe = async (recipeId: string): Promise<void> => {
-  try {
-    await axios.delete(`${BASE_URL}/api/spotit/${recipeId}`, {
-      headers: AUTH_HEADER,
-    });
-    console.log("Recipe deleted:", recipeId);
-  } catch (err: any) {
-    console.error("Error deleting recipe:", err.response?.data || err.message);
-  }
-};
-
-export const addCategory = async (categoryName: string): Promise<any> => {
-  if (!categoryName?.trim()) {
-    console.warn("Category name is empty");
-    return;
-  }
-  try {
-    const res = await axios.post(
-      `${BASE_URL}/api/categories`,
-      { category: categoryName.trim() },
-      { headers: AUTH_HEADER }
-    );
-    console.log("Category added:", res.data);
-    return res.data;
-  } catch (err: any) {
-    console.error("Error adding category:", err.response?.data || err.message);
-    return null;
-  }
-};
-
-export const delCategory = async (categoryId: string, categoryName?: string): Promise<void> => {
-  try {
-    await axios.delete(`${BASE_URL}/api/categories/${categoryId}`, {
-      headers: AUTH_HEADER,
-    });
-    console.log("Category deleted:", categoryId, categoryName);
-  } catch (err: any) {
-    console.error("Error deleting category:", err.response?.data || err.message);
-  }
-};
-
-export const handleItemsChangeOrder = async (orderedCategories: Category[]): Promise<void> => {
-  try {
-    const updates = orderedCategories.map((cat, index) =>
-      axios.put(
-        `${BASE_URL}/api/categories/${cat._id}`,
-        { priority: index + 1 },
-        { headers: AUTH_HEADER }
-      )
-    );
-    await Promise.all(updates);
-    console.log("Categories reordered successfully");
-  } catch (err: any) {
-    console.error("Error updating category order:", err.response?.data || err.message);
-  }
-};
-
-export const updateCategory = async (updatedCategory: Category): Promise<any> => {
-  if (!updatedCategory._id) {
-    console.error("Missing category ID for update.");
-    return null;
-  }
-  try {
-    const res = await axios.put(
-      `${BASE_URL}/api/categories/${updatedCategory._id}`,
-      {
-        category: updatedCategory.category,
-        // Add other fields to update as needed
-      },
-      { headers: AUTH_HEADER }
-    );
-    console.log("Category updated:", res.data);
-    return res.data;
-  } catch (err: any) {
-    console.error("Error updating category:", err.response?.data || err.message);
-    return null;
-  }
-};

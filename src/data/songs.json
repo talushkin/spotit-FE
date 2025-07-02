@@ -3,12 +3,12 @@
     "header": {
       "logo": "https://placehold.co/230x70?text=My+Website"
     },
-    "pages": [
+    "genres": [
       {
-        "category": "Rock",
+        "genre": "Rock",
         "priority": 1,
         "createdAt": "04-05-2025",
-        "itemPage": [
+        "songs": [
           {
             "image": "https://img.youtube.com/vi/fJ9rUzIMcZQ/hqdefault.jpg",
             "title": "Bohemian Rhapsody",
@@ -192,10 +192,10 @@
         ]
       },
       {
-        "category": "Pop",
+        "genre": "Pop",
         "priority": 2,
         "createdAt": "01-05-2025",
-        "itemPage": [
+        "songs": [
           {
             "image": "https://img.youtube.com/vi/Zi_XLOBDo_Y/hqdefault.jpg",
             "title": "Billie Jean",
@@ -226,10 +226,10 @@
         ]
       },
       {
-        "category": "Hip-Hop",
+        "genre": "Hip-Hop",
         "priority": 3,
         "createdAt": "02-05-2025",
-        "itemPage": [
+        "songs": [
           {
             "image": "https://img.youtube.com/vi/_Yhyp-_hX2s/hqdefault.jpg",
             "title": "Lose Yourself",
@@ -260,10 +260,10 @@
         ]
       },
       {
-        "category": "Jazz",
+        "genre": "Jazz",
         "priority": 4,
         "createdAt": "02-05-2025",
-        "itemPage": [
+        "songs": [
           {
             "image": "https://img.youtube.com/vi/zqNTltOGh5c/hqdefault.jpg",
             "title": "So What",

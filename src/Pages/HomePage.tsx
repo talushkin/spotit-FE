@@ -3,35 +3,33 @@ import React, { useState, useEffect } from "react";
 import HeaderBar from "../components/HeaderBar";
 import NavMenu from "../components/NavMenu";
 import MainContent from "../components/MainContent";
-import { useTranslation } from "react-i18next";
 import { ThemeProvider } from "styled-components";
 import { lightTheme, darkTheme } from "../components/themes";
 import GlobalStyle from "../components/GlobalStyle";
-import * as store from "../utils/storage"; // adjust path if needed
-import { useNavigate } from "react-router-dom";
 import FooterBar from "../components/FooterBar";
+import type { Genre, Song, SiteData } from "../utils/storage";
+
 
 interface HomePageProps {
-  setSelectedRecipe: (recipe: any) => void;
-  selectedRecipe: any;
-  newRecipe: any;
-  recipes: any;
-  setRecipes: (recipes: any) => void;
-  selectedCategory: any;
-  setSelectedCategory: (cat: any) => void;
-  songList: any[];
-  setSongList: (songs: any[]) => void;
-  onAddSongToList: (song: any) => void;
+  setSelectedSong: (song: Song | null) => void;
+  selectedSong: Song | null;
+  songs: SiteData;
+  setSongs: (songs: SiteData) => void;
+  selectedGenre: Genre | null;
+  setSelectedGenre: (genre: Genre | null) => void;
+  songList: Song[];
+  setSongList: (songs: Song[]) => void;
+  onAddSongToList: (song: Song, location?: number) => void;
 }
 
-export default function Main(props: HomePageProps) {
-  const { setSelectedRecipe, selectedRecipe, newRecipe, recipes, setRecipes, selectedCategory, setSelectedCategory, songList, setSongList, onAddSongToList } = props;
+function HomePage(props: HomePageProps) {
+  const { setSelectedSong, selectedSong, songs, setSongs, selectedGenre, setSelectedGenre, songList, setSongList, onAddSongToList } = props;
+ // console.log("HomePage genres:", songs?.site?.genres);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { i18n } = useTranslation();
+  // Language support removed: only English
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [desktop, setDesktop] = useState(window.innerWidth > 768); // Check if desktop
-  const navigate = useNavigate();
-
+  //console.log("props", props);
   // Add toggleDarkMode function
   const toggleDarkMode = () => {
     setIsDarkMode((prev) => !prev);
@@ -66,22 +64,21 @@ export default function Main(props: HomePageProps) {
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <div className="App">
-        <GlobalStyle />
+        <GlobalStyle theme={isDarkMode ? darkTheme : lightTheme} />
 
         <div className="TOP" style={{ background: isDarkMode ? '#000' : undefined }}>
           <HeaderBar
             desktop={desktop}
             logo={"https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"}
             onHamburgerClick={handleHamburgerClick}
-            pages={recipes?.site?.pages}
+            genres={songs?.genres}
             isDarkMode={isDarkMode}
-            data={recipes}
-            toggleDarkMode={toggleDarkMode}
-            setSelectedCategory={setSelectedCategory}
-            setSelectedRecipe={setSelectedRecipe}
-            selectedRecipe={selectedRecipe}
-            selectedCategory={selectedCategory}
-            showLangAndTheme={false} // Pass prop to hide on mobile
+            setSelectedGenre={setSelectedGenre}
+            setSelectedSong={setSelectedSong}
+            selectedSong={selectedSong}
+            songList={songList}
+            setSongList={setSongList}
+            
           />
         </div>
         <div className="container-fluid ps-0 pe-0">
@@ -92,34 +89,27 @@ export default function Main(props: HomePageProps) {
             >
               <NavMenu
                 isDarkMode={isDarkMode}
-                toggleDarkMode={toggleDarkMode}
-                pages={recipes?.site?.pages}
+                genres={songs?.site?.genres}
                 isOpen={menuOpen || desktop}
-                onSelect={setSelectedCategory}
-                editCategories={false}
-                data={recipes}
                 desktop={desktop}
-                language={i18n.language}
-                setSelectedRecipe={setSelectedRecipe}
-                selectedRecipe={selectedRecipe}
-                showLangAndTheme={!isMobile} // Hide from menu on mobile
-                onHamburgerClick={handleHamburgerClick}
+                onSelect={setSelectedGenre}
+                setSelectedSong={setSelectedSong}
+                selectedSong={selectedSong}
               />
             </div>
 
             <div className="main-content col">
-              {selectedCategory && (
+              {selectedGenre && (
                 <MainContent
-                  selectedCategory={selectedCategory}
-                  selectedRecipe={selectedRecipe}
-                  addRecipe={newRecipe}
-                  data={recipes}
+                  selectedGenre={selectedGenre}
+                  selectedSong={selectedSong}
                   desktop={desktop}
                   isDarkMode={isDarkMode}
-                  setSelectedRecipe={setSelectedRecipe}
                   songList={songList}
                   setSongList={setSongList}
                   onAddSongToList={onAddSongToList}
+                  setSelectedSong={setSelectedSong}
+                  setSelectedGenre={setSelectedGenre} 
                 />
               )}
             </div>
@@ -127,16 +117,17 @@ export default function Main(props: HomePageProps) {
         </div>
         {/* Sticky FooterBar only on mobile */}
         {/* {isMobile && ( */}
-          <FooterBar
-            isDarkMode={isDarkMode}
-            toggleDarkMode={toggleDarkMode}
-            language={i18n.language}
-            i18n={i18n}
-            setSelectedRecipe={setSelectedRecipe}
-            selectedRecipe={selectedRecipe}
-          />
-        {/* )} */}
+        <FooterBar
+          isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
+          selectedSong={selectedSong ?? undefined}
+          setSelectedSong={setSelectedSong}
+          setSongList={setSongList}
+          songList={songList}
+        />
       </div>
     </ThemeProvider>
   );
-}
+};
+
+export default HomePage;

@@ -1,67 +1,68 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { Autocomplete, TextField, InputAdornment } from "@mui/material";
-import RecipeDialog from "./RecipeDialog";
-import ClearIcon from "@mui/icons-material/Clear";
+// import { useTranslation } from "react-i18next";
+import { Autocomplete, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { translateDirectly } from "./translateAI";
 import { useNavigate } from "react-router-dom";
-import type { Category, Recipe } from "../utils/storage";
+import type { Genre, Song } from "../utils/storage";
 
-interface HeaderBarProps {
-  logo: string;
-  onHamburgerClick: () => void;
-  pages: Category[];
-  desktop: boolean;
-  setSelectedCategory: (cat: Category) => void;
-  setSelectedRecipe: (recipe: Recipe) => void;
-  selectedRecipe: Recipe | null;
-  isDarkMode: boolean;
-}
+
 
 // Add type for search/autocomplete options
 interface RecipeOption {
   title: string;
-  category: string;
+  genre: string;
   originalTitle: string;
+}
+
+interface HeaderBarProps {
+  logo: string;
+  onHamburgerClick: () => void;
+  genres: Genre[];
+  desktop: boolean;
+  setSelectedGenre: (genre: Genre) => void;
+  setSelectedSong: (song: Song) => void;
+  selectedSong: Song | null;
+  isDarkMode: boolean;
+  songList?: Song[]; // Optional prop for song list
+  setSongList?: (songs: Song[]) => void; // Optional setter for song list
 }
 
 export default function HeaderBar({
   logo,
   onHamburgerClick,
-  pages,
+  genres,
   desktop,
-  setSelectedCategory,
-  setSelectedRecipe,
-  selectedRecipe,
+  setSelectedGenre,
+  setSelectedSong,
+  selectedSong,
   isDarkMode,
+  songList = [],
+  setSongList = () => {}, // Default to no-op if not provided
 }: HeaderBarProps) {
-  const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSuggestions, setFilteredSuggestions] = useState<RecipeOption[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [language, setLanguage] = useState(i18n.language);
   const [searchActive, setSearchActive] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [translatedOptions, setTranslatedOptions] = useState<RecipeOption[]>([]);
 
-  // Build allRecipes as before
-  const allRecipes = pages?.flatMap((category) =>
-    category.itemPage.map((r) => ({ ...r, category: category.category }))
+  // Build allSongs as before
+  const allSongs = genres?.flatMap((genre) =>
+    genre.songs.map((r) => ({ ...r, genre: genre.genre }))
   ) || [];
 
   useEffect(() => {
-    if (!allRecipes) return;
+    if (!allSongs) return;
     setTranslatedOptions(
-      allRecipes.map((r) => ({
+      allSongs.map((r) => ({
         title: r.title,
-        category: r.category,
+        genre: r.genre,
         originalTitle: r.title,
       }))
     );
-  }, [allRecipes, i18n.language]);
+  }, [allSongs]);
 
   useEffect(() => {
     if (searchInputRef.current && searchQuery === "") {
@@ -86,8 +87,8 @@ export default function HeaderBar({
     if (!value) return;
     const option = translatedOptions.find((opt) => opt.title === value);
     if (option) {
-      const recipe = allRecipes.find((r) => r.title === option.originalTitle);
-      if (recipe) {
+      const song = allSongs.find((r) => r.title === option.originalTitle);
+      if (song) {
         setDialogOpen(true);
         setSearchActive(false);
         setShowMobileSearch(false);
@@ -97,7 +98,7 @@ export default function HeaderBar({
           searchInputRef.current.blur();
         }
         navigate(
-          `/spotit/${encodeURIComponent(recipe.category)}/${encodeURIComponent(recipe.title)}`
+          `/spotit/${encodeURIComponent(song.genre)}/${encodeURIComponent(song.title)}`
         );
         window.location.reload();
       }
@@ -204,8 +205,8 @@ export default function HeaderBar({
                   inputRef={searchInputRef}
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e, e.target.value)}
-                  label={t("search")}
-                  placeholder="recipe name"
+                  label="Search"
+                  placeholder="Song name"
                   variant="outlined"
                   sx={{
                     minWidth: "50px",
