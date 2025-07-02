@@ -10,7 +10,6 @@ interface SongSliderProps {
   onSelectSong: (song: Song) => void;
 }
 
-
 const SongSlider: React.FC<SongSliderProps> = ({
   songs,
   selectedGenre,
@@ -53,7 +52,11 @@ const SongSlider: React.FC<SongSliderProps> = ({
         {songs.map((item, index) => (
           <div
             key={index}
-            style={{ minWidth: 220, maxWidth: 220, flex: '0 0 auto', cursor: 'pointer' }}
+            style={{
+              minWidth: window.innerWidth <= 650 ? 160 : 240,
+              flex: '0 0 auto',
+              cursor: 'pointer'
+            }}
             onClick={() => onSelectSong(item)}
           >
             <CaseCard

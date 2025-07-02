@@ -136,10 +136,8 @@
 /*       STICKY NOTE       */
 /* ======================= */
 
-.case {
+/* .case {
   min-width: 120px;
-  height: 220px;
-  min-height: 220px;
   background-size: cover;
   background-position: center;
   background-repeat: repeat;
@@ -181,16 +179,16 @@
   padding-left: 8px;
   padding-right: 8px;
   justify-content: center !important;
-  /* Center on small screens */
+  /* Center on small screens 
 }
-
+*/
 @media (min-width: 651px) {
   .case-col {
     max-width: 50%;
     flex: 0 0 50%;
     justify-content: center !important;
   }
-}
+} */
 
 /* ======================= */
 /*      RESPONSIVE         */

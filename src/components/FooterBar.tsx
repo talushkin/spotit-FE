@@ -1,5 +1,5 @@
-
-import React, { useRef, useState } from "react";
+import * as React from "react";
+const { useRef, useState, useEffect, useMemo } = React;
 import {
   DndContext,
   closestCenter,
@@ -18,6 +18,17 @@ import { CSS } from "@dnd-kit/utilities";
 import { Box, IconButton, Slider } from "@mui/material";
 // LanguageSelector removed: only English
 import ThemeModeButton from "./ThemeModeButton";
+
+// Helper to detect mobile (max-width: 650px)
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 650 : false);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 650);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return isMobile;
+}
 import YouTube, { YouTubePlayer } from "react-youtube";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -51,7 +62,7 @@ interface FooterBarExtendedProps extends FooterBarProps {
 
 function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDarkMode }: any) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: idx.toString() });
-  const [hovered, setHovered] = React.useState(false);
+  const [hovered, setHovered] = useState(false);
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -66,15 +77,15 @@ function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDar
     border: isNextSelected ? (isDarkMode ? '1px solid #1976d2' : '1px solid #1976d2') : undefined,
   };
   // Scrolling logic for long titles
-  const [scrollIndex, setScrollIndex] = React.useState(0);
+  const [scrollIndex, setScrollIndex] = useState(0);
   const shouldScroll = song.title && song.title.length > 30;
-  React.useEffect(() => {
+  useEffect(() => {
     if (!shouldScroll || !isSelected) {
       setScrollIndex(0);
       return;
     }
     const interval = setInterval(() => {
-      setScrollIndex((prev) => (prev + 1) % (song.title.length - 29));
+      setScrollIndex((prev: number) => (prev + 1) % (song.title.length - 29));
     }, 500); // 0.5 sec per letter
     return () => clearInterval(interval);
   }, [shouldScroll, isSelected, song.title]);
@@ -96,7 +107,7 @@ function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDar
       {...attributes}
       {...listeners}
     >
-      <td style={{ width: 38, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
+      <td style={{ width: 32, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
         {hovered ? <PlayArrowIcon fontSize="small" style={{ verticalAlign: "middle", color: isDarkMode ? "#90caf9" : "#1976d2" }} /> : idx + 1}
       </td>
       <td style={{ padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#fff" : "#222"), fontWeight: isSelected ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", maxWidth: 180, display: "flex", alignItems: "center", gap: 4 }}>
@@ -110,6 +121,7 @@ function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDar
 }
 
 export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, setSelectedSong, songList: propSongList = [], setSongList: setAppSongList, currentSongIndex = 0 }: FooterBarExtendedProps) {
+  const isMobile = useIsMobile();
   // Next song highlight state
   const [nextSongToHighlight, setNextSongToHighlight] = useState<Song | null>(null);
 
@@ -121,12 +133,12 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
 
 
   // Volume state
-  const [volume, setVolume] = React.useState(10);
+  const [volume, setVolume] = useState(10);
   // Next song highlight state (no crossfade)
   // (removed crossfade and next player state)
 
   // Update YouTube player volume when changed
-  React.useEffect(() => {
+  useEffect(() => {
     if (playerRef.current) {
       playerRef.current.setVolume(volume);
     }
@@ -135,7 +147,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
   const [songList, setSongList] = useState<Song[]>(propSongList);
 
   // Sync local songList with app songList when propSongList changes
-  React.useEffect(() => {
+  useEffect(() => {
     setSongList(propSongList);
   }, [propSongList]);
   // DnD-kit sensors
@@ -147,8 +159,8 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
   const handleSongDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = songList.findIndex((_, i) => i.toString() === active.id);
-    const newIndex = songList.findIndex((_, i) => i.toString() === over.id);
+    const oldIndex = songList.findIndex((_: any, i: number) => i.toString() === active.id);
+    const newIndex = songList.findIndex((_: any, i: number) => i.toString() === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
     const newList = arrayMove(songList, oldIndex, newIndex);
     setSongList(newList);
@@ -160,7 +172,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     if (!selectedSong) return 0;
     //console.log('Current song:', selectedSong);
     return songList.findIndex(
-      (s) => s.title === selectedSong.title && s.artist === selectedSong.artist
+      (s: Song) => s.title === selectedSong.title && s.artist === selectedSong.artist
     );
   };
 
@@ -184,7 +196,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     const idx = getCurrentSongIndex();
     if (idx > 0) {
       const prevSong = songList[idx - 1];
-      setSelectedSong(prevSong);
+      //setSelectedSong(prevSong);
       setTimeout(() => {
         // Update duration for new song
         if (playerRef.current) {
@@ -265,7 +277,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     }
     return "";
   };
-  const videoId = React.useMemo(() => getVideoId(selectedSong?.url), [selectedSong?.url]);
+  const videoId = useMemo(() => getVideoId(selectedSong?.url), [selectedSong?.url]);
 
   // When video changes, update total duration
   React.useEffect(() => {
@@ -282,7 +294,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  const thumbUrl = React.useMemo(() => {
+  const thumbUrl = useMemo(() => {
     if (!videoId) return "";
     return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
   }, [videoId]);
@@ -308,17 +320,18 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
           ? "1px solid rgb(71, 69, 69)"
           : "1px solid rgb(234, 227, 227)",
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        flexDirection: isMobile ? "column" : "row",
+        justifyContent: isMobile ? "flex-start" : "center",
+        alignItems: isMobile ? "stretch" : "center",
         px: 2,
         py: 1,
         boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
         gap: 2,
       }}
     >
-      <div style={{ width: "40%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: 'relative' }}>
-        {/* Vertical Volume Slider and Crossfade */}
-        <div style={{ position: 'absolute', left: 0, top: 0, height: 100, display: 'flex', flexDirection: 'row', alignItems: 'center', zIndex: 2 }}>
+      {/* Volume always left, vertical, on left of thumbnails (desktop only) */}
+      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: isMobile ? '100%' : '40%' }}>
+        {!isMobile && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Slider
               orientation="vertical"
@@ -328,7 +341,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
               onChange={(_, value) => setVolume(Array.isArray(value) ? value[0] : value)}
               sx={{
                 height: 64,
-                color: '#1976d2', // blue
+                color: '#1976d2',
                 '& .MuiSlider-thumb': {
                   backgroundColor: '#1976d2',
                   border: '2px solid #fff',
@@ -338,145 +351,151 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
             />
             <span style={{ fontSize: 12, color: '#1976d2', marginTop: 4 }}>{volume}</span>
           </div>
-        </div>
-        {videoId && (
-          <>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-              {thumbUrl && (
-                <img
-                  src={thumbUrl}
-                  alt={selectedSong?.title || "thumbnail"}
-                  style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", marginRight: 8 }}
-                />
-              )}
-              <IconButton onClick={handlePrevSong} color="primary" disabled={getCurrentSongIndex() <= 0}>
-                <SkipPreviousIcon />
-              </IconButton>
-              <IconButton onClick={handlePlayPause} color="primary">
-                {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-              </IconButton>
-              <IconButton onClick={handleNextSong} color="primary" disabled={getCurrentSongIndex() === songList.length - 1 || songList.length === 0}>
-                <SkipNextIcon />
-              </IconButton>
-            </div>
-            {/* Main YouTube player (current song) */}
-            <YouTube
-              videoId={videoId}
-              opts={{
-                width: "0.1",
-                height: "0.1",
-                playerVars: { controls: 0, modestbranding: 1, autoplay: 1 },
-              }}
-              onReady={onPlayerReady}
-              onPause={() => setIsPlaying(false)}
-              onPlay={() => setIsPlaying(true)}
-              onEnd={handleNextSong}
-              style={{ display: "none" }}
-              iframeClassName="yt-hidden-iframe"
-            />
-            <style>{`.yt-hidden-iframe { display: none !important; }`}</style>
-            <div style={{ marginTop: 4, color: isDarkMode ? "#fff" : "#222", textAlign: "center", fontWeight: 600, fontSize: "1.1rem" }}>
-              {selectedSong?.title || ""}
-              {((selectedSong as Song)?.duration || totalDuration) && (
-                <span style={{ fontWeight: 400, fontSize: "1rem", color: isDarkMode ? "#bbb" : "#333", marginLeft: 8 }}>
-                  ({
-                    typeof (selectedSong as Song)?.duration === 'string' && (selectedSong as Song).duration
-                      ? (selectedSong as Song).duration
-                      : (totalDuration ? formatTime(totalDuration) : "")
-                  })
-                </span>
-              )}
-              {selectedSong?.artist && (
-                <span style={{ fontWeight: 400, fontSize: "0.95rem", color: isDarkMode ? "#bbb" : "#333", display: "block" }}>
-                  {selectedSong.artist}
-                </span>
-              )}
-              {/* Song location display and progress bar */}
-              {(1 === 1) && (
-                <div style={{ marginTop: 8, width: 240, marginLeft: "auto", marginRight: "auto" }}>
-                  {/* Main player time slider */}
-                  <Slider
-                    min={0}
-                    max={totalDuration || 1}
-                    value={typeof currentTime === 'number' && !isNaN(currentTime) ? Math.min(currentTime, totalDuration || 1) : 0}
-                    onChange={handleSeek}
-                    step={1}
-                    size="small"
-                    sx={{ color: isDarkMode ? "#1db954" : "#024803" }}
+        )}
+        {/* Player controls and info */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          {videoId && (
+            <>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: isMobile ? '100%' : undefined }}>
+                {thumbUrl && (
+                  <img
+                    src={thumbUrl}
+                    alt={selectedSong?.title || "thumbnail"}
+                    style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", marginRight: 8 }}
                   />
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: isDarkMode ? "#bbb" : "#333" }}>
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{typeof (selectedSong as Song | undefined)?.duration === 'string' && (selectedSong as Song).duration
-                      ? (selectedSong as Song).duration
-                      : (totalDuration ? formatTime(totalDuration) : "")}</span>
+                )}
+                <IconButton onClick={handlePrevSong} color="primary" disabled={getCurrentSongIndex() <= 0}>
+                  <SkipPreviousIcon />
+                </IconButton>
+                <IconButton onClick={handlePlayPause} color="primary">
+                  {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+                </IconButton>
+                <IconButton onClick={handleNextSong} color="primary" disabled={getCurrentSongIndex() === songList.length - 1 || songList.length === 0}>
+                  <SkipNextIcon />
+                </IconButton>
+              </div>
+              {/* Main YouTube player (current song) */}
+              <YouTube
+                videoId={videoId}
+                opts={{
+                  width: "0.1",
+                  height: "0.1",
+                  playerVars: { controls: 0, modestbranding: 1, autoplay: 1 },
+                }}
+                onReady={onPlayerReady}
+                onPause={() => setIsPlaying(false)}
+                onPlay={() => setIsPlaying(true)}
+                onEnd={handleNextSong}
+                style={{ display: "none" }}
+                iframeClassName="yt-hidden-iframe"
+              />
+              <style>{`.yt-hidden-iframe { display: none !important; }`}</style>
+              <div style={{ marginTop: 4, color: isDarkMode ? "#fff" : "#222", textAlign: "center", fontWeight: 600, fontSize: "1.1rem" }}>
+                {selectedSong?.title || ""}
+                {((selectedSong as Song)?.duration || totalDuration) && (
+                  <span style={{ fontWeight: 400, fontSize: "1rem", color: isDarkMode ? "#bbb" : "#333", marginLeft: 8 }}>
+                    ({
+                      typeof (selectedSong as Song)?.duration === 'string' && (selectedSong as Song).duration
+                        ? (selectedSong as Song).duration
+                        : (totalDuration ? formatTime(totalDuration) : "")
+                    })
+                  </span>
+                )}
+                {selectedSong?.artist && (
+                  <span style={{ fontWeight: 400, fontSize: "0.95rem", color: isDarkMode ? "#bbb" : "#333", display: "block" }}>
+                    {selectedSong.artist}
+                  </span>
+                )}
+                {/* Song location display and progress bar */}
+                {(1 === 1) && (
+                  <div style={{ marginTop: 8, width: 240, marginLeft: "auto", marginRight: "auto" }}>
+                    {/* Main player time slider */}
+                    <Slider
+                      min={0}
+                      max={totalDuration || 1}
+                      value={typeof currentTime === 'number' && !isNaN(currentTime) ? Math.min(currentTime, totalDuration || 1) : 0}
+                      onChange={handleSeek}
+                      step={1}
+                      size="small"
+                      sx={{ color: isDarkMode ? "#1db954" : "#024803" }}
+                    />
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: isDarkMode ? "#bbb" : "#333" }}>
+                      <span>{formatTime(currentTime)}</span>
+                      <span>{typeof (selectedSong as Song | undefined)?.duration === 'string' && (selectedSong as Song).duration
+                        ? (selectedSong as Song).duration
+                        : (totalDuration ? formatTime(totalDuration) : "")}</span>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-      <div style={{ width: "50%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        {songList.length > 0 && (
-          <div style={{
-            width: "100%",
-            maxHeight: 4 * 32 + 8, // 4 rows * row height + some padding
-            overflowY: songList.length > 4 ? "auto" : "visible",
-            borderRadius: 8,
-            background: "transparent"
-          }}>
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSongDragEnd}>
-              <SortableContext items={songList.map((_, i) => i.toString())} strategy={verticalListSortingStrategy}>
-                <table style={{ width: "100%", borderCollapse: "collapse", background: "transparent" }}>
-                  <tbody>
-                    {songList.map((song, idx) => (
-                      <SortableSongRow
-                        key={idx}
-                        song={song}
-                        idx={idx}
-                        isSelected={
-                          selectedSong && song.title === selectedSong.title && song.artist === selectedSong.artist
-                        }
-                        isNextSelected={
-                          nextSongToHighlight && song.title === nextSongToHighlight.title && song.artist === nextSongToHighlight.artist
-                        }
-                        onClick={() => {
-                          // Play and select the clicked song
-                          if (idx !== currentSongIndex) {
-                            setIsPlaying(false);
-                            setTimeout(() => {
-                              setIsPlaying(true);
-                            }, 100);
+                )}
+              </div>
+            </>
+          )}
+          {/* Song list: on mobile, show under player controls; on desktop, show to the right */}
+          {songList.length > 0 && (
+            <div style={{
+              width: isMobile ? "100%" : "100%",
+              maxHeight: 4 * 32 + 8,
+              overflowY: songList.length > 4 ? "auto" : "visible",
+              borderRadius: 8,
+              background: "transparent",
+              marginTop: isMobile ? 12 : 0
+            }}>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSongDragEnd}>
+                <SortableContext items={songList.map((_: any, i: number) => i.toString())} strategy={verticalListSortingStrategy}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", background: "transparent" }}>
+                    <tbody>
+                      {songList.map((song, idx) => (
+                        <SortableSongRow
+                          key={idx}
+                          song={song}
+                          idx={idx}
+                          isSelected={
+                            selectedSong && song.title === selectedSong.title && song.artist === selectedSong.artist
                           }
-                          // Update selectedSong and currentSongIndex if possible
-                          if (typeof window !== 'undefined') {
-                            // Try to update via navigation (simulate selection)
-                            if (song.title) {
-                              // Try to find genre if available
-                              let genre = (selectedSong && (selectedSong as any).genre) || '';
-                              setSelectedSong({
-                                title: song.title,
-                                artist: song.artist,
-                                url: song.url,
-                                duration: song.duration,
-                                genre: genre
-                              });
+                          isNextSelected={
+                            nextSongToHighlight && song.title === nextSongToHighlight.title && song.artist === nextSongToHighlight.artist
+                          }
+                          onClick={() => {
+                            // Play and select the clicked song
+                            if (idx !== currentSongIndex) {
+                              setIsPlaying(false);
+                              setTimeout(() => {
+                                setIsPlaying(true);
+                              }, 100);
                             }
-                          }
-                        }}
-                        isDarkMode={isDarkMode}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </SortableContext>
-            </DndContext>
-          </div>
-        )}
+                            // Update selectedSong and currentSongIndex if possible
+                            if (typeof window !== 'undefined') {
+                              // Try to update via navigation (simulate selection)
+                              if (song.title) {
+                                // Try to find genre if available
+                                let genre = (selectedSong && (selectedSong as any).genre) || '';
+                                setSelectedSong({
+                                  title: song.title,
+                                  artist: song.artist,
+                                  url: song.url,
+                                  duration: song.duration,
+                                  genre: genre
+                                });
+                              }
+                            }
+                          }}
+                          isDarkMode={isDarkMode}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </SortableContext>
+              </DndContext>
+            </div>
+          )}
+        </div>
       </div>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <ThemeModeButton isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
-      </div>
+      {/* ThemeModeButton: only show on desktop */}
+      {!isMobile && (
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <ThemeModeButton isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+        </div>
+      )}
     </Box>
   );
 }
