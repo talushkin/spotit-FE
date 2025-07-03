@@ -19,6 +19,7 @@ interface SearchBarProps {
     allSongs: Song[];
     setAllSongs: (songs: Song[]) => void;
     setSelectedSong: (song: Song) => void;
+    setIsPlaying?: (playing: boolean) => void;
     onAddSongToList?: (song: Song, location?: number) => void;
     onSearchMiss?: (title: string) => void;
     setSearchActive?: (active: boolean) => void;
@@ -33,7 +34,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
     setSelectedSong,
     onAddSongToList,
     onSearchMiss,
-    setSearchActive
+    setSearchActive,
+    setIsPlaying
 }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [filteredSuggestions, setFilteredSuggestions] = useState<RecipeOption[]>([]);
@@ -54,7 +56,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 imageUrl: r.imageUrl || r.image || undefined,
             }))
         );
-    }, [allSongs]);
+    }, [searchOptions]);
 
     useEffect(() => {
         // Log Redux searchOptions after fetch
@@ -66,7 +68,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             originalTitle: opt.title,
             imageUrl: opt.imageUrl || opt.image || undefined,
         }));
-        setTranslatedOptions(options);
+        if (options) {setTranslatedOptions(options);}
     }, [searchOptions]);
 
     useEffect(() => {
@@ -76,17 +78,19 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }, [searchQuery]);
 
     const handleSearchChange = (_event: React.SyntheticEvent<Element, Event>, value: string) => {
+        console.log("Search input changed:", value);
         setSearchQuery(value);
         if (!value) {
-            setFilteredSuggestions([]);
+            //setFilteredSuggestions([]);
+            console.log("Search cleared, no suggestions.");
             return;
         }
         const filtered = translatedOptions.filter((opt: RecipeOption) =>
             (opt.title || '').toLowerCase().includes(value.toLowerCase())
         );
-        setFilteredSuggestions(filtered);
+        if (filtered) {setFilteredSuggestions(filtered);}
         if (filtered.length === 0 && onSearchMiss) {
-            onSearchMiss(value);
+            //onSearchMiss(value);
         }
     };
 
@@ -107,7 +111,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 setSearchActiveInternal(false);
                 setShowMobileSearch(false);
                 setSearchQuery("");
-                setFilteredSuggestions([]);
+                //setFilteredSuggestions([]);
                 if (setSearchActive) setSearchActive(false);
                 if (searchInputRef.current) {
                     searchInputRef.current.blur();
@@ -115,6 +119,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 if (onAddSongToList) {
                     onAddSongToList(song, 1);
                 }
+                setSelectedSong(song);
+                if (setIsPlaying) setIsPlaying(true);
             }
         }
     };

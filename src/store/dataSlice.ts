@@ -81,7 +81,9 @@ const dataSlice = createSlice({
         // Add new API songs to allSongs in state.site
         const fetchedSongs = action.payload;
         console.log('Fetched songs:', fetchedSongs.map((song: Song) => song.title));
-        state.searchOptions = fetchedSongs;
+        if (fetchedSongs && fetchedSongs.length > 0) {
+          state.searchOptions = fetchedSongs;
+        }
         state.loading = false;
       });
   },

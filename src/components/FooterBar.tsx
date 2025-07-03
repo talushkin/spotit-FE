@@ -137,6 +137,25 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     setSongList(propSongList);
   }, [propSongList]);
 
+  // Auto-play when the first song is loaded and selectedSong is not set
+  // Auto-play when the first song is loaded and selectedSong is not set
+  useEffect(() => {
+    if (
+      propSongList &&
+      propSongList.length > 0 &&
+      (!selectedSong || !selectedSong.title || !selectedSong.url)
+    ) {
+      setSelectedSong(propSongList[0]);
+    }
+  }, [propSongList, selectedSong]);
+
+  // When selectedSong changes (first load), auto-play
+  useEffect(() => {
+    if (selectedSong && selectedSong.title && selectedSong.url) {
+      setIsPlaying(true);
+    }
+  }, [selectedSong]);
+
   // Keep propSongList in sync with reordered songList
   useEffect(() => {
     if (typeof setAppSongList === 'function' && songList !== propSongList) {
@@ -172,16 +191,17 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     const idx = getCurrentSongIndex();
     if (idx >= 0 && idx < songList.length - 1) {
       const nextSong = songList[idx + 1];
+      console.log('Next song:', nextSong);
       setSelectedSong(nextSong);
       setCurrentTime(0);
-      setTimeout(() => {
-        if (playerRef.current) {
-          playerRef.current.seekTo(0, true);
-          const duration = playerRef.current.getDuration?.() || 0;
-          setTotalDuration(duration);
-        }
-        setIsPlaying(true);
-      }, 200);
+      // setTimeout(() => {
+      //   if (playerRef.current) {
+      //     playerRef.current.seekTo(0, true);
+      //     const duration = playerRef.current.getDuration?.() || 0;
+      //     setTotalDuration(duration);
+      //   }
+      //   setIsPlaying(true);
+      // }, 200);
     }
   };
 
@@ -238,18 +258,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
           setNextSongToHighlight(null);
         }
         // Switch to next song at end
-        if (duration > 0 && time >= duration && songList.length > 1) {
-          if (idx < songList.length - 1) {
-            setSelectedSong(songList[idx + 1]);
-            setCurrentTime(0);
-            setTimeout(() => {
-              if (playerRef.current) {
-                playerRef.current.seekTo(0, true);
-              }
-            }, 200);
-          }
-        }
-      }, 100);
+      }, 500);
     }
     return () => {
       if (intervalId) clearInterval(intervalId);
