@@ -153,8 +153,8 @@ const MainContent: React.FC<MainContentProps> = ({
                 justifyContent: 'flex-start',
                 alignItems: 'center',
                 width: '100%',
-                marginBottom: '1.5rem',
-                marginTop: '1.5rem',
+                marginBottom: '0rem',
+                marginTop: '0rem',
                 overflowX: 'hidden',
               }}
             >

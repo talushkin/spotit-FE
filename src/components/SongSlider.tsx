@@ -26,7 +26,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
           style={{
             fontWeight: 600,
             fontSize: '1.3rem',
-            marginBottom: '0.5rem',
+            marginBottom: '0px',
             color: isDarkMode ? 'white' : '#222',
             textAlign: 'left',
             marginLeft: '0.5rem',
@@ -48,7 +48,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
           userSelect: 'none',
           WebkitOverflowScrolling: 'touch',
           msOverflowStyle: 'none',
-          background: isDarkMode ? '#000' : '#f5f5f5',
+          //background: isDarkMode ? '#000' : '#f5f5f5',
           borderRadius: '16px',
           boxShadow: isDarkMode ? '0 2px 12px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.08)',
           padding: '0.5rem 0',
@@ -73,12 +73,10 @@ const SongSlider: React.FC<SongSliderProps> = ({
             style={{
               minWidth: window.innerWidth <= 650 ? 160 : 240,
               width: window.innerWidth <= 650 ? 160 : 240,
-              //height: window.innerWidth <= 650 ? 160 : 240,
               flex: '0 0 auto',
               cursor: 'pointer',
-                margin: '0.5rem',
+              margin: '0 10px', // Reduce horizontal gap to almost touch
             }}
-            //onClick={() => onSelectSong(item)}
           >
             <CaseCard
               index={index + 1}
@@ -86,7 +84,6 @@ const SongSlider: React.FC<SongSliderProps> = ({
               category={selectedGenre?.genre || ''}
               isDarkMode={isDarkMode}
               onAddSongToList={onAddSongToList}
-              //onSelectSong={onSelectSong}
             />
           </div>
         ))}
