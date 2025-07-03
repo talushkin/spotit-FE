@@ -1,23 +1,18 @@
-import * as React from "react";
-const { useRef, useState, useEffect, useMemo } = React;
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
-  DndContext,
-  closestCenter,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent
+  DragEndEvent,
+  closestCenter
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  arrayMove,
-  useSortable
-} from "@dnd-kit/sortable";
+import { arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Box, IconButton, Slider } from "@mui/material";
 // LanguageSelector removed: only English
 import ThemeModeButton from "./ThemeModeButton";
+import FooterControlPanel from "./FooterControlPanel";
+import FooterSongTable from "./FooterSongTable";
 
 // Helper to detect mobile (max-width: 650px)
 function useIsMobile() {
@@ -58,9 +53,8 @@ interface FooterBarExtendedProps extends FooterBarProps {
 
 
 
-
-
-function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDarkMode }: any) {
+// SortableSongRow is now exported for use in FooterSongTable
+export const SortableSongRow = ({ song, idx, isSelected, isNextSelected, onClick, isDarkMode }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: idx.toString() });
   const [hovered, setHovered] = useState(false);
   const style = {
@@ -79,7 +73,7 @@ function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDar
   // Scrolling logic for long titles
   const [scrollIndex, setScrollIndex] = useState(0);
   const shouldScroll = song.title && song.title.length > 30;
-  useEffect(() => {
+  React.useEffect(() => {
     if (!shouldScroll || !isSelected) {
       setScrollIndex(0);
       return;
@@ -97,9 +91,12 @@ function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDar
     displayTitle = song.title.slice(0, 30) + '...';
   }
 
+  // Only return a <tr> if used inside a <table>, otherwise return a <div>
+  // This fixes the JSX parse error if used outside a table context
+  // Always return a <div> to avoid JSX parse errors in non-table context
   return (
-    <tr
-      ref={setNodeRef}
+    <div
+      ref={setNodeRef as any}
       style={style}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
@@ -107,50 +104,38 @@ function SortableSongRow({ song, idx, isSelected, isNextSelected, onClick, isDar
       {...attributes}
       {...listeners}
     >
-      <td style={{ width: 32, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
+      <span style={{ width: 32, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
         {hovered ? <PlayArrowIcon fontSize="small" style={{ verticalAlign: "middle", color: isDarkMode ? "#90caf9" : "#1976d2" }} /> : idx + 1}
-      </td>
-      <td style={{ padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#fff" : "#222"), fontWeight: isSelected ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", maxWidth: 180, display: "flex", alignItems: "center", gap: 4 }}>
+      </span>
+      <span style={{ padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#fff" : "#222"), fontWeight: isSelected ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", maxWidth: 180, display: "inline-flex", alignItems: "center", gap: 4 }}>
         {displayTitle}
-      </td>
-      <td style={{ width: 60, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
+      </span>
+      <span style={{ width: 60, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400, marginRight: 30 }}>
         {song.duration || ""}
-      </td>
-    </tr>
+      </span>
+
+    </div>
   );
-}
+};
+
 
 export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, setSelectedSong, songList: propSongList = [], setSongList: setAppSongList, currentSongIndex = 0 }: FooterBarExtendedProps) {
   const isMobile = useIsMobile();
-  // Next song highlight state
   const [nextSongToHighlight, setNextSongToHighlight] = useState<Song | null>(null);
-
-  // YouTube player state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
   const playerRef = useRef<YouTubePlayer | null>(null);
-
-
-  // Volume state
   const [volume, setVolume] = useState(10);
-  // Next song highlight state (no crossfade)
-  // (removed crossfade and next player state)
-
-  // Update YouTube player volume when changed
+  const [songList, setSongList] = useState<Song[]>(propSongList);
   useEffect(() => {
     if (playerRef.current) {
       playerRef.current.setVolume(volume);
     }
   }, [volume]);
-  // State to keep track of played songs (local for drag, but syncs with app)
-  const [songList, setSongList] = useState<Song[]>(propSongList);
-
-  // Sync local songList with app songList when propSongList changes
   useEffect(() => {
     setSongList(propSongList);
   }, [propSongList]);
-  // DnD-kit sensors
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -321,176 +306,63 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
           : "1px solid rgb(234, 227, 227)",
         display: "flex",
         flexDirection: isMobile ? "column" : "row",
-        justifyContent: isMobile ? "flex-start" : "center",
-        alignItems: isMobile ? "stretch" : "center",
+        justifyContent: isMobile ? "center" : "center",
+        alignItems: isMobile ? "center" : "center",
         px: 2,
         py: 1,
         boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
         gap: 2,
       }}
     >
-      {/* Volume always left, vertical, on left of thumbnails (desktop only) */}
-      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: isMobile ? '100%' : '40%' }}>
-        {!isMobile && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Slider
-              orientation="vertical"
-              min={0}
-              max={100}
-              value={volume}
-              onChange={(_, value) => setVolume(Array.isArray(value) ? value[0] : value)}
-              sx={{
-                height: 64,
-                color: '#1976d2',
-                '& .MuiSlider-thumb': {
-                  backgroundColor: '#1976d2',
-                  border: '2px solid #fff',
-                },
-                ml: 1,
-              }}
-            />
-            <span style={{ fontSize: 12, color: '#1976d2', marginTop: 4 }}>{volume}</span>
-          </div>
-        )}
-        {/* Player controls and info */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          {videoId && (
-            <>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: isMobile ? '100%' : undefined }}>
-                {thumbUrl && (
-                  <img
-                    src={thumbUrl}
-                    alt={selectedSong?.title || "thumbnail"}
-                    style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", marginRight: 8 }}
-                  />
-                )}
-                <IconButton onClick={handlePrevSong} color="primary" disabled={getCurrentSongIndex() <= 0}>
-                  <SkipPreviousIcon />
-                </IconButton>
-                <IconButton onClick={handlePlayPause} color="primary">
-                  {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-                </IconButton>
-                <IconButton onClick={handleNextSong} color="primary" disabled={getCurrentSongIndex() === songList.length - 1 || songList.length === 0}>
-                  <SkipNextIcon />
-                </IconButton>
-              </div>
-              {/* Main YouTube player (current song) */}
-              <YouTube
-                videoId={videoId}
-                opts={{
-                  width: "0.1",
-                  height: "0.1",
-                  playerVars: { controls: 0, modestbranding: 1, autoplay: 1 },
-                }}
-                onReady={onPlayerReady}
-                onPause={() => setIsPlaying(false)}
-                onPlay={() => setIsPlaying(true)}
-                onEnd={handleNextSong}
-                style={{ display: "none" }}
-                iframeClassName="yt-hidden-iframe"
-              />
-              <style>{`.yt-hidden-iframe { display: none !important; }`}</style>
-              <div style={{ marginTop: 4, color: isDarkMode ? "#fff" : "#222", textAlign: "center", fontWeight: 600, fontSize: "1.1rem" }}>
-                {selectedSong?.title || ""}
-                {((selectedSong as Song)?.duration || totalDuration) && (
-                  <span style={{ fontWeight: 400, fontSize: "1rem", color: isDarkMode ? "#bbb" : "#333", marginLeft: 8 }}>
-                    ({
-                      typeof (selectedSong as Song)?.duration === 'string' && (selectedSong as Song).duration
-                        ? (selectedSong as Song).duration
-                        : (totalDuration ? formatTime(totalDuration) : "")
-                    })
-                  </span>
-                )}
-                {selectedSong?.artist && (
-                  <span style={{ fontWeight: 400, fontSize: "0.95rem", color: isDarkMode ? "#bbb" : "#333", display: "block" }}>
-                    {selectedSong.artist}
-                  </span>
-                )}
-                {/* Song location display and progress bar */}
-                {(1 === 1) && (
-                  <div style={{ marginTop: 8, width: 240, marginLeft: "auto", marginRight: "auto" }}>
-                    {/* Main player time slider */}
-                    <Slider
-                      min={0}
-                      max={totalDuration || 1}
-                      value={typeof currentTime === 'number' && !isNaN(currentTime) ? Math.min(currentTime, totalDuration || 1) : 0}
-                      onChange={handleSeek}
-                      step={1}
-                      size="small"
-                      sx={{ color: isDarkMode ? "#1db954" : "#024803" }}
-                    />
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: isDarkMode ? "#bbb" : "#333" }}>
-                      <span>{formatTime(currentTime)}</span>
-                      <span>{typeof (selectedSong as Song | undefined)?.duration === 'string' && (selectedSong as Song).duration
-                        ? (selectedSong as Song).duration
-                        : (totalDuration ? formatTime(totalDuration) : "")}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-          {/* Song list: on mobile, show under player controls; on desktop, show to the right */}
-          {songList.length > 0 && (
-            <div style={{
-              width: isMobile ? "100%" : "100%",
-              maxHeight: 4 * 32 + 8,
-              overflowY: songList.length > 4 ? "auto" : "visible",
-              borderRadius: 8,
-              background: "transparent",
-              marginTop: isMobile ? 12 : 0
-            }}>
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSongDragEnd}>
-                <SortableContext items={songList.map((_: any, i: number) => i.toString())} strategy={verticalListSortingStrategy}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", background: "transparent" }}>
-                    <tbody>
-                      {songList.map((song, idx) => (
-                        <SortableSongRow
-                          key={idx}
-                          song={song}
-                          idx={idx}
-                          isSelected={
-                            selectedSong && song.title === selectedSong.title && song.artist === selectedSong.artist
-                          }
-                          isNextSelected={
-                            nextSongToHighlight && song.title === nextSongToHighlight.title && song.artist === nextSongToHighlight.artist
-                          }
-                          onClick={() => {
-                            // Play and select the clicked song
-                            if (idx !== currentSongIndex) {
-                              setIsPlaying(false);
-                              setTimeout(() => {
-                                setIsPlaying(true);
-                              }, 100);
-                            }
-                            // Update selectedSong and currentSongIndex if possible
-                            if (typeof window !== 'undefined') {
-                              // Try to update via navigation (simulate selection)
-                              if (song.title) {
-                                // Try to find genre if available
-                                let genre = (selectedSong && (selectedSong as any).genre) || '';
-                                setSelectedSong({
-                                  title: song.title,
-                                  artist: song.artist,
-                                  url: song.url,
-                                  duration: song.duration,
-                                  genre: genre
-                                });
-                              }
-                            }
-                          }}
-                          isDarkMode={isDarkMode}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </SortableContext>
-              </DndContext>
-            </div>
-          )}
-        </div>
-      </div>
-      {/* ThemeModeButton: only show on desktop */}
+      {/* Desktop: Controls left (30%), Songlist right (60%) */}
+      {/* Controls and theme button: group for mobile */}
+      <Box
+        sx={{
+          display: isMobile ? 'flex' : 'block',
+          flexDirection: isMobile ? 'row' : undefined,
+          alignItems: isMobile ? 'center' : undefined,
+          justifyContent: isMobile ? 'center' : undefined,
+          width: isMobile ? '100%' : undefined,
+          position: 'relative',
+        }}
+      >
+        <FooterControlPanel
+          isDarkMode={isDarkMode}
+          isMobile={isMobile}
+          videoId={videoId}
+          thumbUrl={thumbUrl}
+          selectedSong={selectedSong as Song}
+          isPlaying={isPlaying}
+          handlePrevSong={handlePrevSong}
+          handlePlayPause={handlePlayPause}
+          handleNextSong={handleNextSong}
+          getCurrentSongIndex={getCurrentSongIndex}
+          songList={songList}
+          playerRef={playerRef}
+          onPlayerReady={onPlayerReady}
+          totalDuration={totalDuration}
+          currentTime={currentTime}
+          handleSeek={handleSeek}
+          formatTime={formatTime}
+          setVolume={setVolume}
+          volume={volume}
+        />
+        {/* ThemeModeButton: only show on desktop at far right */}
+      </Box>
+      <FooterSongTable
+        isMobile={isMobile}
+        songList={songList}
+        sensors={sensors}
+        handleSongDragEnd={handleSongDragEnd}
+        SortableSongRow={SortableSongRow}
+        selectedSong={selectedSong as Song}
+        nextSongToHighlight={nextSongToHighlight}
+        currentSongIndex={currentSongIndex}
+        setIsPlaying={setIsPlaying}
+        setSelectedSong={setSelectedSong}
+        isDarkMode={isDarkMode}
+      />
+      {/* ThemeModeButton: only show on desktop at far right */}
       {!isMobile && (
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <ThemeModeButton isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />

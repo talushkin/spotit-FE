@@ -1,3 +1,24 @@
+// Fetch songs by title from API (moved from dataSlice)
+export const fetchSongsByTitleApi = async (title: string): Promise<Song[]> => {
+  try {
+    const res = await fetch("https://be-tan-theta.vercel.app/api/ai/get-song-list", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer 1234",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ title })
+    });
+    if (!res.ok) throw new Error("API error");
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      return data.map((item: any) => ({ ...item, genre: 'API' }));
+    }
+    return [];
+  } catch (err: any) {
+    throw new Error(err.message || 'API error');
+  }
+};
 // utils/storage.ts
 import axios from "axios";
 import data from "../data/songs.json";

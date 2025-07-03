@@ -19,7 +19,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
   const handlePlaySong = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log("Playing pressed on song:", item);
-    if (onSelectSong && onAddSongToList) {
+    if ( onAddSongToList) {
 
       onAddSongToList(item, 1); 
     }
@@ -53,7 +53,6 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
           : "1px solid rgb(234, 227, 227)",
         borderRadius: "18px",
         transition: "border 0.2s",
-        width: window.innerWidth <= 650 ? "50px" : "100px",
         position: "relative",
         overflow: "hidden",
         boxSizing: "border-box",
@@ -62,25 +61,6 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
         alignItems: "center",
       }}
     >
-      <style>
-        {`
-          @media (max-width: 650px) {
-            .case {
-              width: 30vw !important;
-              min-width: 90px !important;
-              max-width: 30px !important;
-              height: 30vh !important;
-            }
-            .case img {
-              width: 30vw !important;
-              height: 15vh !important;
-              min-width: 60px !important;
-              max-width: 30px !important;
-  
-            }
-          }
-        `}
-      </style>
       <img
         src={item.image || item.imageUrl || imageUrl}
         alt={item.title}

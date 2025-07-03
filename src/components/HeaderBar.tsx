@@ -1,18 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
-// import { useTranslation } from "react-i18next";
-import { Autocomplete, TextField } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import type { Genre, Song } from "../utils/storage";
+import SearchBar from "./SearchBar";
+import { fetchSongsByTitle } from "../store/dataSlice";
+import type { ThunkDispatch } from '@reduxjs/toolkit';
+import type { AnyAction } from 'redux';
 
 
 
-// Add type for search/autocomplete options
-interface RecipeOption {
-  title: string;
-  genre: string;
-  originalTitle: string;
-}
+
 
 interface HeaderBarProps {
   logo: string;
@@ -25,6 +21,7 @@ interface HeaderBarProps {
   isDarkMode: boolean;
   songList?: Song[]; // Optional prop for song list
   setSongList?: (songs: Song[]) => void; // Optional setter for song list
+  onAddSongToList?: (song: Song, location?: number) => void; // Optional function to add song to list
 }
 
 export default function HeaderBar({
@@ -38,94 +35,27 @@ export default function HeaderBar({
   isDarkMode,
   songList = [],
   setSongList = () => {}, // Default to no-op if not provided
+  onAddSongToList
 }: HeaderBarProps) {
+  // Use correct dispatch type for thunks
+  const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
+  // Use Redux state for allSongs
+  const allSongs = useSelector((state: any) => state.data.site?.allSongs || []);
+  const setAllSongs = (songs: Song[]) => {
+    // Optionally, dispatch an action to update allSongs in Redux if needed
+    // For now, this is a no-op for compatibility
+  };
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredSuggestions, setFilteredSuggestions] = useState<RecipeOption[]>([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  // Handler for when a search miss occurs (not found locally)
+  const handleSearchMiss = (title: string) => {
+   // console.log("Search miss for title:", title);
+    dispatch(fetchSongsByTitle(title));
+  };
+
+  // Track if search is active (focus or has value)
   const [searchActive, setSearchActive] = useState(false);
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const [translatedOptions, setTranslatedOptions] = useState<RecipeOption[]>([]);
-
-  // Build allSongs as before
-  const allSongs = genres?.flatMap((genre) =>
-    genre.songs.map((r) => ({ ...r, genre: genre.genre }))
-  ) || [];
-
-  useEffect(() => {
-    if (!allSongs) return;
-    setTranslatedOptions(
-      allSongs.map((r) => ({
-        title: r.title,
-        genre: r.genre,
-        originalTitle: r.title,
-      }))
-    );
-  }, [allSongs]);
-
-  useEffect(() => {
-    if (searchInputRef.current && searchQuery === "") {
-      searchInputRef.current.value = "";
-    }
-  }, [searchQuery]);
-
-  const handleSearchChange = (_event: React.SyntheticEvent, value: string) => {
-    setShowMobileSearch(false);
-    setSearchQuery(value);
-    if (!value) {
-      setFilteredSuggestions([]);
-      return;
-    }
-    const filtered = translatedOptions.filter((opt) =>
-      opt.title?.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredSuggestions(filtered);
-  };
-
-  const handleSelect = (_event: React.SyntheticEvent, value: string | null) => {
-    if (!value) return;
-    const option = translatedOptions.find((opt) => opt.title === value);
-    if (option) {
-      const song = allSongs.find((r) => r.title === option.originalTitle);
-      if (song) {
-        setDialogOpen(true);
-        setSearchActive(false);
-        setShowMobileSearch(false);
-        setSearchQuery("");
-        setFilteredSuggestions([]);
-        if (searchInputRef.current) {
-          searchInputRef.current.blur();
-        }
-
-      }
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Escape" && searchActive) {
-      setSearchActive(false);
-      setSearchQuery("");
-      setFilteredSuggestions([]);
-      if (searchInputRef.current) {
-        searchInputRef.current.blur();
-      }
-    }
-  };
-
-  const fadeStyle: React.CSSProperties = {
-    transition:
-      "opacity 0.4s cubic-bezier(.4,0,.2,1), width 0.4s cubic-bezier(.4,0,.2,1)",
-    opacity: searchActive ? 0 : 1,
-    width: searchActive ? 0 : "auto",
-    pointerEvents: searchActive ? ("none" as React.CSSProperties["pointerEvents"]) : ("auto" as React.CSSProperties["pointerEvents"]),
-    willChange: "opacity,width",
-    overflow: "hidden",
-    minWidth: 0,
-    display: searchActive ? "none" : "flex",
-    alignItems: "center",
-    gap: "8px",
-  };
+  // Determine if mobile
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 650 : false;
 
   return (
     <>
@@ -142,157 +72,67 @@ export default function HeaderBar({
           width: "100%",
           boxSizing: "border-box",
           maxHeight: "80px",
-          background: isDarkMode ? "#000" : undefined, // Set dark background if dark mode
+          background: isDarkMode ? "#000" : undefined,
         }}
       >
-        {/* Left side: Hamburger and Site Name */}
-        <div
-          style={{
-            display: searchActive ? "none" : "flex",
-            alignItems: "center",
-            gap: "8px",
-            ...fadeStyle,
-          }}
-        >
-          {!desktop && !searchActive  && (
-  <button className="hamburger" onClick={onHamburgerClick}>
-    ☰
-  </button>
-)}
-          <img
-            src="https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"
-            alt="Logo"
-            style={{
-              width: "60px",
-              borderRadius: "50%",
-            }}
-          />
-          <div className="SiteName">spotIt</div>
-        </div>
-        {/* Search input or icon */}
-        <div style={{ flex: 0, maxWidth: "100%" }}>
-          {/* Show magnifier on small screens, input on desktop or when expanded */}
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {/* Mobile: show icon if not expanded */}
-            <span
+        {/* Desktop: SearchBar right of app name; Mobile: normal */}
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+          {!(isMobile && searchActive) && (
+            <div
               style={{
-                display:
-                  !desktop && !showMobileSearch ? "inline-flex" : "none",
+                display: "flex",
                 alignItems: "center",
-                cursor: "pointer",
-                color: "white",
-                background: "rgba(0,0,0,0.2)",
-                borderRadius: "50%",
-                padding: "8px",
-                marginLeft: "8px",
+                gap: "8px",
+                flex: 1,
+                minWidth: 0,
               }}
-              onClick={() => setShowMobileSearch(true)}
             >
-              <SearchIcon sx={{ fontSize: 28 }} />
-            </span>
-            {/* Show input if desktop or mobile search expanded */}
-            <Autocomplete
-              freeSolo
-              options={translatedOptions.map((opt) => opt.title)}
-              onInputChange={handleSearchChange}
-              onChange={handleSelect}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  inputRef={searchInputRef}
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e, e.target.value)}
-                  label="Search"
-                  placeholder="Song name"
-                  variant="outlined"
-                  sx={{
-                    minWidth: "50px",
-                    maxWidth: "100%",
-                    borderRadius: "8px",
-                    borderWidth: "0px",
-                    backgroundColor: isDarkMode ? "#222" : "#f5f5f5", // dark grey for dark mode, light for light mode
-                    backgroundImage: "none",
-                    backgroundSize: undefined,
-                    backgroundRepeat: undefined,
-                    "& .MuiInputBase-input": { color: "white" },
-                    "& .MuiInputLabel-root": { color: "white" },
-                    "& .MuiOutlinedInput-notchedOutline": { borderWidth: 0 },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "white",
-                      borderWidth: "2px",
-                      borderRadius: "8px",
-                    },
-                    "&.Mui-focused .MuiInputBase-input": {
-                      color: "white",
-                    },
-                    "&.Mui-focused .MuiInputLabel-root": {
-                      color: "white",
-                    },
-                    display:
-                      desktop || showMobileSearch ? "block" : "none",
-                    transition: "width 0.3s",
-                  }}
-                  InputProps={{
-                    ...params.InputProps,
-                  }}
-                  onFocus={() => setSearchActive(true)}
-                  onBlur={() => {
-                    setTimeout(() => {
-                      setSearchActive(false);
-                      setShowMobileSearch(false);
-                    }, 100);
-                  }}
-                  onKeyDown={handleKeyDown}
-                />
+              {!desktop && (
+                <button className="hamburger" onClick={onHamburgerClick}>
+                  ☰
+                </button>
               )}
-              sx={{
-                width:
-                  desktop || showMobileSearch
-                    ? { xs: "90vw", sm: "200px" }
-                    : "0",
-                maxWidth: "95%",
-                transition: "width 0.3s ease",
-                backgroundColor: isDarkMode ? "#222" : "#f5f5f5", // dark grey for dark mode, light for light mode
-                backgroundImage: "none",
-                backgroundSize: undefined,
-                backgroundRepeat: undefined,
-                borderRadius: "8px",
-                position: "relative",
-                "& .MuiInputBase-input": {
-                  color: "white",
-                },
-                "& .MuiInputLabel-root": {
-                  color: "white",
-                },
-                "&:focus-within .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "white",
-                  borderWidth: "2px",
-                },
-                "&:focus-within .MuiInputBase-input": {
-                  color: "white",
-                },
-                "&:focus-within .MuiInputLabel-root": {
-                  color: "white",
-                },
-                "&:focus-within": {
-                  width: "95vw",
-                  maxWidth: "95vw",
-                  zIndex: 10,
-                  position: "relative",
-                  left: "unset",
-                  right: "unset",
-                  margin: "0 auto",
-                  borderRadius: "8px",
-                  borderWidth: "0px",
-                },
-                boxSizing: "border-box",
-                display: desktop || showMobileSearch ? "block" : "none",
-              }}
+              {/* Inline SVG waveform icon, matches app icon */}
+              <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 60, height: 60, borderRadius: "50%", background: isDarkMode ? "#222" : "#fff", boxShadow: isDarkMode ? undefined : "0 0 4px #ccc" }}>
+                <svg width="40" height="40" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="64" height="64" rx="16" fill="#000" />
+                  <path d="M8 32h4m4 0h4m4 0h4m4 0h4m4 0h4m4 0h4m4 0h4" stroke="#fff" strokeWidth="4" strokeLinecap="round" />
+                  <path d="M16 32v-8m8 8v-16m8 16v-24m8 24v-16m8 16v-8" stroke="#fff" strokeWidth="4" strokeLinecap="round" />
+                </svg>
+              </span>
+              <div className="SiteName">Spot.it</div>
+              {desktop && (
+                <div style={{ minWidth: 0, flex: '0 0 auto', marginLeft: 16 }}>
+                  <SearchBar
+                    desktop={desktop}
+                    isDarkMode={isDarkMode}
+                    genres={genres}
+                    allSongs={allSongs}
+                    setAllSongs={setAllSongs}
+                    setSelectedSong={setSelectedSong}
+                    onAddSongToList={onAddSongToList}
+                    onSearchMiss={handleSearchMiss}
+                    setSearchActive={setSearchActive}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          {!desktop && (
+            <SearchBar
+              desktop={desktop}
+              isDarkMode={isDarkMode}
+              genres={genres}
+              allSongs={allSongs}
+              setAllSongs={setAllSongs}
+              setSelectedSong={setSelectedSong}
+              onAddSongToList={onAddSongToList}
+              onSearchMiss={handleSearchMiss}
+              setSearchActive={setSearchActive}
             />
-          </div>
+          )}
         </div>
       </div>
-
     </>
   );
 }

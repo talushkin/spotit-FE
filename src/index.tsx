@@ -1,6 +1,8 @@
 // Log songList and index whenever songList changes
 
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { setSearchOptions } from "./store/dataSlice";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ReactDOM from "react-dom/client";
 import {
@@ -25,6 +27,7 @@ const root = ReactDOM.createRoot(rootElement);
 // (Removed unused DataState and initialState)
 
 function App() {
+  const dispatch = useDispatch();
   const [songs, setSongs] = useState<any>(null);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [selectedGenre, setSelectedGenre] = useState<Genre | null>(null);
@@ -80,6 +83,11 @@ function App() {
         let initialGenre = genres[0];
         setSelectedGenre(initialGenre);
         setSelectedSong(initialGenre.songs[0] || null); // Set initial selected song if available
+        // Set search options to all songs from all genres in Redux
+        const allSongs = genres.flatMap((g) => g.songs || []);
+        dispatch(setSearchOptions(allSongs));
+      } else {
+        dispatch(setSearchOptions([]));
       }
 
       setLoading(false);
@@ -101,7 +109,7 @@ function App() {
 
   // Handler to add a song to the song list (to be passed to CaseCard)
   const handleAddSongToList = (song: any, location?: number) => {
-   // console.log("Adding song to list:", song, "at location:", location);
+    console.log("Adding song to list:", song, "at location:", location);
     //console.log("Current song:", selectedSong);
     setSongList((prev) => {
       if (prev.some((s) => s.title === song.title && s.artist === song.artist)) return prev;

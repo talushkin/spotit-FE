@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import CaseCard from "./CaseCard";
 import type { Song, Genre } from "../utils/storage";
+import { Margin } from "@mui/icons-material";
 
 interface SongSliderProps {
   songs: Song[];
@@ -39,23 +40,43 @@ const SongSlider: React.FC<SongSliderProps> = ({
         style={{
           display: 'flex',
           flexDirection: 'row',
-          //gap: '1.5rem',
           overflowX: 'auto',
+          overflowY: 'hidden',
           scrollBehavior: 'smooth',
-          maxWidth: '70vw',
+          maxWidth: '100vw',
           cursor: 'pointer',
           userSelect: 'none',
           WebkitOverflowScrolling: 'touch',
           msOverflowStyle: 'none',
+          background: isDarkMode ? '#000' : '#f5f5f5',
+          borderRadius: '16px',
+          boxShadow: isDarkMode ? '0 2px 12px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.08)',
+          padding: '0.5rem 0',
+          scrollbarColor: isDarkMode ? '#444 #000' : '#ccc #f5f5f5',
+          scrollbarWidth: 'thin',
         }}
       >
+        {/* Custom scrollbar for horizontal slider */}
+        <style>{`
+          #song-slider::-webkit-scrollbar {
+            height: 6px;
+            background: ${isDarkMode ? '#000' : '#f5f5f5'};
+          }
+          #song-slider::-webkit-scrollbar-thumb {
+            background: ${isDarkMode ? '#444' : '#ccc'};
+            border-radius: 3px;
+          }
+        `}</style>
         {songs.map((item, index) => (
           <div
             key={index}
             style={{
               minWidth: window.innerWidth <= 650 ? 160 : 240,
+              width: window.innerWidth <= 650 ? 160 : 240,
+              //height: window.innerWidth <= 650 ? 160 : 240,
               flex: '0 0 auto',
-              cursor: 'pointer'
+              cursor: 'pointer',
+                margin: '0.5rem',
             }}
             onClick={() => onSelectSong(item)}
           >

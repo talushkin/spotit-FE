@@ -1,7 +1,6 @@
 import "../styles.css";
 import React, { useState, useEffect } from "react";
 import HeaderBar from "../components/HeaderBar";
-import NavMenu from "../components/NavMenu";
 import MainContent from "../components/MainContent";
 import { ThemeProvider } from "styled-components";
 import { lightTheme, darkTheme } from "../components/themes";
@@ -78,23 +77,11 @@ function HomePage(props: HomePageProps) {
             selectedSong={selectedSong}
             songList={songList}
             setSongList={setSongList}
+            onAddSongToList={onAddSongToList}
           />
         </div>
         <div className="container-fluid ps-0 pe-0">
           <div className="flex-column flex-md-row ps-0 pe-0 row">
-            <div
-              className="nav-menu col-12 col-md-auto ps-0 pe-0"
-              style={{ width: desktop ? '270px' : '100%' }}
-            >
-              <NavMenu
-                isDarkMode={isDarkMode}
-                genres={songs?.site?.genres}
-                isOpen={menuOpen || desktop}
-                desktop={desktop}
-                onSelect={setSelectedGenre}
-              />
-            </div>
-
             <div className="main-content col">
               {selectedGenre && (
                 <MainContent
