@@ -321,7 +321,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
         gap: 2,
         bottom: 0,
         transition: 'transform 0.4s cubic-bezier(.4,2,.6,1)',
-        transform: isMobile && hidden ? 'translateY(calc(100% - 60px))' : 'translateY(0)',
+        transform: isMobile && hidden ? 'translateY(calc(100% - 115px))' : 'translateY(0)',
         pointerEvents: isMobile && hidden ? 'auto' : undefined,
         cursor: isMobile && hidden ? 'pointer' : undefined,
       }}

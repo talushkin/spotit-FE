@@ -119,7 +119,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
         overflowY: songList.length > 4 ? "auto" : "visible",
         borderRadius: 8,
         background: "transparent",
-        marginTop: 12,
+        marginTop: -12,
         ...(typeof window !== "undefined" && window.innerWidth > 650
           ? { marginLeft: 24 }
           : {})

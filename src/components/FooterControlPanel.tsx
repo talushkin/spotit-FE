@@ -53,7 +53,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
 }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: 250, maxWidth: 400 }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 12 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 1, marginTop: -60 }}>
         <Slider
           orientation="vertical"
           min={0}
@@ -61,7 +61,8 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
           value={volume}
           onChange={(_, value) => setVolume(Array.isArray(value) ? value[0] : value)}
           sx={{
-            height: 64,
+            height: 80,
+            marginBottom: 6,
             color: '#1976d2',
             '& .MuiSlider-thumb': {
               backgroundColor: '#1976d2',
@@ -70,7 +71,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
             ml: 1,
           }}
         />
-        <span style={{ fontSize: 12, color: '#1976d2', marginTop: 4 }}>{volume}</span>
+        <span style={{ fontSize: 12, color: '#1976d2', marginLeft: 5 ,marginTop: -45 }}>{volume}</span>
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {videoId && (
@@ -130,7 +131,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                   onChange={handleSeek}
                   step={1}
                   size="small"
-                  sx={{ color: isDarkMode ? "#1db954" : "#024803" }}
+                  sx={{ color: isDarkMode ? "#1db954" : "#024803" , margin: "0px" }}
                 />
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: isDarkMode ? "#bbb" : "#333" }}>
                   <span>{formatTime(currentTime)}</span>
