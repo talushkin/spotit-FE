@@ -48,6 +48,9 @@ interface FooterBarExtendedProps extends FooterBarProps {
   songList?: Song[];
   setSongList?: (list: Song[]) => void;
   currentSongIndex?: number;
+  // Add prop for hidden state
+  hidden?: boolean;
+  onShowFooter?: () => void;
 }
 
 
@@ -119,7 +122,7 @@ export const SortableSongRow = ({ song, idx, isSelected, isNextSelected, onClick
 };
 
 
-export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, setSelectedSong, songList: propSongList = [], setSongList: setAppSongList, currentSongIndex = 0 }: FooterBarExtendedProps) {
+export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, setSelectedSong, songList: propSongList = [], setSongList: setAppSongList, currentSongIndex = 0, hidden, onShowFooter }: FooterBarExtendedProps) {
   const isMobile = useIsMobile();
   const [nextSongToHighlight, setNextSongToHighlight] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -300,8 +303,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
   return (
     <Box
       sx={{
-        position: "sticky",
-        bottom: 0,
+        position: "fixed",
         left: 0,
         width: "100vw",
         zIndex: 1200,
@@ -317,7 +319,13 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
         py: 1,
         boxShadow: "0 -2px 8px rgba(0,0,0,0.05)",
         gap: 2,
+        bottom: 0,
+        transition: 'transform 0.4s cubic-bezier(.4,2,.6,1)',
+        transform: isMobile && hidden ? 'translateY(calc(100% - 60px))' : 'translateY(0)',
+        pointerEvents: isMobile && hidden ? 'auto' : undefined,
+        cursor: isMobile && hidden ? 'pointer' : undefined,
       }}
+      onClick={isMobile && hidden && onShowFooter ? (e => { e.stopPropagation(); onShowFooter(); }) : undefined}
     >
       {/* Desktop: Controls left (30%), Songlist right (60%) */}
       {/* Controls and theme button: group for mobile */}

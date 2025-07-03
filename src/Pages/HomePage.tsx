@@ -28,6 +28,7 @@ function HomePage(props: HomePageProps) {
   // Language support removed: only English
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [desktop, setDesktop] = useState(window.innerWidth > 768); // Check if desktop
+  const [footerHidden, setFooterHidden] = useState(false);
   //console.log("props", props);
   // Add toggleDarkMode function
   const toggleDarkMode = () => {
@@ -62,44 +63,41 @@ function HomePage(props: HomePageProps) {
 
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
-      <div className="App">
-        <GlobalStyle theme={isDarkMode ? darkTheme : lightTheme} />
-
-        <div className="TOP" style={{ background: isDarkMode ? '#000' : undefined }}>
-          <HeaderBar
-            desktop={desktop}
-            logo={"https://vt-photos.s3.amazonaws.com/recipe-app-icon-generated-image.png"}
-            onHamburgerClick={handleHamburgerClick}
-            genres={songs?.site?.genres}
-            isDarkMode={isDarkMode}
-            setSelectedGenre={setSelectedGenre}
-            setSelectedSong={setSelectedSong}
-            selectedSong={selectedSong}
-            songList={songList}
-            setSongList={setSongList}
-            onAddSongToList={onAddSongToList}
-          />
-        </div>
-        <div className="container-fluid ps-0 pe-0">
-          <div className="flex-column flex-md-row ps-0 pe-0 row">
-            <div className="main-content col">
-              {selectedGenre && (
-                <MainContent
-                  selectedGenre={selectedGenre}
-                  selectedSong={selectedSong}
-                  desktop={desktop}
-                  isDarkMode={isDarkMode}
-                  songList={songList}
-                  setSongList={setSongList}
-                  onAddSongToList={onAddSongToList}
-                  setSelectedSong={setSelectedSong}
-                />
-              )}
+      <GlobalStyle theme={isDarkMode ? darkTheme : lightTheme} />
+      <div className={isDarkMode ? "dark" : "light"}>
+        <HeaderBar
+          logo={"/logo192.png"}
+          onHamburgerClick={handleHamburgerClick}
+          genres={songs?.site?.genres || []}
+          desktop={desktop}
+          setSelectedGenre={setSelectedGenre as (genre: any) => void}
+          setSelectedSong={setSelectedSong as (song: any) => void}
+          selectedSong={selectedSong}
+          isDarkMode={isDarkMode}
+          songList={songList}
+          setSongList={setSongList}
+          onAddSongToList={onAddSongToList}
+        />
+        <div className="container-fluid" style={{ paddingBottom: 0 }}>
+          <div className="row">
+            <div className="col-12">
+              {/* Only pass the correct props to MainContent */}
+              <MainContent
+                selectedGenre={selectedGenre as Genre}
+                selectedSong={selectedSong as Song}
+                desktop={desktop}
+                isDarkMode={isDarkMode}
+                songList={songList}
+                setSongList={setSongList}
+                onAddSongToList={onAddSongToList}
+                setSelectedSong={setSelectedSong}
+                footerHidden={footerHidden}
+                setFooterHidden={setFooterHidden}
+              />
             </div>
           </div>
         </div>
         {/* Sticky FooterBar only on mobile */}
-        {/* {isMobile && ( */}
         <FooterBar
           isDarkMode={isDarkMode}
           toggleDarkMode={toggleDarkMode}
@@ -107,6 +105,8 @@ function HomePage(props: HomePageProps) {
           setSelectedSong={setSelectedSong}
           setSongList={setSongList}
           songList={songList}
+          hidden={footerHidden}
+          onShowFooter={() => setFooterHidden(false)}
         />
       </div>
     </ThemeProvider>

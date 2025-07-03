@@ -17,6 +17,9 @@ interface MainContentProps {
   setSongList: (songs: Song[]) => void;
   onAddSongToList: (song: Song, location?: number) => void;
   setSelectedSong: (song: Song | null) => void;
+  // Add prop to control footer visibility
+  footerHidden?: boolean;
+  setFooterHidden?: (hidden: boolean) => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -28,6 +31,8 @@ const MainContent: React.FC<MainContentProps> = ({
   setSongList,
   onAddSongToList,
   setSelectedSong,
+  footerHidden,
+  setFooterHidden,
 }) => {
   const [rowJustify, setRowJustify] = useState<string>(
     window.innerWidth <= 770
@@ -61,9 +66,82 @@ const MainContent: React.FC<MainContentProps> = ({
   //   onAddSongToList(song, -1); // Add to bottom of song list
   // };
 
-  return (
-    <div className="main">
+  // Detect mobile
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 650);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 650);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
+  // Tap handler for mobile to hide/show footer
+  const handleMainTap = () => {
+    if (isMobile && setFooterHidden) {
+      setFooterHidden(!footerHidden);
+    }
+  };
+
+  // Hide footer on drag/scroll (touchmove or mousemove after mousedown)
+  useEffect(() => {
+    if (!isMobile || !setFooterHidden) return;
+    let dragging = false;
+    let dragStartY = 0;
+    let dragMoved = false;
+    const onTouchStart = (e: TouchEvent) => {
+      dragging = true;
+      dragStartY = e.touches[0].clientY;
+      dragMoved = false;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!dragging) return;
+      const deltaY = Math.abs(e.touches[0].clientY - dragStartY);
+      if (deltaY > 10 && !footerHidden) {
+        setFooterHidden(true);
+        dragMoved = true;
+      }
+    };
+    const onTouchEnd = () => {
+      dragging = false;
+    };
+    const onMouseDown = (e: MouseEvent) => {
+      dragging = true;
+      dragStartY = e.clientY;
+      dragMoved = false;
+    };
+    const onMouseMove = (e: MouseEvent) => {
+      if (!dragging) return;
+      const deltaY = Math.abs(e.clientY - dragStartY);
+      if (deltaY > 10 && !footerHidden) {
+        setFooterHidden(true);
+        dragMoved = true;
+      }
+    };
+    const onMouseUp = () => {
+      dragging = false;
+    };
+    const main = document.querySelector('.main');
+    if (main) {
+      main.addEventListener('touchstart', onTouchStart as EventListener);
+      main.addEventListener('touchmove', onTouchMove as EventListener);
+      main.addEventListener('touchend', onTouchEnd as EventListener);
+      main.addEventListener('mousedown', onMouseDown as EventListener);
+      main.addEventListener('mousemove', onMouseMove as EventListener);
+      main.addEventListener('mouseup', onMouseUp as EventListener);
+    }
+    return () => {
+      if (main) {
+        main.removeEventListener('touchstart', onTouchStart as EventListener);
+        main.removeEventListener('touchmove', onTouchMove as EventListener);
+        main.removeEventListener('touchend', onTouchEnd as EventListener);
+        main.removeEventListener('mousedown', onMouseDown as EventListener);
+        main.removeEventListener('mousemove', onMouseMove as EventListener);
+        main.removeEventListener('mouseup', onMouseUp as EventListener);
+      }
+    };
+  }, [isMobile, setFooterHidden, footerHidden]);
+
+  return (
+    <div className="main" onClick={handleMainTap} style={{ cursor: isMobile ? 'pointer' : undefined }}>
       {/* Song sliders for all genres, stacked vertically */}
       {Array.isArray(require('../data/songs.json').site.genres)
         ? require('../data/songs.json').site.genres.map((genre: Genre, idx: number) => (
