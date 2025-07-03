@@ -55,11 +55,11 @@ const MainContent: React.FC<MainContentProps> = ({
   const totalItems = songs.length;
 
 
-  const handleSelectSong = (song: Song) => {
-    console.log("Selected song:", song);
-    //setSelectedSong(song);
-    onAddSongToList(song, -1); // Add to bottom of song list
-  };
+  // const handleSelectSong = (song: Song) => {
+  //   console.log("Selected song:", song);
+  //   //setSelectedSong(song);
+  //   onAddSongToList(song, -1); // Add to bottom of song list
+  // };
 
   return (
     <div className="main">
@@ -85,7 +85,7 @@ const MainContent: React.FC<MainContentProps> = ({
                 selectedGenre={genre}
                 isDarkMode={isDarkMode}
                 onAddSongToList={onAddSongToList}
-                onSelectSong={handleSelectSong}
+                //onSelectSong={handleSelectSong}
               />
             </div>
           ))

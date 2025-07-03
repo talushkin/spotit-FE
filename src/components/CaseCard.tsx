@@ -16,14 +16,7 @@ interface CaseCardProps {
 
 export default function CaseCard({ item, category, index, isDarkMode = true, onAddSongToList, onSelectSong }: CaseCardProps) {
   // Handler for play button: select and play (do not add to list here)
-  const handlePlaySong = (e: React.MouseEvent) => {
-    e.preventDefault();
-    console.log("Playing pressed on song:", item);
-    if ( onAddSongToList) {
 
-      onAddSongToList(item, 1); 
-    }
-  };
   // Language support removed: only English
   const [imageUrl] = useState<string>(
     "C:\\FE-code\\recipes\\BE\\images\\1747127810600-generated-image.png"
@@ -31,7 +24,13 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
-
+  const handlePlaySong = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Playing pressed on song:", item);
+    if ( onAddSongToList) {
+      onAddSongToList(item, 1); 
+    }
+  };
   // Handler for add-to-song-list button (to be implemented by parent via prop or context)
   const handleAddToSongList = (e: React.MouseEvent) => {
     e.preventDefault();

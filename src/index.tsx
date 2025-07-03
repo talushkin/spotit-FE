@@ -109,13 +109,13 @@ function App() {
 
   // Handler to add a song to the song list (to be passed to CaseCard)
   const handleAddSongToList = (song: any, location?: number) => {
-    //console.log("Adding song to list:", song, "at location:", location);
+    console.log("Adding song to list:", song, "at location:", location);
     //console.log("Current song:", selectedSong);
     setSongList((prev) => {
       if (prev.some((s) => s.title === song.title && s.artist === song.artist)) return prev;
       if (location === 1) {
         // Add to top (first position) but keep only one instance at the top
-        console.log("Adding song to top of list",song.title);
+        console.log("Adding song to top of list and start playing",song.title);
         const filtered = prev.filter((s: any) => !(s.title === song.title && s.artist === song.artist));
         const newList = [song, ...filtered];
         setSelectedSong(song); // Set the newly added song as selected

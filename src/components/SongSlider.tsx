@@ -8,7 +8,7 @@ interface SongSliderProps {
   selectedGenre?: Genre;
   isDarkMode: boolean;
   onAddSongToList: (song: Song, location?: number) => void;
-  onSelectSong: (song: Song) => void;
+  //onSelectSong: (song: Song) => void;
 }
 
 const SongSlider: React.FC<SongSliderProps> = ({
@@ -16,7 +16,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
   selectedGenre,
   isDarkMode,
   onAddSongToList,
-  onSelectSong,
+  //onSelectSong,
 }) => {
   return (
     <div style={{ marginBottom: '0.5rem' }}>
@@ -78,7 +78,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
               cursor: 'pointer',
                 margin: '0.5rem',
             }}
-            onClick={() => onSelectSong(item)}
+            //onClick={() => onSelectSong(item)}
           >
             <CaseCard
               index={index + 1}
@@ -86,7 +86,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
               category={selectedGenre?.genre || ''}
               isDarkMode={isDarkMode}
               onAddSongToList={onAddSongToList}
-              onSelectSong={onSelectSong}
+              //onSelectSong={onSelectSong}
             />
           </div>
         ))}

@@ -137,25 +137,6 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     setSongList(propSongList);
   }, [propSongList]);
 
-  // Auto-play when the first song is loaded and selectedSong is not set
-  // Auto-play when the first song is loaded and selectedSong is not set
-  useEffect(() => {
-    if (
-      propSongList &&
-      propSongList.length > 0 &&
-      (!selectedSong || !selectedSong.title || !selectedSong.url)
-    ) {
-      setSelectedSong(propSongList[0]);
-    }
-  }, [propSongList, selectedSong]);
-
-  // When selectedSong changes (first load), auto-play
-  useEffect(() => {
-    if (selectedSong && selectedSong.title && selectedSong.url) {
-      setIsPlaying(true);
-    }
-  }, [selectedSong]);
-
   // Keep propSongList in sync with reordered songList
   useEffect(() => {
     if (typeof setAppSongList === 'function' && songList !== propSongList) {
