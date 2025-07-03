@@ -109,7 +109,7 @@ function App() {
 
   // Handler to add a song to the song list (to be passed to CaseCard)
   const handleAddSongToList = (song: any, location?: number) => {
-    console.log("Adding song to list:", song, "at location:", location);
+    //console.log("Adding song to list:", song, "at location:", location);
     //console.log("Current song:", selectedSong);
     setSongList((prev) => {
       if (prev.some((s) => s.title === song.title && s.artist === song.artist)) return prev;

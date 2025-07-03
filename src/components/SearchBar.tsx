@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
+// Removed createSelector import
 import { Autocomplete, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import type { Song, Genre } from "../utils/storage";
@@ -41,7 +42,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     const searchInputRef = useRef<HTMLInputElement | null>(null);
     const [translatedOptions, setTranslatedOptions] = useState<RecipeOption[]>([]);
 
-    // Get searchOptions from Redux
+    // UseSelector directly, no createSelector (no transformation needed)
     const searchOptions = useSelector((state: any) => state.data.searchOptions || []);
 
     useEffect(() => {

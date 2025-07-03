@@ -136,6 +136,13 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
   useEffect(() => {
     setSongList(propSongList);
   }, [propSongList]);
+
+  // Keep propSongList in sync with reordered songList
+  useEffect(() => {
+    if (typeof setAppSongList === 'function' && songList !== propSongList) {
+      setAppSongList(songList);
+    }
+  }, [songList]);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
@@ -166,9 +173,10 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     if (idx >= 0 && idx < songList.length - 1) {
       const nextSong = songList[idx + 1];
       setSelectedSong(nextSong);
+      setCurrentTime(0);
       setTimeout(() => {
-        // Update duration for new song
         if (playerRef.current) {
+          playerRef.current.seekTo(0, true);
           const duration = playerRef.current.getDuration?.() || 0;
           setTotalDuration(duration);
         }
@@ -181,10 +189,11 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     const idx = getCurrentSongIndex();
     if (idx > 0) {
       const prevSong = songList[idx - 1];
-      //setSelectedSong(prevSong);
+      setSelectedSong(prevSong);
+      setCurrentTime(0);
       setTimeout(() => {
-        // Update duration for new song
         if (playerRef.current) {
+          playerRef.current.seekTo(0, true);
           const duration = playerRef.current.getDuration?.() || 0;
           setTotalDuration(duration);
         }
@@ -232,6 +241,12 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
         if (duration > 0 && time >= duration && songList.length > 1) {
           if (idx < songList.length - 1) {
             setSelectedSong(songList[idx + 1]);
+            setCurrentTime(0);
+            setTimeout(() => {
+              if (playerRef.current) {
+                playerRef.current.seekTo(0, true);
+              }
+            }, 200);
           }
         }
       }, 100);
