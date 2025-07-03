@@ -48,13 +48,6 @@
   ],
   "devDependencies": {
     "@babel/core": "^7.28.0",
-    "@babel/helper-environment-visitor": "^7.24.7",
-    "@babel/helpers": "^7.27.6",
-    "@babel/plugin-proposal-optional-chaining": "^7.21.0",
-    "@babel/plugin-syntax-flow": "^7.27.1",
-    "@babel/plugin-transform-react-jsx": "^7.27.1",
-    "@babel/preset-env": "^7.21.0",
-    "@babel/preset-react": "^7.21.0",
     "@popperjs/core": "^2.11.8",
     "cross-env": "^7.0.3",
     "levenary": "^1.1.1"
