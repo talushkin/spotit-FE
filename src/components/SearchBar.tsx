@@ -74,35 +74,34 @@ const SearchBar: React.FC<SearchBarProps> = ({
         }
     }, [searchQuery]);
 
-    const handleSearchChange = (_event: any, value: string) => {
+    const handleSearchChange = (_event: React.SyntheticEvent<Element, Event>, value: string) => {
         setSearchQuery(value);
-        //console.log("Search query:", value);
         if (!value) {
             setFilteredSuggestions([]);
             return;
         }
         const filtered = translatedOptions.filter((opt: RecipeOption) =>
-            opt.title?.toLowerCase().includes(value.toLowerCase())
+            (opt.title || '').toLowerCase().includes(value.toLowerCase())
         );
         setFilteredSuggestions(filtered);
         if (filtered.length === 0 && onSearchMiss) {
             onSearchMiss(value);
         }
-    }
+    };
 
-    const handleSelect = (_event: any, value: string | null) => {
+    const handleSelect = (_event: React.SyntheticEvent<Element, Event>, value: string | null) => {
         if (!value) return;
         const option = translatedOptions.find((opt: RecipeOption) => opt.title === value);
         if (option) {
             // Build song object from option and searchOptions (Redux)
             const reduxSong = searchOptions.find((s: Song) => s.title === option.title);
-            const song = reduxSong && reduxSong.title && reduxSong.artist && reduxSong.url
+            const song: Song = reduxSong && reduxSong.title && reduxSong.artist && reduxSong.url
                 ? reduxSong
                 : {
                     title: option.title,
-                    artist: reduxSong?.artist || '',
-                    url: reduxSong?.url || '',
-                  };
+                    artist: (reduxSong && typeof reduxSong.artist === 'string') ? reduxSong.artist : '',
+                    url: (reduxSong && typeof reduxSong.url === 'string') ? reduxSong.url : '',
+                };
             if (song.title && song.artist && song.url) {
                 setSearchActiveInternal(false);
                 setShowMobileSearch(false);
