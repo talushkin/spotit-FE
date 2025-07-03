@@ -141,7 +141,7 @@ const MainContent: React.FC<MainContentProps> = ({
   }, [isMobile, setFooterHidden, footerHidden]);
 
   return (
-    <div className="main" onClick={handleMainTap} style={{ cursor: isMobile ? 'pointer' : undefined }}>
+    <div className="main" onClick={handleMainTap} style={{ cursor: isMobile ? 'pointer' : undefined, marginBottom: 120}}>
       {/* Song sliders for all genres, stacked vertically */}
       {Array.isArray(require('../data/songs.json').site.genres)
         ? require('../data/songs.json').site.genres.map((genre: Genre, idx: number) => (
@@ -166,6 +166,7 @@ const MainContent: React.FC<MainContentProps> = ({
                 //onSelectSong={handleSelectSong}
               />
             </div>
+
           ))
         : null}
     </div>
