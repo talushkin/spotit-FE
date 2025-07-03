@@ -53,7 +53,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
 }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: 250, maxWidth: 400 }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 1, marginTop: -60 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 1, marginTop: -40 }}>
         <Slider
           orientation="vertical"
           min={0}
@@ -123,7 +123,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                   {selectedSong.artist}
                 </span>
               )}
-              <div style={{ marginTop: 8, width: 240, marginLeft: "auto", marginRight: "auto" }}>
+              <div style={{ marginTop:-10, width: 240, marginLeft: "auto", marginRight: "auto" }}>
                 <Slider
                   min={0}
                   max={totalDuration || 1}
@@ -131,9 +131,9 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                   onChange={handleSeek}
                   step={1}
                   size="small"
-                  sx={{ color: isDarkMode ? "#1db954" : "#024803" , margin: "0px" }}
+                  sx={{ marginTop:-20,  color: isDarkMode ? "#1db954" : "#024803" , margin: "0px" }}
                 />
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: isDarkMode ? "#bbb" : "#333" }}>
+                <div style={{ display: "flex", marginTop: -20 ,justifyContent: "space-between", fontSize: 12, color: isDarkMode ? "#bbb" : "#333" }}>
                   <span>{formatTime(currentTime)}</span>
                   <span>{typeof selectedSong?.duration === 'string' && selectedSong.duration
                     ? selectedSong.duration
