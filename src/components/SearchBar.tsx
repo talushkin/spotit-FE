@@ -60,7 +60,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
     useEffect(() => {
         // Log Redux searchOptions after fetch
-        console.log('Redux searchOptions:', searchOptions);
+        console.log('found searchOptions:', searchOptions);
         //add searchOptions to translatedOptions
         const options = searchOptions.map((opt: any) => ({  
             title: opt.title,
@@ -77,20 +77,29 @@ const SearchBar: React.FC<SearchBarProps> = ({
         }
     }, [searchQuery]);
 
+    // Debounce timer for onSearchMiss
+    const searchMissTimeout = useRef<NodeJS.Timeout | null>(null);
+
     const handleSearchChange = (_event: React.SyntheticEvent<Element, Event>, value: string) => {
         console.log("Search input changed:", value);
         setSearchQuery(value);
         if (!value) {
             //setFilteredSuggestions([]);
             console.log("Search cleared, no suggestions.");
+            if (searchMissTimeout.current) clearTimeout(searchMissTimeout.current);
             return;
         }
         const filtered = translatedOptions.filter((opt: RecipeOption) =>
             (opt.title || '').toLowerCase().includes(value.toLowerCase())
         );
         if (filtered) {setFilteredSuggestions(filtered);}
-        if (filtered.length === 0 && onSearchMiss) {
-            //onSearchMiss(value);
+        if (onSearchMiss) {
+            if (searchMissTimeout.current) clearTimeout(searchMissTimeout.current);
+            if (filtered.length === 0) {
+                searchMissTimeout.current = setTimeout(() => {
+                    onSearchMiss(value);
+                }, 500);
+            }
         }
     };
 

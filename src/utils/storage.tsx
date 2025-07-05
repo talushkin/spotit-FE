@@ -95,7 +95,7 @@ export const loadData = async (loadFromMemory = false): Promise<SiteResponse | {
           genres: (data.site.genres || []).map((cat: any) => ({
             _id: cat._id || cat.category || cat.genre || Math.random().toString(36).slice(2),
             genre: cat.genre || cat.genre || "unknown genre",
-            translatedGenre: cat.translatedCategory || cat.translatedGenre || [],
+            //anslatedGenre: cat.translatedCategory || cat.translatedGenre || [],
             songs: (cat.songs || cat.itemPage || []).map((song: any) => ({
               _id: song._id || song.title || Math.random().toString(36).slice(2),
               title: song.title,

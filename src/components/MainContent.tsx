@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import CaseCard from "./CaseCard";
 import SongSlider from "./SongSlider";
-import { useNavigate } from "react-router-dom";
-// Update this import to only include exported members from "../utils/storage"
+import { useSelector } from "react-redux";
 import type { Genre, Song } from "../utils/storage";
-import { add } from "@dnd-kit/utilities";
 
 // --- Types ---
 
@@ -34,6 +32,7 @@ const MainContent: React.FC<MainContentProps> = ({
   footerHidden,
   setFooterHidden,
 }) => {
+  const [searchSliderSongs, setSearchSliderSongs] = useState<Song[]>([]);
   const [rowJustify, setRowJustify] = useState<string>(
     window.innerWidth <= 770
       ? "center"
@@ -42,6 +41,22 @@ const MainContent: React.FC<MainContentProps> = ({
 
   // Songs are stored in selectedGenre?.songs
   const songs = selectedGenre?.songs || [];
+  // UseSelector directly, no createSelector (no transformation needed)
+  const searchOptions: Song[] = useSelector((state: any) =>
+    state && state.data && Array.isArray(state.data.searchOptions)
+      ? state.data.searchOptions
+      : []
+  );
+
+  useEffect(() => {
+    setSearchSliderSongs(
+      searchOptions.map((r: Song) => ({
+        ...r,
+        originalTitle: r.title,
+        imageUrl: r.imageUrl || r.image || undefined,
+      }))
+    );
+  }, [searchOptions]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -143,6 +158,29 @@ const MainContent: React.FC<MainContentProps> = ({
   return (
     <div className="main" onClick={handleMainTap} style={{ cursor: isMobile ? 'pointer' : undefined, marginBottom: 120}}>
       {/* Song sliders for all genres, stacked vertically */}
+      {/*add slider for search results*/}
+      {searchSliderSongs.length > 0 && (
+            <div
+              key={"search results"}
+              style={{
+                // display: 'flex',
+                // flexDirection: 'row',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                width: '100%',
+                marginBottom: '0rem',
+                marginTop: '0rem',
+                overflowX: 'hidden',
+              }}
+            >
+          <SongSlider
+            songs={searchSliderSongs}
+            selectedGenre={{ genre: "Search Results", songs: searchSliderSongs }}
+            isDarkMode={isDarkMode}
+            onAddSongToList={onAddSongToList}
+          />
+        </div>
+      )}
       {Array.isArray(require('../data/songs.json').site.genres)
         ? require('../data/songs.json').site.genres.map((genre: Genre, idx: number) => (
             <div

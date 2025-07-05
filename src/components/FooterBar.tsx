@@ -73,23 +73,48 @@ export const SortableSongRow = ({ song, idx, isSelected, isNextSelected, onClick
     cursor: hovered ? "pointer" : "grab",
     border: isNextSelected ? (isDarkMode ? '1px solid #1976d2' : '1px solid #1976d2') : undefined,
   };
-  // Scrolling logic for long titles
+  // Scrolling logic for long titles with pause at end
   const [scrollIndex, setScrollIndex] = useState(0);
+  const [pauseAtEnd, setPauseAtEnd] = useState(false);
   const shouldScroll = song.title && song.title.length > 30;
   React.useEffect(() => {
     if (!shouldScroll || !isSelected) {
       setScrollIndex(0);
+      setPauseAtEnd(false);
       return;
     }
-    const interval = setInterval(() => {
-      setScrollIndex((prev: number) => (prev + 1) % (song.title.length - 29));
-    }, 500); // 0.5 sec per letter
-    return () => clearInterval(interval);
-  }, [shouldScroll, isSelected, song.title]);
+    let interval: NodeJS.Timeout | null = null;
+    let pauseTimeout: NodeJS.Timeout | null = null;
+    const maxScroll = song.title.length - 30;
+    if (pauseAtEnd) {
+      pauseTimeout = setTimeout(() => {
+        setScrollIndex(0);
+        setPauseAtEnd(false);
+      }, 3000); // 3 sec pause at end
+    } else {
+      interval = setInterval(() => {
+        setScrollIndex((prev: number) => {
+          if (prev >= maxScroll) {
+            setPauseAtEnd(true);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 200);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+      if (pauseTimeout) clearTimeout(pauseTimeout);
+    };
+  }, [shouldScroll, isSelected, song.title, pauseAtEnd]);
 
   let displayTitle = song.title;
   if (shouldScroll && isSelected) {
     displayTitle = song.title.slice(scrollIndex, scrollIndex + 30);
+    if (scrollIndex >= song.title.length - 30) {
+      // show full end of title, then pause
+      displayTitle = song.title.slice(song.title.length - 30);
+    }
   } else if (shouldScroll) {
     displayTitle = song.title.slice(0, 30) + '...';
   }
