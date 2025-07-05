@@ -85,7 +85,7 @@ function App() {
         setSelectedSong(initialGenre.songs[0] || null); // Set initial selected song if available
         // Set search options to all songs from all genres in Redux
         const allSongs = genres.flatMap((g) => g.songs || []);
-        dispatch(setSearchOptions(allSongs));
+        //dispatch(setSearchOptions(allSongs));
       } else {
         dispatch(setSearchOptions([]));
       }
