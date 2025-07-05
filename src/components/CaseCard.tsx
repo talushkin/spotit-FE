@@ -42,9 +42,36 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
     }
   };
 
+  // Drag-to-scroll logic for parent song slider
+  const onMouseDown = (e: React.MouseEvent) => {
+    // Find the closest parent with id 'song-slider'
+    let slider = (e.target as HTMLElement).closest('#song-slider') as HTMLDivElement | null;
+    if (!slider) return;
+    let isDragging = true;
+    let startX = e.pageX - (slider.offsetLeft || 0);
+    let scrollLeft = slider.scrollLeft;
+    document.body.style.cursor = 'grabbing';
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      if (!isDragging) return;
+      moveEvent.preventDefault();
+      const x = moveEvent.pageX - (slider?.offsetLeft || 0);
+      const walk = (x - startX) * 1.2;
+      if (slider) slider.scrollLeft = scrollLeft - walk;
+    };
+    const onMouseUp = () => {
+      isDragging = false;
+      document.body.style.cursor = '';
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
   return (
     <div
       className="case"
+      onMouseDown={onMouseDown}
       style={{
         backgroundColor: isDarkMode ? "#333" : "#fffce8",
         border: isDarkMode

@@ -18,6 +18,37 @@ const SongSlider: React.FC<SongSliderProps> = ({
   onAddSongToList,
   //onSelectSong,
 }) => {
+  // Drag-to-scroll logic
+  const sliderRef = useRef<HTMLDivElement>(null);
+  let isDragging = false;
+  let startX = 0;
+  let scrollLeft = 0;
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    // Only start drag if the target is an IMG inside a .case
+    const target = e.target as HTMLElement;
+    if (!(target.tagName === 'IMG' && target.closest('.case'))) return;
+    isDragging = true;
+    startX = e.pageX - (sliderRef.current?.offsetLeft || 0);
+    scrollLeft = sliderRef.current?.scrollLeft || 0;
+    document.body.style.cursor = 'grabbing';
+  };
+  const onMouseLeave = () => {
+    isDragging = false;
+    document.body.style.cursor = '';
+  };
+  const onMouseUp = () => {
+    isDragging = false;
+    document.body.style.cursor = '';
+  };
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - (sliderRef.current?.offsetLeft || 0);
+    const walk = (x - startX) * 2.5; // scroll speed (increased)
+    if (sliderRef.current) sliderRef.current.scrollLeft = scrollLeft - walk;
+  };
+
   return (
     <div style={{ marginBottom: '0.5rem' }}>
       {/* Genre title */}
@@ -37,6 +68,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
       )}
       <div
         id="song-slider"
+        ref={sliderRef}
         style={{
           display: 'flex',
           flexDirection: 'row',
@@ -44,17 +76,20 @@ const SongSlider: React.FC<SongSliderProps> = ({
           overflowY: 'hidden',
           scrollBehavior: 'smooth',
           maxWidth: '100vw',
-          cursor: 'pointer',
+          cursor: 'grab',
           userSelect: 'none',
           WebkitOverflowScrolling: 'touch',
           msOverflowStyle: 'none',
-          //background: isDarkMode ? '#000' : '#f5f5f5',
           borderRadius: '16px',
           boxShadow: isDarkMode ? '0 2px 12px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.08)',
           padding: '0.5rem 0',
           scrollbarColor: isDarkMode ? '#444 #000' : '#ccc #f5f5f5',
           scrollbarWidth: 'thin',
         }}
+        onMouseDown={onMouseDown}
+        onMouseLeave={onMouseLeave}
+        onMouseUp={onMouseUp}
+        onMouseMove={onMouseMove}
       >
         {/* Custom scrollbar for horizontal slider */}
         <style>{`
