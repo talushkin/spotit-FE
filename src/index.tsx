@@ -9,10 +9,10 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useNavigate,
-  useParams,
+  useNavigate,useParams
 } from "react-router-dom";
 import HomePage from "./Pages/HomePage";
+import WatchPage from "./Pages/WatchPage";
 import "./styles.css";
 import { CircularProgress, Box } from "@mui/material";
 import { Provider } from "react-redux";
@@ -35,30 +35,6 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(true); // Set initial theme to dark
   // Song list state (array of songs)
   const [songList, setSongList] = useState<any[]>([
-    {
-      title: "Bohemian Rhapsody",
-      artist: "Queen",
-      duration: "5:55",
-      url: "https://www.youtube.com/watch?v=fJ9rUzIMcZQ"
-    },
-    {
-      title: "Stairway to Heaven",
-      artist: "Led Zeppelin",
-      duration: "8:02",
-      url: "https://www.youtube.com/watch?v=QkF3oxziUI4"
-    },
-    {
-      title: "Sweet Child O' Mine",
-      artist: "Guns N' Roses",
-      duration: "5:56",
-      url: "https://www.youtube.com/watch?v=1w7OgIMMRc4"
-    },
-    {
-      title: "Smoke on the Water",
-      artist: "Deep Purple",
-      duration: "5:40",
-      url: "https://www.youtube.com/watch?v=zUwEIt9ez7M"
-    }
   ]);
 
   const navigate = useNavigate();
@@ -152,6 +128,7 @@ function App() {
           <CircularProgress size={64} />
         </Box>
       )}
+
       {!loading && songs && (
         <Routes>
           <Route
@@ -170,10 +147,21 @@ function App() {
               />
             }
           />
+          <Route
+            path="/watch/:videoId"
+            element={<WatchPageRoute />}
+          />
         </Routes>
       )}
     </>
   );
+
+// Route component to extract videoId param using useParams
+function WatchPageRoute() {
+  const { videoId } = useParams();
+  if (!videoId || typeof videoId !== 'string') return null;
+  return <WatchPage videoId={videoId} />;
+}
 }
 
 root.render(

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { setVolume } from "../store/dataSlice";
 import {
   PointerSensor,
   useSensor,
@@ -147,14 +149,31 @@ export const SortableSongRow = ({ song, idx, isSelected, isNextSelected, onClick
 };
 
 
-export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, setSelectedSong, songList: propSongList = [], setSongList: setAppSongList, currentSongIndex = 0, hidden, onShowFooter }: FooterBarExtendedProps) {
+const FooterBar = (props: any) => {
+  // Destructure props and fallback for legacy prop names
+  const {
+    isDarkMode,
+    toggleDarkMode,
+    selectedSong,
+    setSelectedSong,
+    onPrevSong,
+    onNextSong,
+    songList: propSongList = [],
+    setSongList: setAppSongList,
+    currentSongIndex,
+    hidden,
+    onShowFooter
+  } = props;
+
   const isMobile = useIsMobile();
   const [nextSongToHighlight, setNextSongToHighlight] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
   const playerRef = useRef<YouTubePlayer | null>(null);
-  const [volume, setVolume] = useState(10);
+  const dispatch = useDispatch();
+  const volume = useSelector((state: any) => state.data.volume ?? 50);
+  const setVolumeGlobal = (v: number) => dispatch(setVolume(v));
   const [songList, setSongList] = useState<Song[]>(propSongList);
   useEffect(() => {
     if (playerRef.current) {
@@ -325,6 +344,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
     setCurrentTime(seekTo);
   };
 
+
   return (
     <Box
       sx={{
@@ -350,7 +370,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
         pointerEvents: isMobile && hidden ? 'auto' : undefined,
         cursor: isMobile && hidden ? 'pointer' : undefined,
       }}
-      onClick={isMobile && hidden && onShowFooter ? (e => { e.stopPropagation(); onShowFooter(); }) : undefined}
+      onClick={isMobile && hidden && onShowFooter ? ((e: React.MouseEvent<HTMLDivElement>) => { e.stopPropagation(); onShowFooter(); }) : undefined}
     >
       {/* Desktop: Controls left (30%), Songlist right (60%) */}
       {/* Controls and theme button: group for mobile */}
@@ -382,7 +402,7 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
           currentTime={currentTime}
           handleSeek={handleSeek}
           formatTime={formatTime}
-          setVolume={setVolume}
+          setVolume={setVolumeGlobal}
           volume={volume}
         />
         {/* ThemeModeButton: only show on desktop at far right */}
@@ -408,4 +428,6 @@ export default function FooterBar({ isDarkMode, toggleDarkMode, selectedSong, se
       )}
     </Box>
   );
-}
+};
+
+export default FooterBar;

@@ -3,6 +3,7 @@ import CaseCard from "./CaseCard";
 import SongSlider from "./SongSlider";
 import { useSelector } from "react-redux";
 import type { Genre, Song } from "../utils/storage";
+import { DisplayType } from "../utils/storage";
 
 // --- Types ---
 
@@ -175,7 +176,7 @@ const MainContent: React.FC<MainContentProps> = ({
             >
           <SongSlider
             songs={searchSliderSongs}
-            selectedGenre={{ genre: "Search Results", songs: searchSliderSongs }}
+            selectedGenre={{ genre: "Search Results", songs: searchSliderSongs, displayType: DisplayType.Slider }}
             isDarkMode={isDarkMode}
             onAddSongToList={onAddSongToList}
           />

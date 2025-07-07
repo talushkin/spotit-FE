@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import CaseCard from "./CaseCard";
 import type { Song, Genre } from "../utils/storage";
+import { DisplayType } from "../utils/storage";
 import { Margin } from "@mui/icons-material";
+
 
 interface SongSliderProps {
   songs: Song[];
   selectedGenre?: Genre;
   isDarkMode: boolean;
   onAddSongToList: (song: Song, location?: number) => void;
-  //onSelectSong: (song: Song) => void;
 }
 
 const SongSlider: React.FC<SongSliderProps> = ({
@@ -16,13 +17,15 @@ const SongSlider: React.FC<SongSliderProps> = ({
   selectedGenre,
   isDarkMode,
   onAddSongToList,
-  //onSelectSong,
-}) => {
+}: SongSliderProps) => {
   // Drag-to-scroll logic
   const sliderRef = useRef<HTMLDivElement>(null);
   let isDragging = false;
   let startX = 0;
   let scrollLeft = 0;
+
+  // Determine displayType from selectedGenre
+  const displayType: DisplayType = selectedGenre?.displayType || DisplayType.Slider;
 
   const onMouseDown = (e: React.MouseEvent) => {
     // Only start drag if the target is an IMG inside a .case
@@ -47,6 +50,33 @@ const SongSlider: React.FC<SongSliderProps> = ({
     const x = e.pageX - (sliderRef.current?.offsetLeft || 0);
     const walk = (x - startX) * 2.5; // scroll speed (increased)
     if (sliderRef.current) sliderRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  // Gradient backgrounds per displayType
+  const getSliderBackground = () => {
+    // Special case: search results slider (genre === 'Search Results')
+    if (selectedGenre?.genre === 'Search Results') {
+      return '#001a3a'; // Full dark blue
+    }
+    if (displayType === "circles") {
+      return isDarkMode
+        ? "linear-gradient(90deg, #3a3a3a 0%, #222 100%)"
+        : "linear-gradient(90deg, #f7e8ff 0%, #fffce8 100%)";
+    }
+    if (displayType === "radio") {
+      return isDarkMode
+        ? "linear-gradient(90deg, #2b3a55 0%, #222 100%)"
+        : "linear-gradient(90deg, #e0f7fa 0%, #fffce8 100%)";
+    }
+    if (displayType === "slider") {
+      return isDarkMode
+        ? "linear-gradient(90deg, #232526 0%, #333 100%)"
+        : "linear-gradient(90deg, #f5f7fa 0%, #fffce8 100%)";
+    }
+    // Default fallback
+    return isDarkMode
+      ? "linear-gradient(90deg, #232526 0%, #333 100%)"
+      : "linear-gradient(90deg, #f5f7fa 0%, #fffce8 100%)";
   };
 
   return (
@@ -78,6 +108,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
           maxWidth: '100vw',
           cursor: 'grab',
           userSelect: 'none',
+          gap: '10px',
           WebkitOverflowScrolling: 'touch',
           msOverflowStyle: 'none',
           borderRadius: '16px',
@@ -85,6 +116,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
           padding: '0.5rem 0',
           scrollbarColor: isDarkMode ? '#444 #000' : '#ccc #f5f5f5',
           scrollbarWidth: 'thin',
+          background: getSliderBackground(),
         }}
         onMouseDown={onMouseDown}
         onMouseLeave={onMouseLeave}
@@ -102,23 +134,63 @@ const SongSlider: React.FC<SongSliderProps> = ({
             border-radius: 3px;
           }
         `}</style>
-        {songs.map((item, index) => (
+        {songs.map((item: Song, index: number) => (
           <div
             key={index}
-            style={{
-              minWidth: window.innerWidth <= 650 ? 160 : 240,
-              width: window.innerWidth <= 650 ? 160 : 240,
-              flex: '0 0 auto',
-              cursor: 'pointer',
-              margin: '0 10px', // Reduce horizontal gap to almost touch
-            }}
+            style={
+              displayType === "circles"
+                ? {
+                    minWidth: 120,
+                    width: 120,
+                    height: 140,
+                    flex: '0 0 auto',
+                    cursor: 'pointer',
+                    margin: '0 10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                  }
+                : {
+                    minWidth: window.innerWidth <= 650 ? 160 : 180,
+                    width: window.innerWidth <= 650 ? 160 : 180,
+                    flex: '0 0 auto',
+                    cursor: 'pointer',
+                    margin: '0 10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                  }
+            }
           >
+            {/* Title above the card: only for circles */}
+            {displayType === "circles" && (
+              <div
+                style={{
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  color: isDarkMode ? '#fff' : '#222',
+                  textAlign: 'center',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  marginBottom: 4,
+                  marginTop: 2,
+                  minHeight: 22,
+                }}
+              >
+                {item.artist || item.title}
+              </div>
+            )}
             <CaseCard
               index={index + 1}
               item={item}
               category={selectedGenre?.genre || ''}
               isDarkMode={isDarkMode}
               onAddSongToList={onAddSongToList}
+              displayType={displayType}
             />
           </div>
         ))}

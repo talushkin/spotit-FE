@@ -1,5 +1,5 @@
 // Fetch songs by title from API (moved from dataSlice)
-export const fetchSongsByTitleApi = async (title: string): Promise<Song[]> => {
+export const fetchSongsByTitleApi = async (title: string='movie'): Promise<Song[]> => {
   try {
     const res = await fetch("https://be-tan-theta.vercel.app/api/ai/get-song-list", {
       method: "POST",
@@ -49,9 +49,26 @@ export interface Song {
 
 
 
+export enum DisplayType {
+  Slider = "slider",
+  Circles = "circles",
+  Radio = "radio",
+  SearchResults = "searchResults",
+  Recommended = "recommended",
+  ArtistRadio = "artistRadio",
+  DailyMix = "dailyMix",
+  Trending = "trending",
+  DiscoverWeekly = "discoverWeekly",
+  RecommendedArtists = "recommendedArtists",
+  RadioOfTheDay = "radioOfTheDay",
+  TopCharts = "topCharts",
+  ThrowbackHits = "throwbackHits"
+}
+
 export interface Genre {
   _id?: string;
   genre: string;
+  displayType: DisplayType;
   priority?: number;
   createdAt?: string;
   songs: Song[];
@@ -95,7 +112,9 @@ export const loadData = async (loadFromMemory = false): Promise<SiteResponse | {
           genres: (data.site.genres || []).map((cat: any) => ({
             _id: cat._id || cat.category || cat.genre || Math.random().toString(36).slice(2),
             genre: cat.genre || cat.genre || "unknown genre",
-            //anslatedGenre: cat.translatedCategory || cat.translatedGenre || [],
+            displayType: cat.displayType || "slider",
+            priority: cat.priority,
+            createdAt: cat.createdAt,
             songs: (cat.songs || cat.itemPage || []).map((song: any) => ({
               _id: song._id || song.title || Math.random().toString(36).slice(2),
               title: song.title,

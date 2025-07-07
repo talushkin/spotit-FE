@@ -5,7 +5,7 @@ import { Autocomplete, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import type { Song, Genre } from "../utils/storage";
 
-interface RecipeOption {
+interface SongOption {
     title: string;
     genre: string;
     originalTitle: string;
@@ -38,11 +38,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
     setIsPlaying
 }) => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [filteredSuggestions, setFilteredSuggestions] = useState<RecipeOption[]>([]);
+    const [filteredSuggestions, setFilteredSuggestions] = useState<SongOption[]>([]);
     const [searchActiveInternal, setSearchActiveInternal] = useState(false);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
     const searchInputRef = useRef<HTMLInputElement | null>(null);
-    const [translatedOptions, setTranslatedOptions] = useState<RecipeOption[]>([]);
+    const [translatedOptions, setTranslatedOptions] = useState<SongOption[]>([]);
 
     // UseSelector directly, no createSelector (no transformation needed)
     const searchOptions = useSelector((state: any) => state.data.searchOptions || []);
@@ -50,7 +50,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     useEffect(() => {
         setTranslatedOptions(
             allSongs.map((r: Song) => ({
-                title: r.title,
+            title: r.title.replace(/&quot;/g, '"'),
                 genre: r.genre ?? "",
                 originalTitle: r.title,
                 imageUrl: r.imageUrl || r.image || undefined,
@@ -63,7 +63,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         console.log('found searchOptions:', searchOptions);
         //add searchOptions to translatedOptions
         const options = searchOptions.map((opt: any) => ({  
-            title: opt.title,
+            title: opt.title.replace(/&quot;/g, '"'),
             genre: opt.genre || "",
             originalTitle: opt.title,
             imageUrl: opt.imageUrl || opt.image || undefined,
@@ -89,7 +89,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             if (searchMissTimeout.current) clearTimeout(searchMissTimeout.current);
             return;
         }
-        const filtered = translatedOptions.filter((opt: RecipeOption) =>
+        const filtered = translatedOptions.filter((opt: SongOption) =>
             (opt.title || '').toLowerCase().includes(value.toLowerCase())
         );
         if (filtered) {setFilteredSuggestions(filtered);}
@@ -98,14 +98,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
             if (filtered.length === 0) {
                 searchMissTimeout.current = setTimeout(() => {
                     onSearchMiss(value);
-                }, 500);
+                }, 300);
             }
         }
     };
 
     const handleSelect = (_event: React.SyntheticEvent<Element, Event>, value: string | null) => {
         if (!value) return;
-        const option = translatedOptions.find((opt: RecipeOption) => opt.title === value);
+        const option = translatedOptions.find((opt: SongOption) => opt.title === value);
         if (option) {
             // Build song object from option and searchOptions (Redux)
             const reduxSong = searchOptions.find((s: Song) => s.title === option.title);

@@ -6,99 +6,184 @@
     "genres": [
       {
         "genre": "Rock",
+        "displayType": "slider",
         "priority": 1,
         "createdAt": "04-05-2025",
         "songs": [
-          {
-            "image": "https://img.youtube.com/vi/fJ9rUzIMcZQ/hqdefault.jpg",
-            "title": "Bohemian Rhapsody",
-            "artist": "Queen",
-            "url": "https://www.youtube.com/watch?v=fJ9rUzIMcZQ",
-            "lyrics": "Is this the real life? Is this just fantasy?",
-            "duration": "5:55",
-            "createdAt": "01-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/QkF3oxziUI4/hqdefault.jpg",
-            "title": "Stairway to Heaven",
-            "artist": "Led Zeppelin",
-            "url": "https://www.youtube.com/watch?v=QkF3oxziUI4",
-            "lyrics": "And she's buying a stairway to heaven...",
-            "duration": "8:02",
-            "createdAt": "02-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/_FrOQC-zEog/hqdefault.jpg",
-            "title": "Comfortably Numb",
-            "artist": "Pink Floyd",
-            "url": "https://www.youtube.com/watch?v=_FrOQC-zEog",
-            "lyrics": "Hello, is there anybody in there?",
-            "duration": "6:22",
-            "createdAt": "03-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/ktvTqknDobU/hqdefault.jpg",
-            "title": "Radioactive",
-            "artist": "Imagine Dragons",
-            "url": "https://www.youtube.com/watch?v=ktvTqknDobU",
-            "lyrics": "I'm waking up to ash and dust...",
-            "duration": "3:06",
-            "createdAt": "04-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/3YxaaGgTQYM/hqdefault.jpg",
-            "title": "Bring Me To Life",
-            "artist": "Evanescence",
-            "url": "https://www.youtube.com/watch?v=3YxaaGgTQYM",
-            "lyrics": "How can you see into my eyes like open doors...",
-            "duration": "4:13",
-            "createdAt": "05-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/1w7OgIMMRc4/hqdefault.jpg",
-            "title": "Sweet Child O' Mine",
-            "artist": "Guns N' Roses",
-            "url": "https://www.youtube.com/watch?v=1w7OgIMMRc4",
-            "lyrics": "She's got a smile that it seems to me...",
-            "duration": "5:56",
-            "createdAt": "06-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/ktvTqknDobU/hqdefault.jpg",
-            "title": "Smells Like Teen Spirit",
-            "artist": "Nirvana",
-            "url": "https://www.youtube.com/watch?v=hTWKbfoikeg",
-            "lyrics": "Load up on guns, bring your friends...",
-            "duration": "5:01",
-            "createdAt": "07-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/6Ejga4kJUts/hqdefault.jpg",
-            "title": "Zombie",
-            "artist": "The Cranberries",
-            "url": "https://www.youtube.com/watch?v=6Ejga4kJUts",
-            "lyrics": "Another head hangs lowly, child is slowly taken...",
-            "duration": "5:06",
-            "createdAt": "08-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/6hzrDeceEKc/hqdefault.jpg",
-            "title": "Wonderwall",
-            "artist": "Oasis",
-            "url": "https://www.youtube.com/watch?v=6hzrDeceEKc",
-            "lyrics": "Today is gonna be the day that they're gonna throw it back to you...",
-            "duration": "4:18",
-            "createdAt": "09-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/6Ejga4kJUts/hqdefault.jpg",
-            "title": "Numb",
-            "artist": "Linkin Park",
-            "url": "https://www.youtube.com/watch?v=kXYiU_JCYtU",
-            "lyrics": "I've become so numb, I can't feel you there...",
-            "duration": "3:07",
-            "createdAt": "10-05-2025"
-          },
+          { "title": "Bohemian Rhapsody", "artist": "Queen", "url": "https://www.youtube.com/watch?v=fJ9rUzIMcZQ", "image": "https://img.youtube.com/vi/fJ9rUzIMcZQ/hqdefault.jpg", "duration": "5:55" },
+          { "title": "Stairway to Heaven", "artist": "Led Zeppelin", "url": "https://www.youtube.com/watch?v=QkF3oxziUI4", "image": "https://img.youtube.com/vi/QkF3oxziUI4/hqdefault.jpg", "duration": "8:02" },
+          { "title": "Comfortably Numb", "artist": "Pink Floyd", "url": "https://www.youtube.com/watch?v=_FrOQC-zEog", "image": "https://img.youtube.com/vi/_FrOQC-zEog/hqdefault.jpg", "duration": "6:22" },
+          { "title": "Sweet Child O' Mine", "artist": "Guns N' Roses", "url": "https://www.youtube.com/watch?v=1w7OgIMMRc4", "image": "https://img.youtube.com/vi/1w7OgIMMRc4/hqdefault.jpg", "duration": "5:56" },
+          { "title": "Smells Like Teen Spirit", "artist": "Nirvana", "url": "https://www.youtube.com/watch?v=hTWKbfoikeg", "image": "https://img.youtube.com/vi/hTWKbfoikeg/hqdefault.jpg", "duration": "5:01" },
+          { "title": "Zombie", "artist": "The Cranberries", "url": "https://www.youtube.com/watch?v=6Ejga4kJUts", "image": "https://img.youtube.com/vi/6Ejga4kJUts/hqdefault.jpg", "duration": "5:06" },
+          { "title": "Wonderwall", "artist": "Oasis", "url": "https://www.youtube.com/watch?v=6hzrDeceEKc", "image": "https://img.youtube.com/vi/6hzrDeceEKc/hqdefault.jpg", "duration": "4:18" },
+          { "title": "Numb", "artist": "Linkin Park", "url": "https://www.youtube.com/watch?v=kXYiU_JCYtU", "image": "https://img.youtube.com/vi/kXYiU_JCYtU/hqdefault.jpg", "duration": "3:07" },
+          { "title": "November Rain", "artist": "Guns N' Roses", "url": "https://www.youtube.com/watch?v=8SbUC-UaAxE", "image": "https://img.youtube.com/vi/8SbUC-UaAxE/hqdefault.jpg", "duration": "8:57" },
+          { "title": "Seven Nation Army", "artist": "The White Stripes", "url": "https://www.youtube.com/watch?v=0J2QdDbelmY", "image": "https://img.youtube.com/vi/0J2QdDbelmY/hqdefault.jpg", "duration": "3:52" }
+        ]
+      },
+      {
+        "genre": "Recommended for You",
+        "displayType": "slider",
+        "priority": 2,
+        "createdAt": "05-05-2025",
+        "songs": [
+          { "title": "Blinding Lights", "artist": "The Weeknd", "url": "https://www.youtube.com/watch?v=4NRXx6U8ABQ", "image": "https://img.youtube.com/vi/4NRXx6U8ABQ/hqdefault.jpg", "duration": "3:20" },
+          { "title": "Levitating", "artist": "Dua Lipa", "url": "https://www.youtube.com/watch?v=TUVcZfQe-Kw", "image": "https://img.youtube.com/vi/TUVcZfQe-Kw/hqdefault.jpg", "duration": "3:23" },
+          { "title": "Peaches", "artist": "Justin Bieber", "url": "https://www.youtube.com/watch?v=tQ0yjYUFKAE", "image": "https://img.youtube.com/vi/tQ0yjYUFKAE/hqdefault.jpg", "duration": "3:18" },
+          { "title": "Watermelon Sugar", "artist": "Harry Styles", "url": "https://www.youtube.com/watch?v=E07s5ZYygMg", "image": "https://img.youtube.com/vi/E07s5ZYygMg/hqdefault.jpg", "duration": "2:54" },
+          { "title": "Don't Start Now", "artist": "Dua Lipa", "url": "https://www.youtube.com/watch?v=oygrmJFKYZY", "image": "https://img.youtube.com/vi/oygrmJFKYZY/hqdefault.jpg", "duration": "3:03" },
+          { "title": "Dance Monkey", "artist": "Tones and I", "url": "https://www.youtube.com/watch?v=q0hyYWKXF0Q", "image": "https://img.youtube.com/vi/q0hyYWKXF0Q/hqdefault.jpg", "duration": "4:20" },
+          { "title": "Bad Guy", "artist": "Billie Eilish", "url": "https://www.youtube.com/watch?v=DyDfgMOUjCI", "image": "https://img.youtube.com/vi/DyDfgMOUjCI/hqdefault.jpg", "duration": "3:14" },
+          { "title": "Senorita", "artist": "Shawn Mendes & Camila Cabello", "url": "https://www.youtube.com/watch?v=Pkh8UtuejGw", "image": "https://img.youtube.com/vi/Pkh8UtuejGw/hqdefault.jpg", "duration": "3:11" },
+          { "title": "Old Town Road", "artist": "Lil Nas X", "url": "https://www.youtube.com/watch?v=r7qovpFAGrQ", "image": "https://img.youtube.com/vi/r7qovpFAGrQ/hqdefault.jpg", "duration": "2:38" },
+          { "title": "Shallow", "artist": "Lady Gaga & Bradley Cooper", "url": "https://www.youtube.com/watch?v=bo_efYhYU2A", "image": "https://img.youtube.com/vi/bo_efYhYU2A/hqdefault.jpg", "duration": "3:37" }
+        ]
+      },
+      {
+        "genre": "Artist Radio",
+        "displayType": "radio",
+        "priority": 3,
+        "createdAt": "06-05-2025",
+        "songs": [
+          { "title": "Shape of You", "artist": "Ed Sheeran", "url": "https://www.youtube.com/watch?v=JGwWNGJdvx8", "image": "https://img.youtube.com/vi/JGwWNGJdvx8/hqdefault.jpg", "duration": "4:24" },
+          { "title": "Blinding Lights", "artist": "The Weeknd", "url": "https://www.youtube.com/watch?v=4NRXx6U8ABQ", "image": "https://img.youtube.com/vi/4NRXx6U8ABQ/hqdefault.jpg", "duration": "3:20" },
+          { "title": "Bad Guy", "artist": "Billie Eilish", "url": "https://www.youtube.com/watch?v=DyDfgMOUjCI", "image": "https://img.youtube.com/vi/DyDfgMOUjCI/hqdefault.jpg", "duration": "3:14" },
+          { "title": "Havana", "artist": "Camila Cabello", "url": "https://www.youtube.com/watch?v=HCjNJDNzw8Y", "image": "https://img.youtube.com/vi/HCjNJDNzw8Y/hqdefault.jpg", "duration": "3:38" },
+          { "title": "Senorita", "artist": "Shawn Mendes & Camila Cabello", "url": "https://www.youtube.com/watch?v=Pkh8UtuejGw", "image": "https://img.youtube.com/vi/Pkh8UtuejGw/hqdefault.jpg", "duration": "3:11" },
+          { "title": "Levitating", "artist": "Dua Lipa", "url": "https://www.youtube.com/watch?v=TUVcZfQe-Kw", "image": "https://img.youtube.com/vi/TUVcZfQe-Kw/hqdefault.jpg", "duration": "3:23" },
+          { "title": "Peaches", "artist": "Justin Bieber", "url": "https://www.youtube.com/watch?v=tQ0yjYUFKAE", "image": "https://img.youtube.com/vi/tQ0yjYUFKAE/hqdefault.jpg", "duration": "3:18" },
+          { "title": "Sunflower", "artist": "Post Malone & Swae Lee", "url": "https://www.youtube.com/watch?v=ApXoWvfEYVU", "image": "https://img.youtube.com/vi/ApXoWvfEYVU/hqdefault.jpg", "duration": "2:38" },
+          { "title": "Memories", "artist": "Maroon 5", "url": "https://www.youtube.com/watch?v=SlPhMPnQ58k", "image": "https://img.youtube.com/vi/SlPhMPnQ58k/hqdefault.jpg", "duration": "3:16" },
+          { "title": "Watermelon Sugar", "artist": "Harry Styles", "url": "https://www.youtube.com/watch?v=E07s5ZYygMg", "image": "https://img.youtube.com/vi/E07s5ZYygMg/hqdefault.jpg", "duration": "2:54" }
+        ]
+      },
+      {
+        "genre": "Daily Mix",
+        "displayType": "slider",
+        "priority": 4,
+        "createdAt": "07-05-2025",
+        "songs": [
+          { "title": "Uptown Funk", "artist": "Mark Ronson ft. Bruno Mars", "url": "https://www.youtube.com/watch?v=OPf0YbXqDm0", "image": "https://img.youtube.com/vi/OPf0YbXqDm0/hqdefault.jpg", "duration": "4:31" },
+          { "title": "Can't Stop the Feeling!", "artist": "Justin Timberlake", "url": "https://www.youtube.com/watch?v=ru0K8uYEZWw", "image": "https://img.youtube.com/vi/ru0K8uYEZWw/hqdefault.jpg", "duration": "3:56" },
+          { "title": "Happy", "artist": "Pharrell Williams", "url": "https://www.youtube.com/watch?v=ZbZSe6N_BXs", "image": "https://img.youtube.com/vi/ZbZSe6N_BXs/hqdefault.jpg", "duration": "3:53" },
+          { "title": "Sugar", "artist": "Maroon 5", "url": "https://www.youtube.com/watch?v=09R8_2nJtjg", "image": "https://img.youtube.com/vi/09R8_2nJtjg/hqdefault.jpg", "duration": "5:02" },
+          { "title": "Counting Stars", "artist": "OneRepublic", "url": "https://www.youtube.com/watch?v=hT_nvWreIhg", "image": "https://img.youtube.com/vi/hT_nvWreIhg/hqdefault.jpg", "duration": "4:44" },
+          { "title": "Wake Me Up", "artist": "Avicii", "url": "https://www.youtube.com/watch?v=IcrbM1l_BoI", "image": "https://img.youtube.com/vi/IcrbM1l_BoI/hqdefault.jpg", "duration": "4:32" },
+          { "title": "Cheap Thrills", "artist": "Sia", "url": "https://www.youtube.com/watch?v=nYh-n7EOtMA", "image": "https://img.youtube.com/vi/nYh-n7EOtMA/hqdefault.jpg", "duration": "3:44" },
+          { "title": "Sorry", "artist": "Justin Bieber", "url": "https://www.youtube.com/watch?v=fRh_vgS2dFE", "image": "https://img.youtube.com/vi/fRh_vgS2dFE/hqdefault.jpg", "duration": "3:25" },
+          { "title": "Love Me Like You Do", "artist": "Ellie Goulding", "url": "https://www.youtube.com/watch?v=AJtDXIazrMo", "image": "https://img.youtube.com/vi/AJtDXIazrMo/hqdefault.jpg", "duration": "4:10" },
+          { "title": "Havana", "artist": "Camila Cabello ft. Young Thug", "url": "https://www.youtube.com/watch?v=HCjNJDNzw8Y", "image": "https://img.youtube.com/vi/HCjNJDNzw8Y/hqdefault.jpg", "duration": "3:38" }
+        ]
+      },
+      {
+        "genre": "Trending Now",
+        "displayType": "slider",
+        "priority": 5,
+        "createdAt": "08-05-2025",
+        "songs": [
+          { "title": "MONTERO (Call Me By Your Name)", "artist": "Lil Nas X", "url": "https://www.youtube.com/watch?v=6swmTBVI83k", "image": "https://img.youtube.com/vi/6swmTBVI83k/hqdefault.jpg", "duration": "2:18" },
+          { "title": "drivers license", "artist": "Olivia Rodrigo", "url": "https://www.youtube.com/watch?v=ZmDBbnmKpqQ", "image": "https://img.youtube.com/vi/ZmDBbnmKpqQ/hqdefault.jpg", "duration": "4:02" },
+          { "title": "Save Your Tears", "artist": "The Weeknd", "url": "https://www.youtube.com/watch?v=XXYlFuWEuKI", "image": "https://img.youtube.com/vi/XXYlFuWEuKI/hqdefault.jpg", "duration": "3:35" },
+          { "title": "Kiss Me More", "artist": "Doja Cat ft. SZA", "url": "https://www.youtube.com/watch?v=0EVVKs6DQLo", "image": "https://img.youtube.com/vi/0EVVKs6DQLo/hqdefault.jpg", "duration": "4:44" },
+          { "title": "Good 4 U", "artist": "Olivia Rodrigo", "url": "https://www.youtube.com/watch?v=gNi_6U5Pm_o", "image": "https://img.youtube.com/vi/gNi_6U5Pm_o/hqdefault.jpg", "duration": "2:58" },
+          { "title": "Deja Vu", "artist": "Olivia Rodrigo", "url": "https://www.youtube.com/watch?v=cii6ruuycQA", "image": "https://img.youtube.com/vi/cii6ruuycQA/hqdefault.jpg", "duration": "3:35" },
+          { "title": "Leave The Door Open", "artist": "Bruno Mars, Anderson .Paak, Silk Sonic", "url": "https://www.youtube.com/watch?v=adLGHcj_fmA", "image": "https://img.youtube.com/vi/adLGHcj_fmA/hqdefault.jpg", "duration": "4:11" },
+          { "title": "Butter", "artist": "BTS", "url": "https://www.youtube.com/watch?v=WMweEpGlu_U", "image": "https://img.youtube.com/vi/WMweEpGlu_U/hqdefault.jpg", "duration": "2:44" },
+          { "title": "Stay", "artist": "The Kid LAROI, Justin Bieber", "url": "https://www.youtube.com/watch?v=kTJczUoc26U", "image": "https://img.youtube.com/vi/kTJczUoc26U/hqdefault.jpg", "duration": "2:38" },
+          { "title": "Industry Baby", "artist": "Lil Nas X, Jack Harlow", "url": "https://www.youtube.com/watch?v=UTHLKHL_whs", "image": "https://img.youtube.com/vi/UTHLKHL_whs/hqdefault.jpg", "duration": "3:32" }
+        ]
+      },
+      {
+        "genre": "Discover Weekly",
+        "displayType": "slider",
+        "priority": 6,
+        "createdAt": "09-05-2025",
+        "songs": [
+          { "title": "Sunflower", "artist": "Post Malone, Swae Lee", "url": "https://www.youtube.com/watch?v=ApXoWvfEYVU", "image": "https://img.youtube.com/vi/ApXoWvfEYVU/hqdefault.jpg", "duration": "2:38" },
+          { "title": "Memories", "artist": "Maroon 5", "url": "https://www.youtube.com/watch?v=SlPhMPnQ58k", "image": "https://img.youtube.com/vi/SlPhMPnQ58k/hqdefault.jpg", "duration": "3:16" },
+          { "title": "Someone You Loved", "artist": "Lewis Capaldi", "url": "https://www.youtube.com/watch?v=bCuhuePlP8o", "image": "https://img.youtube.com/vi/bCuhuePlP8o/hqdefault.jpg", "duration": "3:02" },
+          { "title": "bad guy", "artist": "Billie Eilish", "url": "https://www.youtube.com/watch?v=DyDfgMOUjCI", "image": "https://img.youtube.com/vi/DyDfgMOUjCI/hqdefault.jpg", "duration": "3:14" },
+          { "title": "Happier", "artist": "Marshmello ft. Bastille", "url": "https://www.youtube.com/watch?v=m7Bc3pLyij0", "image": "https://img.youtube.com/vi/m7Bc3pLyij0/hqdefault.jpg", "duration": "3:54" },
+          { "title": "Without Me", "artist": "Halsey", "url": "https://www.youtube.com/watch?v=ZAfAud_M_mg", "image": "https://img.youtube.com/vi/ZAfAud_M_mg/hqdefault.jpg", "duration": "3:49" },
+          { "title": "Lucid Dreams", "artist": "Juice WRLD", "url": "https://www.youtube.com/watch?v=mzB1VGEGcSU", "image": "https://img.youtube.com/vi/mzB1VGEGcSU/hqdefault.jpg", "duration": "4:00" },
+          { "title": "Eastside", "artist": "benny blanco, Halsey & Khalid", "url": "https://www.youtube.com/watch?v=56WBK4ZK_cw", "image": "https://img.youtube.com/vi/56WBK4ZK_cw/hqdefault.jpg", "duration": "2:53" },
+          { "title": "Lovely", "artist": "Billie Eilish & Khalid", "url": "https://www.youtube.com/watch?v=V1Pl8CzNzCw", "image": "https://img.youtube.com/vi/V1Pl8CzNzCw/hqdefault.jpg", "duration": "3:21" },
+          { "title": "Sucker", "artist": "Jonas Brothers", "url": "https://www.youtube.com/watch?v=CnAmeh0-E-U", "image": "https://img.youtube.com/vi/CnAmeh0-E-U/hqdefault.jpg", "duration": "3:01" }
+        ]
+      },
+      {
+        "genre": "Recommended Artists",
+        "displayType": "circles",
+        "priority": 7,
+        "createdAt": "10-05-2025",
+        "songs": [
+          { "title": "Rolling in the Deep", "artist": "Adele", "url": "https://www.youtube.com/watch?v=rYEDA3JcQqw", "image": "https://img.youtube.com/vi/rYEDA3JcQqw/hqdefault.jpg", "duration": "3:48" },
+          { "title": "Shape of You", "artist": "Ed Sheeran", "url": "https://www.youtube.com/watch?v=JGwWNGJdvx8", "image": "https://img.youtube.com/vi/JGwWNGJdvx8/hqdefault.jpg", "duration": "4:24" },
+          { "title": "Blinding Lights", "artist": "The Weeknd", "url": "https://www.youtube.com/watch?v=4NRXx6U8ABQ", "image": "https://img.youtube.com/vi/4NRXx6U8ABQ/hqdefault.jpg", "duration": "3:20" },
+          { "title": "Bad Guy", "artist": "Billie Eilish", "url": "https://www.youtube.com/watch?v=DyDfgMOUjCI", "image": "https://img.youtube.com/vi/DyDfgMOUjCI/hqdefault.jpg", "duration": "3:14" },
+          { "title": "Havana", "artist": "Camila Cabello", "url": "https://www.youtube.com/watch?v=HCjNJDNzw8Y", "image": "https://img.youtube.com/vi/HCjNJDNzw8Y/hqdefault.jpg", "duration": "3:38" },
+          { "title": "Senorita", "artist": "Shawn Mendes & Camila Cabello", "url": "https://www.youtube.com/watch?v=Pkh8UtuejGw", "image": "https://img.youtube.com/vi/Pkh8UtuejGw/hqdefault.jpg", "duration": "3:11" },
+          { "title": "Levitating", "artist": "Dua Lipa", "url": "https://www.youtube.com/watch?v=TUVcZfQe-Kw", "image": "https://img.youtube.com/vi/TUVcZfQe-Kw/hqdefault.jpg", "duration": "3:23" },
+          { "title": "Peaches", "artist": "Justin Bieber", "url": "https://www.youtube.com/watch?v=tQ0yjYUFKAE", "image": "https://img.youtube.com/vi/tQ0yjYUFKAE/hqdefault.jpg", "duration": "3:18" },
+          { "title": "Sunflower", "artist": "Post Malone & Swae Lee", "url": "https://www.youtube.com/watch?v=ApXoWvfEYVU", "image": "https://img.youtube.com/vi/ApXoWvfEYVU/hqdefault.jpg", "duration": "2:38" },
+          { "title": "Memories", "artist": "Maroon 5", "url": "https://www.youtube.com/watch?v=SlPhMPnQ58k", "image": "https://img.youtube.com/vi/SlPhMPnQ58k/hqdefault.jpg", "duration": "3:16" }
+        ]
+      },
+      {
+        "genre": "Radio of the Day",
+        "displayType": "radio",
+        "priority": 8,
+        "createdAt": "11-05-2025",
+        "songs": [
+          { "title": "Viva La Vida", "artist": "Coldplay", "url": "https://www.youtube.com/watch?v=dvgZkm1xWPE", "image": "https://img.youtube.com/vi/dvgZkm1xWPE/hqdefault.jpg", "duration": "4:02" },
+          { "title": "Counting Stars", "artist": "OneRepublic", "url": "https://www.youtube.com/watch?v=hT_nvWreIhg", "image": "https://img.youtube.com/vi/hT_nvWreIhg/hqdefault.jpg", "duration": "4:44" },
+          { "title": "Demons", "artist": "Imagine Dragons", "url": "https://www.youtube.com/watch?v=mWRsgZuwf_8", "image": "https://img.youtube.com/vi/mWRsgZuwf_8/hqdefault.jpg", "duration": "2:57" },
+          { "title": "Let Her Go", "artist": "Passenger", "url": "https://www.youtube.com/watch?v=RBumgq5yVrA", "image": "https://img.youtube.com/vi/RBumgq5yVrA/hqdefault.jpg", "duration": "4:15" },
+          { "title": "Wake Me Up", "artist": "Avicii", "url": "https://www.youtube.com/watch?v=IcrbM1l_BoI", "image": "https://img.youtube.com/vi/IcrbM1l_BoI/hqdefault.jpg", "duration": "4:32" },
+          { "title": "Take Me To Church", "artist": "Hozier", "url": "https://www.youtube.com/watch?v=PVjiKRfKpPI", "image": "https://img.youtube.com/vi/PVjiKRfKpPI/hqdefault.jpg", "duration": "4:02" },
+          { "title": "Let Me Down Slowly", "artist": "Alec Benjamin", "url": "https://www.youtube.com/watch?v=50VNCymT-Cs", "image": "https://img.youtube.com/vi/50VNCymT-Cs/hqdefault.jpg", "duration": "2:49" },
+          { "title": "Stressed Out", "artist": "Twenty One Pilots", "url": "https://www.youtube.com/watch?v=pXRviuL6vMY", "image": "https://img.youtube.com/vi/pXRviuL6vMY/hqdefault.jpg", "duration": "3:22" },
+          { "title": "Ride", "artist": "Twenty One Pilots", "url": "https://www.youtube.com/watch?v=Pw-0pbY9JeU", "image": "https://img.youtube.com/vi/Pw-0pbY9JeU/hqdefault.jpg", "duration": "3:34" },
+          { "title": "Believer", "artist": "Imagine Dragons", "url": "https://www.youtube.com/watch?v=7wtfhZwyrcc", "image": "https://img.youtube.com/vi/7wtfhZwyrcc/hqdefault.jpg", "duration": "3:24" }
+        ]
+      },
+      {
+        "genre": "Top Charts",
+        "displayType": "slider",
+        "priority": 9,
+        "createdAt": "12-05-2025",
+        "songs": [
+          { "title": "Shape of You", "artist": "Ed Sheeran", "url": "https://www.youtube.com/watch?v=JGwWNGJdvx8", "image": "https://img.youtube.com/vi/JGwWNGJdvx8/hqdefault.jpg", "duration": "4:24" },
+          { "title": "Blinding Lights", "artist": "The Weeknd", "url": "https://www.youtube.com/watch?v=4NRXx6U8ABQ", "image": "https://img.youtube.com/vi/4NRXx6U8ABQ/hqdefault.jpg", "duration": "3:20" },
+          { "title": "Dance Monkey", "artist": "Tones and I", "url": "https://www.youtube.com/watch?v=q0hyYWKXF0Q", "image": "https://img.youtube.com/vi/q0hyYWKXF0Q/hqdefault.jpg", "duration": "4:20" },
+          { "title": "Senorita", "artist": "Shawn Mendes & Camila Cabello", "url": "https://www.youtube.com/watch?v=Pkh8UtuejGw", "image": "https://img.youtube.com/vi/Pkh8UtuejGw/hqdefault.jpg", "duration": "3:11" },
+          { "title": "Old Town Road", "artist": "Lil Nas X", "url": "https://www.youtube.com/watch?v=r7qovpFAGrQ", "image": "https://img.youtube.com/vi/r7qovpFAGrQ/hqdefault.jpg", "duration": "2:38" },
+          { "title": "Bad Guy", "artist": "Billie Eilish", "url": "https://www.youtube.com/watch?v=DyDfgMOUjCI", "image": "https://img.youtube.com/vi/DyDfgMOUjCI/hqdefault.jpg", "duration": "3:14" },
+          { "title": "drivers license", "artist": "Olivia Rodrigo", "url": "https://www.youtube.com/watch?v=ZmDBbnmKpqQ", "image": "https://img.youtube.com/vi/ZmDBbnmKpqQ/hqdefault.jpg", "duration": "4:02" },
+          { "title": "Save Your Tears", "artist": "The Weeknd", "url": "https://www.youtube.com/watch?v=XXYlFuWEuKI", "image": "https://img.youtube.com/vi/XXYlFuWEuKI/hqdefault.jpg", "duration": "3:35" },
+          { "title": "Good 4 U", "artist": "Olivia Rodrigo", "url": "https://www.youtube.com/watch?v=gNi_6U5Pm_o", "image": "https://img.youtube.com/vi/gNi_6U5Pm_o/hqdefault.jpg", "duration": "2:58" },
+          { "title": "Industry Baby", "artist": "Lil Nas X, Jack Harlow", "url": "https://www.youtube.com/watch?v=UTHLKHL_whs", "image": "https://img.youtube.com/vi/UTHLKHL_whs/hqdefault.jpg", "duration": "3:32" }
+        ]
+      },
+      {
+        "genre": "Throwback Hits",
+        "displayType": "slider",
+        "priority": 10,
+        "createdAt": "13-05-2025",
+        "songs": [
+          { "title": "Billie Jean", "artist": "Michael Jackson", "url": "https://www.youtube.com/watch?v=Zi_XLOBDo_Y", "image": "https://img.youtube.com/vi/Zi_XLOBDo_Y/hqdefault.jpg", "duration": "4:54" },
+          { "title": "Like a Prayer", "artist": "Madonna", "url": "https://www.youtube.com/watch?v=79fzeNUqQbQ", "image": "https://img.youtube.com/vi/79fzeNUqQbQ/hqdefault.jpg", "duration": "5:41" },
+          { "title": "I Wanna Dance with Somebody", "artist": "Whitney Houston", "url": "https://www.youtube.com/watch?v=eH3giaIzONA", "image": "https://img.youtube.com/vi/eH3giaIzONA/hqdefault.jpg", "duration": "4:52" },
+          { "title": "Girls Just Want to Have Fun", "artist": "Cyndi Lauper", "url": "https://www.youtube.com/watch?v=PIb6AZdTr-A", "image": "https://img.youtube.com/vi/PIb6AZdTr-A/hqdefault.jpg", "duration": "3:58" },
+          { "title": "Wake Me Up Before You Go-Go", "artist": "Wham!", "url": "https://www.youtube.com/watch?v=pIgZ7gMze7A", "image": "https://img.youtube.com/vi/pIgZ7gMze7A/hqdefault.jpg", "duration": "3:51" },
+          { "title": "Take On Me", "artist": "a-ha", "url": "https://www.youtube.com/watch?v=djV11Xbc914", "image": "https://img.youtube.com/vi/djV11Xbc914/hqdefault.jpg", "duration": "3:48" },
+          { "title": "Africa", "artist": "Toto", "url": "https://www.youtube.com/watch?v=FTQbiNvZqaY", "image": "https://img.youtube.com/vi/FTQbiNvZqaY/hqdefault.jpg", "duration": "4:55" },
+          { "title": "Eye of the Tiger", "artist": "Survivor", "url": "https://www.youtube.com/watch?v=btPJPFnesV4", "image": "https://img.youtube.com/vi/btPJPFnesV4/hqdefault.jpg", "duration": "4:04" },
+          { "title": "Livin' on a Prayer", "artist": "Bon Jovi", "url": "https://www.youtube.com/watch?v=lDK9QqIzhwk", "image": "https://img.youtube.com/vi/lDK9QqIzhwk/hqdefault.jpg", "duration": "4:09" },
+          { "title": "Sweet Dreams (Are Made of This)", "artist": "Eurythmics", "url": "https://www.youtube.com/watch?v=qeMFqkcPYcg", "image": "https://img.youtube.com/vi/qeMFqkcPYcg/hqdefault.jpg", "duration": "3:37" }
+        ]
+      },
           {
             "image": "https://img.youtube.com/vi/8SbUC-UaAxE/hqdefault.jpg",
             "title": "November Rain",
@@ -190,109 +275,6 @@
             "createdAt": "20-05-2025"
           }
         ]
-      },
-      {
-        "genre": "Pop",
-        "priority": 2,
-        "createdAt": "01-05-2025",
-        "songs": [
-          {
-            "image": "https://img.youtube.com/vi/Zi_XLOBDo_Y/hqdefault.jpg",
-            "title": "Billie Jean",
-            "artist": "Michael Jackson",
-            "url": "https://www.youtube.com/watch?v=Zi_XLOBDo_Y",
-            "lyrics": "Billie Jean is not my lover...",
-            "duration": "4:54",
-            "createdAt": "28-04-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/79fzeNUqQbQ/hqdefault.jpg",
-            "title": "Like a Prayer",
-            "artist": "Madonna",
-            "url": "https://www.youtube.com/watch?v=79fzeNUqQbQ",
-            "lyrics": "Life is a mystery, everyone must stand alone...",
-            "duration": "5:41",
-            "createdAt": "30-04-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/nfWlot6h_JM/hqdefault.jpg",
-            "title": "Shake It Off",
-            "artist": "Taylor Swift",
-            "url": "https://www.youtube.com/watch?v=nfWlot6h_JM",
-            "lyrics": "Cause the players gonna play, play, play, play, play...",
-            "duration": "3:39",
-            "createdAt": "01-05-2025"
-          }
-        ]
-      },
-      {
-        "genre": "Hip-Hop",
-        "priority": 3,
-        "createdAt": "02-05-2025",
-        "songs": [
-          {
-            "image": "https://img.youtube.com/vi/_Yhyp-_hX2s/hqdefault.jpg",
-            "title": "Lose Yourself",
-            "artist": "Eminem",
-            "url": "https://www.youtube.com/watch?v=_Yhyp-_hX2s",
-            "lyrics": "His palms are sweaty, knees weak, arms are heavy...",
-            "duration": "5:26",
-            "createdAt": "02-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/tvTRZJ-4EyI/hqdefault.jpg",
-            "title": "HUMBLE.",
-            "artist": "Kendrick Lamar",
-            "url": "https://www.youtube.com/watch?v=tvTRZJ-4EyI",
-            "lyrics": "Sit down, be humble...",
-            "duration": "2:57",
-            "createdAt": "02-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/xpVfcZ0ZcFM/hqdefault.jpg",
-            "title": "God's Plan",
-            "artist": "Drake",
-            "url": "https://www.youtube.com/watch?v=xpVfcZ0ZcFM",
-            "lyrics": "She said, 'Do you love me?' I tell her, 'Only partly'...",
-            "duration": "3:19",
-            "createdAt": "02-05-2025"
-          }
-        ]
-      },
-      {
-        "genre": "Jazz",
-        "priority": 4,
-        "createdAt": "02-05-2025",
-        "songs": [
-          {
-            "image": "https://img.youtube.com/vi/zqNTltOGh5c/hqdefault.jpg",
-            "title": "So What",
-            "artist": "Miles Davis",
-            "url": "https://www.youtube.com/watch?v=zqNTltOGh5c",
-            "lyrics": "Instrumental",
-            "duration": "9:22",
-            "createdAt": "02-02-2023"
-          },
-          {
-            "image": "https://img.youtube.com/vi/30FTr6G53VU/hqdefault.jpg",
-            "title": "Giant Steps",
-            "artist": "John Coltrane",
-            "url": "https://www.youtube.com/watch?v=30FTr6G53VU",
-            "lyrics": "Instrumental",
-            "duration": "4:43",
-            "createdAt": "01-05-2025"
-          },
-          {
-            "image": "https://img.youtube.com/vi/CWzrABouyeE/hqdefault.jpg",
-            "title": "What a Wonderful World",
-            "artist": "Louis Armstrong",
-            "url": "https://www.youtube.com/watch?v=CWzrABouyeE",
-            "lyrics": "I see trees of green, red roses too...",
-            "duration": "2:21",
-            "createdAt": "01-05-2025"
-          }
-        ]
       }
-    ]
   }
-}
+

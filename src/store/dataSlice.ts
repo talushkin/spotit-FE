@@ -8,11 +8,13 @@ interface SiteData {
   [key: string]: any;
 }
 
+
 interface DataState {
   site: SiteData | null;
   loading: boolean;
   error: string | null;
   searchOptions?: Song[];
+  volume: number;
 }
 
 const initialState: DataState = {
@@ -20,6 +22,7 @@ const initialState: DataState = {
   loading: false,
   error: null,
   searchOptions: [],
+  volume: 50, // default volume (0-100)
 };
 
 // Async thunk for loading data
@@ -44,9 +47,10 @@ import { fetchSongsByTitleApi } from '../utils/storage';
 export const fetchSongsByTitle = createAsyncThunk<Song[], string, { rejectValue: string }>(
   'data/fetchSongsByTitle',
   async (title, { rejectWithValue }) => {
-    console.log('Fetching songs by title:', title);
+    const movieTitle = title.includes('movie') ? title : title + ' movie';
+    console.log('Fetching Movies by title:', movieTitle);
     try {
-      const data = await fetchSongsByTitleApi(title);
+      const data = await fetchSongsByTitleApi(movieTitle);
       const songNames = data.map((song: Song) => song.title);
       return data;
     } catch (err: any) {
@@ -61,6 +65,9 @@ const dataSlice = createSlice({
   reducers: {
     setSearchOptions: (state, action: PayloadAction<Song[]>) => {
       state.searchOptions = action.payload;
+    },
+    setVolume: (state, action: PayloadAction<number>) => {
+      state.volume = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -89,6 +96,6 @@ const dataSlice = createSlice({
   },
 });
 
-export const { setSearchOptions } = dataSlice.actions;
+export const { setSearchOptions, setVolume } = dataSlice.actions;
 export default dataSlice.reducer;
 // Only export fetchSongsByTitle once (already exported above)
