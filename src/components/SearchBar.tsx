@@ -47,10 +47,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
     // UseSelector directly, no createSelector (no transformation needed)
     const searchOptions = useSelector((state: any) => state.data.searchOptions || []);
 
+
     useEffect(() => {
         setTranslatedOptions(
             allSongs.map((r: Song) => ({
-            title: r.title.replace(/&quot;/g, '"'),
+                title: r.title.replace(/&quot;/g, '"'),
                 genre: r.genre ?? "",
                 originalTitle: r.title,
                 imageUrl: r.imageUrl || r.image || undefined,
@@ -61,15 +62,39 @@ const SearchBar: React.FC<SearchBarProps> = ({
     useEffect(() => {
         // Log Redux searchOptions after fetch
         console.log('found searchOptions:', searchOptions);
-        //add searchOptions to translatedOptions
+        // Add searchOptions to translatedOptions
         const options = searchOptions.map((opt: any) => ({  
             title: opt.title.replace(/&quot;/g, '"'),
             genre: opt.genre || "",
             originalTitle: opt.title,
             imageUrl: opt.imageUrl || opt.image || undefined,
         }));
-        if (options) {setTranslatedOptions(options);}
+        if (options) setTranslatedOptions(options);
     }, [searchOptions]);
+
+    // Debounced search/filtering
+    useEffect(() => {
+        if (searchMissTimeout.current) clearTimeout(searchMissTimeout.current);
+        if (!searchQuery) {
+            setFilteredSuggestions([]);
+            return;
+        }
+        const handler = setTimeout(() => {
+            const filtered = translatedOptions.filter((opt: SongOption) =>
+                (opt.title || '').toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            setFilteredSuggestions(filtered);
+            if (onSearchMiss && filtered.length === 0) {
+                searchMissTimeout.current = setTimeout(() => {
+                    onSearchMiss(searchQuery);
+                }, 300);
+            }
+        }, 300);
+        return () => {
+            clearTimeout(handler);
+            if (searchMissTimeout.current) clearTimeout(searchMissTimeout.current);
+        };
+    }, [searchQuery, translatedOptions, onSearchMiss]);
 
     useEffect(() => {
         if (searchInputRef.current && searchQuery === "") {
@@ -83,23 +108,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
     const handleSearchChange = (_event: React.SyntheticEvent<Element, Event>, value: string) => {
         console.log("Search input changed:", value);
         setSearchQuery(value);
+        // Don't filter immediately; debounce in useEffect below
         if (!value) {
             //setFilteredSuggestions([]);
             console.log("Search cleared, no suggestions.");
             if (searchMissTimeout.current) clearTimeout(searchMissTimeout.current);
+            setFilteredSuggestions([]);
             return;
-        }
-        const filtered = translatedOptions.filter((opt: SongOption) =>
-            (opt.title || '').toLowerCase().includes(value.toLowerCase())
-        );
-        if (filtered) {setFilteredSuggestions(filtered);}
-        if (onSearchMiss) {
-            if (searchMissTimeout.current) clearTimeout(searchMissTimeout.current);
-            if (filtered.length === 0) {
-                searchMissTimeout.current = setTimeout(() => {
-                    onSearchMiss(value);
-                }, 300);
-            }
         }
     };
 

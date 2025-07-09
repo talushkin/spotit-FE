@@ -47,10 +47,9 @@ import { fetchSongsByTitleApi } from '../utils/storage';
 export const fetchSongsByTitle = createAsyncThunk<Song[], string, { rejectValue: string }>(
   'data/fetchSongsByTitle',
   async (title, { rejectWithValue }) => {
-    const movieTitle = title.includes('movie') ? title : title + ' movie';
-    console.log('Fetching Movies by title:', movieTitle);
+    console.log('Fetching songs by title:', title);
     try {
-      const data = await fetchSongsByTitleApi(movieTitle);
+      const data = await fetchSongsByTitleApi(title);
       const songNames = data.map((song: Song) => song.title);
       return data;
     } catch (err: any) {
