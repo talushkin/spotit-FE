@@ -85,7 +85,22 @@ function SongTableRow({
           idx + 1
         )}
       </td>
-      <td style={{ padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#fff" : "#222"), fontWeight: isSelected ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", display: "flex", alignItems: "center", gap: 4, position: "relative" }}>
+      <td
+        style={{
+          padding: "2px 8px",
+          color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#fff" : "#222"),
+          fontWeight: isSelected ? 700 : 400,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          width: "auto",
+          maxWidth: "600px",
+          minWidth: 0,
+          position: "relative",
+          display: "table-cell"
+        }}
+        title={song.title}
+      >
         {song.title}
       </td>
       <td style={{ width: 60, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
@@ -115,6 +130,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
     <div
       style={{
         width: "100%",
+        maxWidth: "90vw",
         maxHeight: 4 * 32 + 8,
         overflowY: songList.length > 4 ? "auto" : "visible",
         borderRadius: 8,
@@ -127,7 +143,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
     >
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSongDragEnd}>
         <SortableContext items={songList.map((_, i) => i.toString())} strategy={verticalListSortingStrategy}>
-          <table style={{ width: "100%", borderCollapse: "collapse", background: "transparent" }}>
+          <table style={{ width: "100%", maxWidth: "90vw", tableLayout: "fixed", borderCollapse: "collapse", background: "transparent" }}>
             <thead>
               <tr>
                 <th style={{
