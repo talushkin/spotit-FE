@@ -31,12 +31,10 @@ const AUTH_HEADER = {
 };
 
 // --- Types ---
-
-
 export interface Song {
   _id?: string;
   title: string;
-  artist?: string;
+  artist: string;
   url?: string;
   duration?: string;
   lyrics?: string;
@@ -46,6 +44,26 @@ export interface Song {
   genreId?: string;
   genre?: string;
 }
+
+export interface Playlist {
+  id: string;
+  title: string;
+  description?: string;
+  image: string;
+  url: string;
+  createdAt?: string;
+  songs?: Song[];
+}
+export interface Playlists {
+  id: string;
+  title: string;
+  description?: string;
+  image: string;
+  url: string;
+  createdAt?: string;
+  playlists?: Playlist[];
+}
+
 
 
 
@@ -62,7 +80,8 @@ export enum DisplayType {
   RecommendedArtists = "recommendedArtists",
   RadioOfTheDay = "radioOfTheDay",
   TopCharts = "topCharts",
-  ThrowbackHits = "throwbackHits"
+  ThrowbackHits = "throwbackHits",
+  Playlist = "playlist"
 }
 
 export interface Genre {
@@ -72,6 +91,7 @@ export interface Genre {
   priority?: number;
   createdAt?: string;
   songs: Song[];
+  playlists?: Playlist[];
 }
 
 

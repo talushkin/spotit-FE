@@ -3,7 +3,8 @@ import YouTube, { YouTubePlayer as YTPlayerType } from "react-youtube";
 
 
 interface YouTubePlayerProps {
-  videoId: string;
+  videoId?: string;
+  playlistId?: string;
   autoplay?: boolean;
   volume?: number; // 0-100
   noControls?: boolean;
@@ -11,7 +12,7 @@ interface YouTubePlayerProps {
 }
 
 
-const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId, autoplay = true, volume = 50, noControls = false, onSpaceToggle }) => {
+const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId, playlistId, autoplay = true, volume = 50, noControls = false, onSpaceToggle }) => {
   const playerRef = useRef<YTPlayerType | null>(null);
 
   const onReady = (event: { target: YTPlayerType }) => {
@@ -46,6 +47,22 @@ const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId, autoplay = true,
     return () => window.removeEventListener("keydown", handleSpace);
   }, [onSpaceToggle]);
 
+  // Choose playerVars for video or playlist
+  const playerVars: any = {
+    autoplay: autoplay ? 1 : 0,
+    rel: 0,
+    controls: 0,
+    modestbranding: 1,
+    fs: 0,
+    disablekb: 1,
+    showinfo: 0,
+    playsinline: 1,
+  };
+  if (playlistId) {
+    playerVars.listType = "playlist";
+    playerVars.list = playlistId;
+  }
+
   return (
     <div style={{ width: "100vw", maxWidth: "100vw", height: "100vh", background: "#000", margin: 0, padding: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
       <div style={{ flex: 1, height: '100%', width: '100%', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
@@ -54,49 +71,30 @@ const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ videoId, autoplay = true,
           opts={{
             width: "100%",
             height: "100%",
-            playerVars: {
-              autoplay: autoplay ? 1 : 0,
-              rel: 0,
-              controls: 0,
-              modestbranding: 1,
-              fs: 0,
-              disablekb: 1,
-              showinfo: 0,
-              playsinline: 1,
-            },
+            playerVars,
           }}
           style={{ width: '100%', height: '100%', display: 'block', pointerEvents: 'auto' }}
           iframeClassName="yt-iframe-fullwidth yt-iframe-no-controls"
           onReady={onReady}
         />
-      <style>{`
-        .yt-iframe-fullwidth {
-          width: 100% !important;
-          height: 100% !important;
-          min-width: 0 !important;
-          min-height: 0 !important;
-          border: none;
-          display: block;
-        }
-        .yt-iframe-no-controls {
-          pointer-events: auto;
-          outline: none !important;
-        }
-        .yt-iframe-no-controls:focus {
-          outline: none !important;
-        }
-      `}</style>
+        <style>{`
+          .yt-iframe-fullwidth {
+            width: 100% !important;
+            height: 100% !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            border: none;
+            display: block;
+          }
+          .yt-iframe-no-controls {
+            pointer-events: auto;
+            outline: none !important;
+          }
+          .yt-iframe-no-controls:focus {
+            outline: none !important;
+          }
+        `}</style>
       </div>
-      <style>{`
-        .yt-iframe-fullwidth {
-          width: 100% !important;
-          height: 100% !important;
-          min-width: 0 !important;
-          min-height: 0 !important;
-          border: none;
-          display: block;
-        }
-      `}</style>
     </div>
   );
 };

@@ -132,8 +132,14 @@
   /* Remove or adjust the background properties if they duplicate the body's */
 }
 
+/* Song and Playlist card base styles */
+.case {
+  min-width: 180px;
+}
 
-
+.case.circle-case {
+  min-width: 180px;
+}
 
 /* ======================= */
 /*      RESPONSIVE         */

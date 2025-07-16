@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import CaseCard from "./CaseCard";
 import SongSlider from "./SongSlider";
+import PlaylistSlider from "./PlaylistSlider";
 import { useSelector } from "react-redux";
-import type { Genre, Song } from "../utils/storage";
+import type { Genre, Song, Playlist } from "../utils/storage";
 import { DisplayType } from "../utils/storage";
 
 // --- Types ---
@@ -39,6 +39,8 @@ const MainContent: React.FC<MainContentProps> = ({
       ? "center"
       : "flex-start"
   );
+  const [hoveredPlaylist, setHoveredPlaylist] = useState<Playlist | null>(null);
+  const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
 
   // Songs are stored in selectedGenre?.songs
   const songs = selectedGenre?.songs || [];
@@ -197,13 +199,79 @@ const MainContent: React.FC<MainContentProps> = ({
                 overflowX: 'hidden',
               }}
             >
-              <SongSlider
-                songs={genre.songs || []}
-                selectedGenre={genre}
-                isDarkMode={isDarkMode}
-                onAddSongToList={onAddSongToList}
-                //onSelectSong={handleSelectSong}
-              />
+              {genre.displayType === 'playlist' && Array.isArray(genre.playlists) ? (
+                <>
+                  <PlaylistSlider
+                    playlists={genre.playlists}
+                    isDarkMode={isDarkMode}
+                    onAddSongToList={(playlist) => {
+                      // Optionally add all songs from playlist to the song list
+                      if (playlist.songs && Array.isArray(playlist.songs)) {
+                        setSongList([...songList, ...playlist.songs]);
+                      }
+                    }}
+                    onPlaylistHover={(playlist, rect) => {
+                      setHoveredPlaylist(playlist);
+                      console.log("Hovered playlist:", playlist ? playlist.songs : []);
+                      {console.log("Hovered playlist location:", rect)}
+                      setHoveredRect(rect || null);
+                    }}
+                  />
+                  {/* Only show tooltip if playlist has songs */}
+                  {hoveredPlaylist && hoveredRect && Array.isArray(hoveredPlaylist.songs) && hoveredPlaylist.songs.length > 0 && (
+                    
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: hoveredRect.right + 12,
+                        top: 600,
+                        width: '340px',
+                        height: hoveredRect.height,
+                        background: isDarkMode ? '#222' : '#fff',
+                        color: isDarkMode ? '#fff' : '#222',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+                        zIndex: 99999,
+                        overflowY: 'auto',
+                        padding: '18px 20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-start',
+                      }}
+                    >
+                      <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                        {hoveredPlaylist.songs.slice(0, 10).map((s, idx) => (
+                          <li key={idx} style={{
+                            marginBottom: 8,
+                            fontSize: '1rem',
+                            lineHeight: '1.3',
+                            background: isDarkMode ? '#222' : '#fff',
+                            color: isDarkMode ? '#fff' : '#222',
+                            padding: '2px 0',
+                            borderRadius: '4px',
+                            overflow: 'visible',
+                            whiteSpace: 'normal',
+                            textOverflow: 'clip',
+                            wordBreak: 'break-word',
+                            maxWidth: '300px',
+                            zIndex: 99999
+                          }}>
+                            {idx + 1}. {s.title.length > 20 ? s.title.slice(0, 20) + '…' : s.title}
+                            {s.artist ? ` / ${s.artist}` : ''}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <SongSlider
+                  songs={genre.songs || []}
+                  selectedGenre={genre}
+                  isDarkMode={isDarkMode}
+                  onAddSongToList={onAddSongToList}
+                />
+              )}
             </div>
 
           ))

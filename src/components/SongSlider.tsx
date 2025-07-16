@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import CaseCard from "./CaseCard";
-import type { Song, Genre } from "../utils/storage";
+import CaseSong from "./CaseSong";
+import CasePlaylist from "./CasePlaylist";
+import type { Song, Genre, Playlist } from "../utils/storage";
 import { DisplayType } from "../utils/storage";
 import { Margin } from "@mui/icons-material";
 
@@ -57,6 +58,10 @@ const SongSlider: React.FC<SongSliderProps> = ({
     // Special case: search results slider (genre === 'Search Results')
     if (selectedGenre?.genre === 'Search Results') {
       return '#001a3a'; // Full dark blue
+    }
+    // Playlist displayType: dark green background
+    if (displayType === DisplayType.Playlist) {
+      return '#0a3d2e'; // Solid dark green
     }
     if (displayType === "circles") {
       return isDarkMode
@@ -134,66 +139,28 @@ const SongSlider: React.FC<SongSliderProps> = ({
             border-radius: 3px;
           }
         `}</style>
-        {songs.map((item: Song, index: number) => (
-          <div
-            key={index}
-            style={
-              displayType === "circles"
-                ? {
-                    minWidth: 120,
-                    width: 120,
-                    height: 140,
-                    flex: '0 0 auto',
-                    cursor: 'pointer',
-                    margin: '0 10px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                  }
-                : {
-                    minWidth: window.innerWidth <= 650 ? 160 : 180,
-                    width: window.innerWidth <= 650 ? 160 : 180,
-                    flex: '0 0 auto',
-                    cursor: 'pointer',
-                    margin: '0 10px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                  }
-            }
-          >
-            {/* Title above the card: only for circles */}
-            {displayType === "circles" && (
-              <div
-                style={{
-                  fontWeight: 600,
-                  fontSize: '1rem',
-                  color: isDarkMode ? '#fff' : '#222',
-                  textAlign: 'center',
-                  width: '100%',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  marginBottom: 4,
-                  marginTop: 2,
-                  minHeight: 22,
-                }}
-              >
-                {item.artist || item.title}
-              </div>
-            )}
-            <CaseCard
-              index={index + 1}
-              item={item}
-              category={selectedGenre?.genre || ''}
-              isDarkMode={isDarkMode}
-              onAddSongToList={onAddSongToList}
-              displayType={displayType}
-            />
-          </div>
-        ))}
+        {displayType === DisplayType.Playlist
+          ? (songs as any[])
+              .filter((s) => typeof s.id === 'string')
+              .map((playlist, index) => (
+                <CasePlaylist
+                  key={playlist.id || index}
+                  playlist={playlist}
+                  isDarkMode={isDarkMode}
+                  onAddSongToList={onAddSongToList as any}
+                />
+              ))
+          : songs.map((item: Song, index: number) => (
+              <CaseSong
+                key={index}
+                index={index + 1}
+                item={item}
+                category={selectedGenre?.genre || ''}
+                isDarkMode={isDarkMode}
+                onAddSongToList={onAddSongToList}
+                displayType={displayType}
+              />
+            ))}
       </div>
     </div>
   );
