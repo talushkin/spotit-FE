@@ -124,6 +124,28 @@ const SearchBar: React.FC<SearchBarProps> = ({
         if (option) {
             // Build song object from option and searchOptions (Redux)
             const reduxSong = searchOptions.find((s: Song) => s.title === option.title);
+            // If reduxSong has a songs array, treat as playlist and add all songs
+            if (reduxSong && Array.isArray((reduxSong as any).songs) && (reduxSong as any).songs.length > 0) {
+                if (onAddSongToList) {
+                    (reduxSong as any).songs.forEach((song: Song) => {
+                        onAddSongToList(song, -1);
+                    });
+                }
+                setSearchActiveInternal(false);
+                setShowMobileSearch(false);
+                setSearchQuery("");
+                if (setSearchActive) setSearchActive(false);
+                if (searchInputRef.current) {
+                    searchInputRef.current.blur();
+                }
+                // Optionally set selectedSong to first song in playlist
+                if ((reduxSong as any).songs.length > 0) {
+                    setSelectedSong((reduxSong as any).songs[0]);
+                }
+                if (setIsPlaying) setIsPlaying(true);
+                return;
+            }
+            // Otherwise, treat as single song
             const song: Song = reduxSong && reduxSong.title && reduxSong.artist && reduxSong.url
                 ? reduxSong
                 : {
@@ -135,7 +157,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 setSearchActiveInternal(false);
                 setShowMobileSearch(false);
                 setSearchQuery("");
-                //setFilteredSuggestions([]);
                 if (setSearchActive) setSearchActive(false);
                 if (searchInputRef.current) {
                     searchInputRef.current.blur();

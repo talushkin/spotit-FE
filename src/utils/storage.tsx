@@ -7,11 +7,15 @@ export const fetchSongsByTitleApi = async (title: string='movie'): Promise<Song[
         "Authorization": "Bearer 1234",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ title })
+      body: JSON.stringify({ q:title })
     });
+    // Log the raw response object for debugging
+    console.log("fetchSongsByTitleApi response:", res);
     if (!res.ok) throw new Error("API error");
     const data = await res.json();
     if (Array.isArray(data)) {
+      // Keep same format: map items and tag genre as 'API'
+      console.log("fetchSongsByTitleApi data:", data);
       return data.map((item: any) => ({ ...item, genre: 'API' }));
     }
     return [];
@@ -19,6 +23,32 @@ export const fetchSongsByTitleApi = async (title: string='movie'): Promise<Song[
     throw new Error(err.message || 'API error');
   }
 };
+
+export const fetchPlaylistsByTitleApi = async (title: string='movie'): Promise<Song[]> => {
+  try {
+    const res = await fetch("https://be-tan-theta.vercel.app/api/ai/get-playlist-list", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer 1234",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ q:title })
+    });
+    // Log the raw response object for debugging
+    console.log("fetchSongsByTitleApi response:", res);
+    if (!res.ok) throw new Error("API error");
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      // Keep same format: map items and tag genre as 'API'
+      console.log("fetchSongsByTitleApi data:", data);
+      return data.map((item: any) => ({ ...item, genre: 'API' }));
+    }
+    return [];
+  } catch (err: any) {
+    throw new Error(err.message || 'API error');
+  }
+};
+
 // utils/storage.ts
 import axios from "axios";
 import data from "../data/songs.json";

@@ -410,10 +410,11 @@ const FooterBar = (props: any) => {
       <FooterSongTable
         isMobile={isMobile}
         songList={songList}
+        setSongList={setSongList}
         sensors={sensors}
         handleSongDragEnd={handleSongDragEnd}
         SortableSongRow={SortableSongRow}
-        selectedSong={selectedSong as Song}
+        selectedSong={selectedSong}
         nextSongToHighlight={nextSongToHighlight}
         currentSongIndex={currentSongIndex}
         setIsPlaying={setIsPlaying}

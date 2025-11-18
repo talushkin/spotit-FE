@@ -28,8 +28,19 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
+  const isPlaylist = Array.isArray((item as any).songs) && (item as any).songs.length > 0;
+
   const handlePlaySong = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (isPlaylist) {
+      // Replace current playlist with all songs from this playlist
+      if (onAddSongToList) {
+        (item as any).songs.forEach((song: any) => {
+          onAddSongToList(song, 1);
+        });
+      }
+      return;
+    }
     // Extract YouTube video ID from item.url
     let videoId = "";
     if (item.url) {
@@ -51,8 +62,16 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
   const handleAddToSongList = (e: React.MouseEvent) => {
     e.preventDefault();
     if (onAddSongToList) {
-      console.log("Adding song to list, should not play!:", item);
-      onAddSongToList(item, -1); // -1 = add to bottom
+      if (isPlaylist) {
+        // Add all songs from playlist to the list
+        console.log("Adding all playlist songs to list:", (item as any).songs);
+        (item as any).songs.forEach((song: any) => {
+          onAddSongToList(song, -1);
+        });
+      } else {
+        console.log("Adding song to list, should not play!:", item);
+        onAddSongToList(item, -1); // -1 = add to bottom
+      }
     } else {
       alert(`Add to song list: ${item.title}`);
     }
@@ -197,7 +216,10 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
           })()
         )}
        
-        <Tooltip title="Play song" arrow placement="top">
+        <Tooltip
+          title={isPlaylist ? "Play the playlist" : "Play song"}
+          arrow placement="top"
+        >
           <button
             className="case-play-btn"
             tabIndex={-1}
@@ -228,7 +250,10 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
           </button>
         </Tooltip>
         {/* Add to song list button */}
-        <Tooltip title="Add to playlist" arrow placement="top">
+        <Tooltip
+          title={isPlaylist ? "Add the playlist to current playlist" : "Add to playlist"}
+          arrow placement="top"
+        >
           <button
             className="case-add-btn"
             onClick={handleAddToSongList}

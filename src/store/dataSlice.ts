@@ -58,6 +58,22 @@ export const fetchSongsByTitle = createAsyncThunk<Song[], string, { rejectValue:
   }
 );
 
+import { fetchPlaylistsByTitleApi } from '../utils/storage';
+// Thunk to fetch songs by title from API (now uses storage.tsx)
+export const fetchPlaylistsByTitle = createAsyncThunk<Song[], string, { rejectValue: string }>(
+  'data/fetchPlaylistsByTitle',
+  async (title, { rejectWithValue }) => {
+    console.log('Fetching playlists by title:', title);
+    try {
+      const data = await fetchPlaylistsByTitleApi(title);
+      const songNames = data.map((song: Song) => song.title);
+      return data;
+    } catch (err: any) {
+      return rejectWithValue(err.message || 'API error');
+    }
+  }
+);
+
 const dataSlice = createSlice({
   name: 'data',
   initialState,
@@ -89,6 +105,15 @@ const dataSlice = createSlice({
         console.log('Fetched songs:', fetchedSongs.map((song: Song) => song.title));
         if (fetchedSongs && fetchedSongs.length > 0) {
           state.searchOptions = fetchedSongs;
+        }
+        state.loading = false;
+      })
+      .addCase(fetchPlaylistsByTitle.fulfilled, (state, action: PayloadAction<Song[]>) => {
+        // Add all playlist songs to searchOptions
+        const playlistSongs = action.payload;
+        console.log('Fetched playlist songs:', playlistSongs.map((song: Song) => song.title));
+        if (playlistSongs && playlistSongs.length > 0) {
+          state.searchOptions = playlistSongs;
         }
         state.loading = false;
       });

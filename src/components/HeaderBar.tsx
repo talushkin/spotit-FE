@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { Genre, Song } from "../utils/storage";
 import SearchBar from "./SearchBar";
-import { fetchSongsByTitle } from "../store/dataSlice";
+import { fetchPlaylistsByTitle } from "../store/dataSlice";
 import type { ThunkDispatch } from '@reduxjs/toolkit';
 import type { AnyAction } from 'redux';
 
@@ -48,8 +48,8 @@ export default function HeaderBar({
 
   // Handler for when a search miss occurs (not found locally)
   const handleSearchMiss = (title: string) => {
-   // console.log("Search miss for title:", title);
-    dispatch(fetchSongsByTitle(title));
+    // console.log("Search miss for title:", title);
+    dispatch(fetchPlaylistsByTitle(title));
   };
 
   // Track if search is active (focus or has value)

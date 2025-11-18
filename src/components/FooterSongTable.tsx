@@ -8,6 +8,7 @@ import type { Song } from "../utils/storage";
 interface FooterSongTableProps {
   isMobile: boolean;
   songList: Song[];
+  setSongList: (songs: Song[]) => void;
   sensors: any;
   handleSongDragEnd: (event: any) => void;
   SortableSongRow: React.FC<any>;
@@ -15,12 +16,14 @@ interface FooterSongTableProps {
   nextSongToHighlight: Song | null;
   currentSongIndex: number;
   setIsPlaying: (v: boolean) => void;
-  setSelectedSong: (song: Song) => void;
+  setSelectedSong: (song: Song | null) => void;
   isDarkMode: boolean;
 }
 
 
 // SongTableRow: Draggable, hoverable, with play icon and drag support
+import DeleteIcon from "@mui/icons-material/Delete";
+
 interface SongTableRowProps {
   song: Song;
   idx: number;
@@ -30,6 +33,7 @@ interface SongTableRowProps {
   hoveredRow: number | null;
   setHoveredRow: (idx: number | null) => void;
   onClick: () => void;
+  onRemoveSong: (idx: number) => void;
 }
 
 function SongTableRow({
@@ -40,7 +44,8 @@ function SongTableRow({
   isDarkMode,
   hoveredRow,
   setHoveredRow,
-  onClick
+  onClick,
+  onRemoveSong
 }: SongTableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: idx.toString() });
   const style = {
@@ -73,6 +78,31 @@ function SongTableRow({
       onMouseUp={() => { if (mouseDown && !dragged) onClick(); setMouseDown(false); setDragged(false); }}
       onMouseMove={() => { if (mouseDown) setDragged(true); }}
     >
+  <td style={{ width: 22, minWidth: 18, maxWidth: 26, height: 30, textAlign: "center", padding: "2px 0px" }}>
+        <button
+          className="delete-btn"
+          onClick={e => { e.stopPropagation(); onRemoveSong(idx); }}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: 0,
+            margin: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: 0.7
+          }}
+          title="Remove from playlist"
+        >
+          <DeleteIcon className="delete-icon" style={{ color: isDarkMode ? "#bbb" : "#888", fontSize: 18, transition: "color 0.15s" }} />
+        </button>
+        <style>{`
+          .delete-btn:hover .delete-icon {
+            color: #fff !important;
+          }
+        `}</style>
+      </td>
       <td style={{ width: 45, height: 30, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
         {hoveredRow === idx ? (
           <span title="Play" style={{ display: "inline-flex", alignItems: "center" }}>
@@ -113,6 +143,7 @@ function SongTableRow({
 const FooterSongTable: React.FC<FooterSongTableProps> = ({
   isMobile,
   songList,
+  setSongList,
   sensors,
   handleSongDragEnd,
   SortableSongRow,
@@ -124,6 +155,19 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
   isDarkMode,
 }) => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+
+  // Remove song handler
+  function handleRemoveSong(removeIdx: number) {
+    const songToRemove = songList[removeIdx];
+    const isPlayedSong = selectedSong && songToRemove.title === selectedSong.title && songToRemove.artist === selectedSong.artist;
+    console.log("Remove song:", songToRemove, isPlayedSong ? "(currently playing)" : "");
+    const newList = songList.filter((_, i) => i !== removeIdx);
+    setSongList(newList);
+    if (isPlayedSong) {
+      setSelectedSong(newList[0] || null);
+    }
+  }
+
   if (!songList.length) return null;
   // Responsive wrapper: add gap between CP and songList for desktop
   return (
@@ -147,6 +191,19 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
             <thead>
               <tr>
                 <th style={{
+                  width: 25,
+                  textAlign: "right",
+                  padding: "2px 8px",
+                  color: isDarkMode ? "#bbb" : "#333",
+                  fontWeight: 700,
+                  background: "#fff0",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backdropFilter: isDarkMode ? undefined : "blur(2px)",
+                  backgroundColor: isDarkMode ? "#181818f0" : "#fff8"
+                }}></th>
+                <th style={{
                   width: 45,
                   textAlign: "right",
                   padding: "2px 8px",
@@ -158,7 +215,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   zIndex: 2,
                   backdropFilter: isDarkMode ? undefined : "blur(2px)",
                   backgroundColor: isDarkMode ? "#181818f0" : "#fff8"
-                }}>Index</th>
+                }}>#</th>
                 <th style={{
                   padding: "2px 8px",
                   color: isDarkMode ? "#bbb" : "#333",
@@ -205,8 +262,10 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                     setSelectedSong(song);
                     setIsPlaying(true);
                   }}
+                  onRemoveSong={removeIdx => handleRemoveSong(removeIdx)}
                 />
               ))}
+
             </tbody>
           </table>
         </SortableContext>
