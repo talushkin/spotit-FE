@@ -325,6 +325,9 @@ const FooterBar = (props: any) => {
   const handleKaraokeGenerate = (rowIndex?: number) => {
     const currentIndex = getCurrentSongIndex();
     const targetIndex = typeof rowIndex === "number" ? rowIndex : currentIndex;
+    const targetSong = songList[targetIndex] || selectedSong || null;
+    const targetKey = getSongKey(targetSong);
+    if (targetKey && karaokeReadyKeys.has(targetKey)) return;
 
     if (isKaraokeLoading) {
       if (typeof targetIndex === "number") {
@@ -348,7 +351,10 @@ const FooterBar = (props: any) => {
   // (removed duplicate declarations)
 
   const handlePlayPause = () => {
-    if (!playerRef.current) return;
+    if (!playerRef.current) {
+      pendingAutoPlayRef.current = true;
+      return;
+    }
     if (isPlaying) {
       playerRef.current.pauseVideo();
       setIsPlaying(false);
@@ -523,6 +529,7 @@ const FooterBar = (props: any) => {
           toastMessage={toastMessage}
           karaokeReady={karaokeReady}
           karaokeMode={karaokeMode}
+          isCurrentKaraokeReady={karaokeReadyKeys.has(getSongKey(selectedSong as Song))}
           onKaraokeGenerate={() => handleKaraokeGenerate()}
           onKaraokeModeToggle={handleKaraokeModeToggle}
         />
@@ -538,8 +545,8 @@ const FooterBar = (props: any) => {
         selectedSong={selectedSong}
         nextSongToHighlight={nextSongToHighlight}
         currentSongIndex={currentSongIndex}
-        setIsPlaying={setIsPlaying}
         onSongTitleSelect={handleSongTitleSelect}
+        setSelectedSong={setSelectedSong}
         isDarkMode={isDarkMode}
         isKaraokeLoading={isKaraokeLoading}
         activeKaraokeRowIndex={activeKaraokeRowIndex}

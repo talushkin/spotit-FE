@@ -36,6 +36,7 @@ interface FooterControlPanelProps {
   toastMessage: string | null;
   karaokeReady: boolean;
   karaokeMode: "mic" | "speaker" | "profile";
+  isCurrentKaraokeReady: boolean;
   onKaraokeGenerate: () => void;
   onKaraokeModeToggle: () => void;
 }
@@ -65,6 +66,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
   toastMessage,
   karaokeReady,
   karaokeMode,
+  isCurrentKaraokeReady,
   onKaraokeGenerate,
   onKaraokeModeToggle,
 }) => {
@@ -122,7 +124,20 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                     {toastMessage}
                   </div>
                 )}
-                <IconButton onClick={onKaraokeGenerate} color="primary">
+                <IconButton
+                  onClick={onKaraokeGenerate}
+                  color="primary"
+                  disabled={isCurrentKaraokeReady}
+                  sx={
+                    isCurrentKaraokeReady
+                      ? {
+                          color: "#1976d2",
+                          opacity: 1,
+                          "&.Mui-disabled": { color: "#1976d2" },
+                        }
+                      : undefined
+                  }
+                >
                   {isKaraokeLoading ? (
                     <CachedIcon sx={{ animation: "karaokeSpin 1s linear infinite" }} />
                   ) : (
@@ -150,18 +165,16 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
             <YouTube
               videoId={videoId}
               opts={{
-                width: "0.1",
-                height: "0.1",
+                width: "1",
+                height: "1",
                 playerVars: { controls: 0, modestbranding: 1, autoplay: 1 },
               }}
               onReady={onPlayerReady}
               onPause={() => {}}
               onPlay={() => {}}
               onEnd={handleNextSong}
-              style={{ display: "none" }}
-              iframeClassName="yt-hidden-iframe"
+              style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: -9999 }}
             />
-            <style>{`.yt-hidden-iframe { display: none !important; }`}</style>
             <style>{`@keyframes karaokeSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } } @keyframes karaokeBlink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }`}</style>
             <div style={{ marginTop: 4, color: isDarkMode ? "#fff" : "#222", textAlign: "center", fontWeight: 600, fontSize: "1.1rem" }}>
               {selectedSong?.title || ""}

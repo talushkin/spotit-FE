@@ -16,8 +16,8 @@ interface FooterSongTableProps {
   selectedSong: Song | undefined;
   nextSongToHighlight: Song | null;
   currentSongIndex: number;
-  setIsPlaying: (v: boolean) => void;
   setSelectedSong: (song: Song | null) => void;
+  onSongTitleSelect: (song: Song) => void;
   isDarkMode: boolean;
   isKaraokeLoading: boolean;
   activeKaraokeRowIndex: number | null;
@@ -111,11 +111,14 @@ function SongTableRow({
             e.stopPropagation();
             onKaraokeClick();
           }}
+          disabled={isKaraokeReady}
           sx={{
             color: karaokeColor,
             padding: "2px",
             width: 24,
             height: 24,
+            opacity: isKaraokeReady ? 1 : undefined,
+            "&.Mui-disabled": { color: karaokeColor },
           }}
         >
           {isKaraokeActive ? (
@@ -202,8 +205,8 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
   selectedSong,
   nextSongToHighlight,
   currentSongIndex,
-  setIsPlaying,
   setSelectedSong,
+  onSongTitleSelect,
   isDarkMode,
   isKaraokeLoading,
   activeKaraokeRowIndex,
@@ -279,10 +282,6 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   padding: "2px 8px",
                   color: isDarkMode ? "#bbb" : "#333",
                   fontWeight: 700,
-                  background: "#fff0",
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 2,
                   backdropFilter: isDarkMode ? undefined : "blur(2px)",
                   backgroundColor: isDarkMode ? "#181818f0" : "#fff8"
                 }}>#</th>
@@ -328,10 +327,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   isDarkMode={isDarkMode}
                   hoveredRow={hoveredRow}
                   setHoveredRow={setHoveredRow}
-                  onClick={() => {
-                    setSelectedSong(song);
-                    setIsPlaying(true);
-                  }}
+                  onClick={() => onSongTitleSelect(song)}
                   onRemoveSong={removeIdx => handleRemoveSong(removeIdx)}
                   isKaraokeActive={isKaraokeLoading && activeKaraokeRowIndex === idx}
                   isKaraokeReady={karaokeReadyKeys.has(`${song.title || ""}::${song.artist || ""}`)}
