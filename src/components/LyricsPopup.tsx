@@ -83,6 +83,20 @@ const LyricsPopup: React.FC<LyricsPopupProps> = ({
           flexDirection: "column",
         }}
       >
+        {error && (
+          <div
+            style={{
+              background: "#991b1b",
+              color: "#fee2e2",
+              padding: "6px 10px",
+              borderRadius: 8,
+              fontSize: 13,
+              marginBottom: 8,
+            }}
+          >
+            {error}
+          </div>
+        )}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: 16 }}>{title || "Lyrics"}</div>
