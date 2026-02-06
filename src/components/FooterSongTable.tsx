@@ -21,7 +21,8 @@ interface FooterSongTableProps {
   isDarkMode: boolean;
   isKaraokeLoading: boolean;
   activeKaraokeRowIndex: number | null;
-  karaokeTouchedKeys: Set<string>;
+  karaokeReadyKeys: Set<string>;
+  pendingKaraokeRowIndex: number | null;
   onKaraokeGenerate: (rowIndex: number) => void;
 }
 
@@ -42,7 +43,8 @@ interface SongTableRowProps {
   onClick: () => void;
   onRemoveSong: (idx: number) => void;
   isKaraokeActive: boolean;
-  isKaraokeTouched: boolean;
+  isKaraokeReady: boolean;
+  isKaraokePending: boolean;
   onKaraokeClick: () => void;
 }
 
@@ -57,6 +59,8 @@ function SongTableRow({
   onClick,
   onRemoveSong,
   isKaraokeActive,
+  isKaraokeReady,
+  isKaraokePending,
   onKaraokeClick,
 }: SongTableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: idx.toString() });
@@ -78,6 +82,16 @@ function SongTableRow({
   // Prevent play on drag: only play if not dragging
   const [mouseDown, setMouseDown] = useState(false);
   const [dragged, setDragged] = useState(false);
+  const karaokeColor = isKaraokeReady
+    ? (isDarkMode ? "#90caf9" : "#1976d2")
+    : (isDarkMode ? "#bbb" : "#444");
+
+  const karaokeAnimation = isKaraokeActive
+    ? "karaokeSpin 1s linear infinite"
+    : isKaraokePending
+      ? "karaokeBlink 1.6s ease-in-out infinite"
+      : undefined;
+
   return (
     <tr
       ref={setNodeRef}
@@ -87,7 +101,7 @@ function SongTableRow({
       onMouseEnter={() => setHoveredRow(idx)}
       onMouseLeave={() => setHoveredRow(null)}
       onMouseDown={() => { setMouseDown(true); setDragged(false); }}
-      onMouseUp={() => { if (mouseDown && !dragged) onClick(); setMouseDown(false); setDragged(false); }}
+      onMouseUp={() => { setMouseDown(false); setDragged(false); }}
       onMouseMove={() => { if (mouseDown) setDragged(true); }}
     >
       <td style={{ width: 30, minWidth: 26, maxWidth: 34, height: 30, textAlign: "center", padding: "2px 0px" }}>
@@ -98,11 +112,17 @@ function SongTableRow({
             onKaraokeClick();
           }}
           sx={{
-            color: isDarkMode ? "#bbb" : "#444",
+            color: karaokeColor,
             padding: "2px",
+            width: 24,
+            height: 24,
           }}
         >
-          <PersonIcon sx={isKaraokeActive ? { animation: "karaokeSpin 1s linear infinite" } : undefined} />
+          {isKaraokeActive ? (
+            <CachedIcon sx={{ animation: karaokeAnimation, fontSize: 18 }} />
+          ) : (
+            <PersonIcon sx={{ animation: karaokeAnimation, fontSize: 18 }} />
+          )}
         </IconButton>
       </td>
       <td style={{ width: 22, minWidth: 18, maxWidth: 26, height: 30, textAlign: "center", padding: "2px 0px" }}>
@@ -154,9 +174,14 @@ function SongTableRow({
           maxWidth: "600px",
           minWidth: 0,
           position: "relative",
-          display: "table-cell"
+          display: "table-cell",
+          cursor: "pointer"
         }}
         title={song.title}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!dragged) onClick();
+        }}
       >
         {song.title}
       </td>
@@ -182,6 +207,8 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
   isDarkMode,
   isKaraokeLoading,
   activeKaraokeRowIndex,
+  karaokeReadyKeys,
+  pendingKaraokeRowIndex,
   onKaraokeGenerate,
 }) => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
@@ -307,6 +334,8 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   }}
                   onRemoveSong={removeIdx => handleRemoveSong(removeIdx)}
                   isKaraokeActive={isKaraokeLoading && activeKaraokeRowIndex === idx}
+                  isKaraokeReady={karaokeReadyKeys.has(`${song.title || ""}::${song.artist || ""}`)}
+                  isKaraokePending={isKaraokeLoading && pendingKaraokeRowIndex === idx}
                   onKaraokeClick={() => onKaraokeGenerate(idx)}
                 />
               ))}
@@ -315,7 +344,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
           </table>
         </SortableContext>
       </DndContext>
-      <style>{`@keyframes karaokeSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }`}</style>
+      <style>{`@keyframes karaokeSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } } @keyframes karaokeBlink { 0% { opacity: 1; } 50% { opacity: 0.45; } 100% { opacity: 1; } }`}</style>
     </div>
   );
 };
