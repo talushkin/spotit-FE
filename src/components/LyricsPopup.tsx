@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -28,6 +28,7 @@ const LyricsPopup: React.FC<LyricsPopupProps> = ({
   isLoading,
   error,
 }) => {
+  const autoCloseTimerRef = useRef<NodeJS.Timeout | null>(null);
   const displayLines = useMemo(() => {
     if (lines.length > 0) return lines;
     if (isLoading) return ["Loading lyrics..."];
@@ -42,6 +43,17 @@ const LyricsPopup: React.FC<LyricsPopupProps> = ({
     const offsetLines = Math.round(maxOffset * progress);
     return -offsetLines * LINE_HEIGHT;
   }, [displayLines.length, currentTime, totalDuration]);
+
+  useEffect(() => {
+    if (!open || !error) return undefined;
+    if (autoCloseTimerRef.current) clearTimeout(autoCloseTimerRef.current);
+    autoCloseTimerRef.current = setTimeout(() => {
+      onClose();
+    }, 3000);
+    return () => {
+      if (autoCloseTimerRef.current) clearTimeout(autoCloseTimerRef.current);
+    };
+  }, [open, error, onClose]);
 
   if (!open) return null;
 
