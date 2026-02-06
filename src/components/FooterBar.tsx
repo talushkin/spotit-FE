@@ -170,6 +170,15 @@ const FooterBar = (props: any) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
+  const [isKaraokeLoading, setIsKaraokeLoading] = useState(false);
+  const [showKaraokeToast, setShowKaraokeToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [karaokeReady, setKaraokeReady] = useState(false);
+  const [karaokeMode, setKaraokeMode] = useState<"mic" | "speaker" | "profile">("mic");
+  const [activeKaraokeRowIndex, setActiveKaraokeRowIndex] = useState<number | null>(null);
+  const [karaokeTouchedKeys, setKaraokeTouchedKeys] = useState<Set<string>>(new Set());
+  const karaokeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const karaokeToastRef = useRef<NodeJS.Timeout | null>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const dispatch = useDispatch();
   const volume = useSelector((state: any) => state.data.volume ?? 50);
@@ -183,6 +192,13 @@ const FooterBar = (props: any) => {
   useEffect(() => {
     setSongList(propSongList);
   }, [propSongList]);
+
+  useEffect(() => {
+    return () => {
+      if (karaokeTimerRef.current) clearTimeout(karaokeTimerRef.current);
+      if (karaokeToastRef.current) clearTimeout(karaokeToastRef.current);
+    };
+  }, []);
 
   // Keep propSongList in sync with reordered songList
   useEffect(() => {
@@ -248,6 +264,53 @@ const FooterBar = (props: any) => {
         setIsPlaying(true);
       }, 200);
     }
+  };
+  
+  const getSongKey = (song?: Song | null) => {
+    if (!song) return "";
+    return `${song.title || ""}::${song.artist || ""}`;
+  };
+
+  const handleKaraokeGenerate = (rowIndex?: number) => {
+    if (isKaraokeLoading) return;
+    const currentIndex = getCurrentSongIndex();
+    const targetIndex = typeof rowIndex === "number" ? rowIndex : currentIndex;
+    setActiveKaraokeRowIndex(targetIndex >= 0 ? targetIndex : null);
+    const targetSong = songList[targetIndex] || selectedSong || null;
+    const targetKey = getSongKey(targetSong);
+    if (targetKey) {
+      setKaraokeTouchedKeys((prev) => {
+        const next = new Set(prev);
+        next.add(targetKey);
+        return next;
+      });
+    }
+    setIsKaraokeLoading(true);
+    setShowKaraokeToast(true);
+    setToastMessage("creating kareoke");
+    setKaraokeReady(false);
+
+    if (karaokeTimerRef.current) clearTimeout(karaokeTimerRef.current);
+    if (karaokeToastRef.current) clearTimeout(karaokeToastRef.current);
+
+    karaokeTimerRef.current = setTimeout(() => {
+      setIsKaraokeLoading(false);
+      setKaraokeReady(true);
+      setToastMessage("kareoke created!");
+      setShowKaraokeToast(true);
+      karaokeToastRef.current = setTimeout(() => {
+        setShowKaraokeToast(false);
+        setToastMessage(null);
+      }, 2000);
+    }, 20000);
+  };
+
+  const handleKaraokeModeToggle = () => {
+    setKaraokeMode((prev) => {
+      if (prev === "mic") return "speaker";
+      if (prev === "speaker") return "profile";
+      return "mic";
+    });
   };
   // Language support removed: only English
 
@@ -404,6 +467,13 @@ const FooterBar = (props: any) => {
           formatTime={formatTime}
           setVolume={setVolumeGlobal}
           volume={volume}
+          isKaraokeLoading={isKaraokeLoading}
+          showKaraokeToast={showKaraokeToast}
+          toastMessage={toastMessage}
+          karaokeReady={karaokeReady}
+          karaokeMode={karaokeMode}
+          onKaraokeGenerate={() => handleKaraokeGenerate()}
+          onKaraokeModeToggle={handleKaraokeModeToggle}
         />
         {/* ThemeModeButton: only show on desktop at far right */}
       </Box>
@@ -420,6 +490,12 @@ const FooterBar = (props: any) => {
         setIsPlaying={setIsPlaying}
         setSelectedSong={setSelectedSong}
         isDarkMode={isDarkMode}
+        isKaraokeLoading={isKaraokeLoading}
+        activeKaraokeRowIndex={activeKaraokeRowIndex}
+        isKaraokeLoading={isKaraokeLoading}
+        activeKaraokeRowIndex={activeKaraokeRowIndex}
+        karaokeTouchedKeys={karaokeTouchedKeys}
+        onKaraokeGenerate={handleKaraokeGenerate}
       />
       {/* ThemeModeButton: only show on desktop at far right */}
       {!isMobile && (

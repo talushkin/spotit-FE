@@ -1,11 +1,14 @@
 import React from "react";
-import { Box, IconButton, Slider } from "@mui/material";
+import { IconButton, Slider } from "@mui/material";
 import YouTube from "react-youtube";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
-import ThemeModeButton from "./ThemeModeButton";
+import MicIcon from "@mui/icons-material/Mic";
+import CachedIcon from "@mui/icons-material/Cached";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import PersonIcon from "@mui/icons-material/Person";
 import type { Song } from "../utils/storage";
 
 interface FooterControlPanelProps {
@@ -28,6 +31,13 @@ interface FooterControlPanelProps {
   formatTime: (seconds: number) => string;
   setVolume: (v: number) => void;
   volume: number;
+  isKaraokeLoading: boolean;
+  showKaraokeToast: boolean;
+  toastMessage: string | null;
+  karaokeReady: boolean;
+  karaokeMode: "mic" | "speaker" | "profile";
+  onKaraokeGenerate: () => void;
+  onKaraokeModeToggle: () => void;
 }
 
 const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
@@ -50,6 +60,13 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
   formatTime,
   setVolume,
   volume,
+  isKaraokeLoading,
+  showKaraokeToast,
+  toastMessage,
+  karaokeReady,
+  karaokeMode,
+  onKaraokeGenerate,
+  onKaraokeModeToggle,
 }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: 250, maxWidth: 400 }}>
@@ -84,12 +101,48 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                   style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", marginRight: 8 }}
                 />
               )}
+              <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+                {showKaraokeToast && toastMessage && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translate(-50%, -6px)",
+                      background: isDarkMode ? "#1f2937" : "#e8f5e9",
+                      color: isDarkMode ? "#f9fafb" : "#1b5e20",
+                      padding: "4px 8px",
+                      borderRadius: 8,
+                      fontSize: 12,
+                      whiteSpace: "nowrap",
+                      boxShadow: isDarkMode ? "0 4px 10px rgba(0,0,0,0.35)" : "0 4px 10px rgba(0,0,0,0.18)",
+                      animation: isKaraokeLoading ? "karaokeBlink 2s ease-in-out infinite" : undefined,
+                    }}
+                  >
+                    {toastMessage}
+                  </div>
+                )}
+                <IconButton onClick={onKaraokeGenerate} color="primary">
+                  {isKaraokeLoading ? (
+                    <CachedIcon sx={{ animation: "karaokeSpin 1s linear infinite" }} />
+                  ) : (
+                    <PersonIcon />
+                  )}
+                </IconButton>
+              </div>
               <IconButton onClick={handlePrevSong} color="primary" disabled={getCurrentSongIndex() <= 0}>
                 <SkipPreviousIcon />
               </IconButton>
               <IconButton onClick={handlePlayPause} color="primary">
                 {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
               </IconButton>
+              {karaokeReady && (
+                <IconButton onClick={onKaraokeModeToggle} color="primary">
+                  {karaokeMode === "mic" && <MicIcon />}
+                  {karaokeMode === "speaker" && <VolumeUpIcon />}
+                  {karaokeMode === "profile" && <PersonIcon />}
+                </IconButton>
+              )}
               <IconButton onClick={handleNextSong} color="primary" disabled={getCurrentSongIndex() === songList.length - 1 || songList.length === 0}>
                 <SkipNextIcon />
               </IconButton>
@@ -109,6 +162,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
               iframeClassName="yt-hidden-iframe"
             />
             <style>{`.yt-hidden-iframe { display: none !important; }`}</style>
+            <style>{`@keyframes karaokeSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } } @keyframes karaokeBlink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }`}</style>
             <div style={{ marginTop: 4, color: isDarkMode ? "#fff" : "#222", textAlign: "center", fontWeight: 600, fontSize: "1.1rem" }}>
               {selectedSong?.title || ""}
               {(selectedSong?.duration || totalDuration) && (

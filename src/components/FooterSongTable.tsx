@@ -4,6 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import type { Song } from "../utils/storage";
+import { IconButton } from "@mui/material";
 
 interface FooterSongTableProps {
   isMobile: boolean;
@@ -18,11 +19,17 @@ interface FooterSongTableProps {
   setIsPlaying: (v: boolean) => void;
   setSelectedSong: (song: Song | null) => void;
   isDarkMode: boolean;
+  isKaraokeLoading: boolean;
+  activeKaraokeRowIndex: number | null;
+  karaokeTouchedKeys: Set<string>;
+  onKaraokeGenerate: (rowIndex: number) => void;
 }
 
 
 // SongTableRow: Draggable, hoverable, with play icon and drag support
 import DeleteIcon from "@mui/icons-material/Delete";
+import PersonIcon from "@mui/icons-material/Person";
+import CachedIcon from "@mui/icons-material/Cached";
 
 interface SongTableRowProps {
   song: Song;
@@ -34,6 +41,9 @@ interface SongTableRowProps {
   setHoveredRow: (idx: number | null) => void;
   onClick: () => void;
   onRemoveSong: (idx: number) => void;
+  isKaraokeActive: boolean;
+  isKaraokeTouched: boolean;
+  onKaraokeClick: () => void;
 }
 
 function SongTableRow({
@@ -45,7 +55,9 @@ function SongTableRow({
   hoveredRow,
   setHoveredRow,
   onClick,
-  onRemoveSong
+  onRemoveSong,
+  isKaraokeActive,
+  onKaraokeClick,
 }: SongTableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: idx.toString() });
   const style = {
@@ -78,7 +90,22 @@ function SongTableRow({
       onMouseUp={() => { if (mouseDown && !dragged) onClick(); setMouseDown(false); setDragged(false); }}
       onMouseMove={() => { if (mouseDown) setDragged(true); }}
     >
-  <td style={{ width: 22, minWidth: 18, maxWidth: 26, height: 30, textAlign: "center", padding: "2px 0px" }}>
+      <td style={{ width: 30, minWidth: 26, maxWidth: 34, height: 30, textAlign: "center", padding: "2px 0px" }}>
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onKaraokeClick();
+          }}
+          sx={{
+            color: isDarkMode ? "#bbb" : "#444",
+            padding: "2px",
+          }}
+        >
+          <PersonIcon sx={isKaraokeActive ? { animation: "karaokeSpin 1s linear infinite" } : undefined} />
+        </IconButton>
+      </td>
+      <td style={{ width: 22, minWidth: 18, maxWidth: 26, height: 30, textAlign: "center", padding: "2px 0px" }}>
         <button
           className="delete-btn"
           onClick={e => { e.stopPropagation(); onRemoveSong(idx); }}
@@ -153,6 +180,9 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
   setIsPlaying,
   setSelectedSong,
   isDarkMode,
+  isKaraokeLoading,
+  activeKaraokeRowIndex,
+  onKaraokeGenerate,
 }) => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
@@ -190,6 +220,19 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
           <table style={{ width: "100%", maxWidth: "90vw", tableLayout: "fixed", borderCollapse: "collapse", background: "transparent" }}>
             <thead>
               <tr>
+                <th style={{
+                  width: 30,
+                  textAlign: "center",
+                  padding: "2px 0px",
+                  color: isDarkMode ? "#bbb" : "#333",
+                  fontWeight: 700,
+                  background: "#fff0",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backdropFilter: isDarkMode ? undefined : "blur(2px)",
+                  backgroundColor: isDarkMode ? "#181818f0" : "#fff8"
+                }}></th>
                 <th style={{
                   width: 25,
                   textAlign: "right",
@@ -263,6 +306,8 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                     setIsPlaying(true);
                   }}
                   onRemoveSong={removeIdx => handleRemoveSong(removeIdx)}
+                  isKaraokeActive={isKaraokeLoading && activeKaraokeRowIndex === idx}
+                  onKaraokeClick={() => onKaraokeGenerate(idx)}
                 />
               ))}
 
@@ -270,6 +315,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
           </table>
         </SortableContext>
       </DndContext>
+      <style>{`@keyframes karaokeSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }`}</style>
     </div>
   );
 };
