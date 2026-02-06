@@ -64,19 +64,23 @@ const LyricsPopup: React.FC<LyricsPopupProps> = ({
         inset: 0,
         background: "rgba(0,0,0,0.45)",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "center",
+        paddingTop: "6vh",
         zIndex: 1600,
       }}
     >
       <div
         style={{
-          width: "min(520px, 92vw)",
+          width: "80vw",
+          height: "40vh",
           background: "#111827",
           color: "#f9fafb",
           borderRadius: 12,
           padding: 16,
           boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -97,6 +101,7 @@ const LyricsPopup: React.FC<LyricsPopupProps> = ({
             background: "#0f172a",
             padding: "8px 12px",
             position: "relative",
+            alignSelf: "center",
           }}
         >
           <div
