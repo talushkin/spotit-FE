@@ -10,6 +10,7 @@
         "priority": 1,
         "createdAt": "04-05-2025",
         "songs": [
+          { "title": "קובי אפללו - בא מן השתיקה (קליפ)", "artist": "קובי אפללו", "url": "https://www.youtube.com/watch?v=aSSKPZBbVe8", "image": "https://img.youtube.com/vi/aSSKPZBbVe8/hqdefault.jpg", "duration": "4:00", "kar": true, "vocals": true, "default": true },
           { "title": "Bohemian Rhapsody", "artist": "Queen", "url": "https://www.youtube.com/watch?v=fJ9rUzIMcZQ", "image": "https://img.youtube.com/vi/fJ9rUzIMcZQ/hqdefault.jpg", "duration": "5:55" },
           { "title": "Stairway to Heaven", "artist": "Led Zeppelin", "url": "https://www.youtube.com/watch?v=QkF3oxziUI4", "image": "https://img.youtube.com/vi/QkF3oxziUI4/hqdefault.jpg", "duration": "8:02" },
           { "title": "Comfortably Numb", "artist": "Pink Floyd", "url": "https://www.youtube.com/watch?v=_FrOQC-zEog", "image": "https://img.youtube.com/vi/_FrOQC-zEog/hqdefault.jpg", "duration": "6:22" },

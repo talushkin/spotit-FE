@@ -58,9 +58,17 @@ function App() {
       if (genres && genres.length > 0) {
         let initialGenre = genres[0];
         setSelectedGenre(initialGenre);
-        const initialSong = initialGenre.songs[0] || null;
-        setSelectedSong(initialSong); // Set initial selected song if available
-        setSongList(initialSong ? [initialSong] : []); // Start list with the player song only
+        // Find the default song across all genres
+        let defaultSong = null;
+        for (const genre of genres) {
+          if (genre.songs) {
+            defaultSong = genre.songs.find((s: any) => s.default === true);
+            if (defaultSong) break;
+          }
+        }
+        const initialSong = defaultSong || initialGenre.songs[0] || null;
+        setSelectedSong(initialSong);
+        setSongList(initialSong ? [initialSong] : []);
         // Set search options to all songs from all genres in Redux
         const allSongs = genres.flatMap((g) => g.songs || []);
         //dispatch(setSearchOptions(allSongs));

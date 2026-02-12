@@ -8,7 +8,6 @@
     "starter"
   ],
   "dependencies": {
-    
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -19,11 +18,10 @@
     "@reduxjs/toolkit": "^2.8.2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "ajv": "^8.17.1",
+    "ajv-keywords": "^5.1.0",
     "axios": "^1.9.0",
     "bootstrap": "5.3.6",
-    
-    
-    
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-redux": "^9.2.0",
@@ -31,7 +29,6 @@
     "react-scripts": "^5.0.1",
     "react-youtube": "^10.1.0",
     "styled-components": "6.1.17",
-    
     "typescript": "^5.8.3"
   },
   "scripts": {
@@ -46,11 +43,5 @@
     "not ie <= 11",
     "not op_mini all"
   ],
-  "devDependencies": {
-    
-    
-    
-    
-  },
   "license": "MIT"
 }
