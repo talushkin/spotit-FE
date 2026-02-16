@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setVolume } from "../store/dataSlice";
@@ -15,7 +16,7 @@ import { Box, IconButton, Slider } from "@mui/material";
 import ThemeModeButton from "./ThemeModeButton";
 import FooterControlPanel from "./FooterControlPanel";
 import FooterSongTable from "./FooterSongTable";
-import LyricsPopup from "./LyricsPopup";
+
 
 // Helper to detect mobile (max-width: 650px)
 function useIsMobile() {
@@ -122,6 +123,8 @@ export const SortableSongRow = ({ song, idx, isSelected, isNextSelected, onClick
     displayTitle = song.title.slice(0, 30) + '...';
   }
 
+
+  // ...existing code...
   // Only return a <tr> if used inside a <table>, otherwise return a <div>
   // This fixes the JSX parse error if used outside a table context
   // Always return a <div> to avoid JSX parse errors in non-table context
@@ -151,6 +154,20 @@ export const SortableSongRow = ({ song, idx, isSelected, isNextSelected, onClick
 
 
 const FooterBar = (props: any) => {
+  // Audio refs for karaoke and vocals
+  const karaokeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const vocalsAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Ensure karaoke audio is unmuted and volume is 1 on mount for testing
+  useEffect(() => {
+    if (karaokeAudioRef.current) {
+      karaokeAudioRef.current.muted = false;
+      karaokeAudioRef.current.volume = 1;
+      // Try to play again in case of browser policy
+      karaokeAudioRef.current.play().catch(() => {});
+    }
+  }, []);
+
   // Destructure props and fallback for legacy prop names
   const {
     isDarkMode,
@@ -174,7 +191,20 @@ const FooterBar = (props: any) => {
   const [isKaraokeLoading, setIsKaraokeLoading] = useState(false);
   const [showKaraokeToast, setShowKaraokeToast] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [karaokeReady, setKaraokeReady] = useState(false);
+  // Set karaokeReady to true if the selectedSong has kar property true (for default song)
+  const [karaokeReady, setKaraokeReady] = useState(() => {
+    if (props.selectedSong && (props.selectedSong.kar === true || props.selectedSong.vocals === true)) {
+      return true;
+    }
+    return false;
+  });
+
+  // Ensure karaokeReady is true if selectedSong changes to a song with kar or vocals true
+  useEffect(() => {
+    if (selectedSong && (selectedSong.kar === true || selectedSong.vocals === true)) {
+      setKaraokeReady(true);
+    }
+  }, [selectedSong]);
   const [karaokeMode, setKaraokeMode] = useState<"mic" | "speaker" | "profile">("mic");
   const [activeKaraokeRowIndex, setActiveKaraokeRowIndex] = useState<number | null>(null);
   const [karaokeReadyKeys, setKaraokeReadyKeys] = useState<Set<string>>(new Set());
@@ -387,7 +417,7 @@ const FooterBar = (props: any) => {
         setPendingKaraokeRowIndex(null);
         startKaraokeForIndex(pendingIndex);
       }
-    }, 20000);
+    }, 2000);
   };
 
   const handleKaraokeGenerate = (rowIndex?: number) => {
@@ -407,30 +437,104 @@ const FooterBar = (props: any) => {
     startKaraokeForIndex(targetIndex);
   };
 
+  // Crossfade helper
+  const crossfade = (from: { setVolume: (v: number) => void } | HTMLAudioElement | null, to: { setVolume: (v: number) => void } | HTMLAudioElement | null, duration = 200) => {
+    if (!from && !to) return;
+    const steps = 10;
+    let step = 0;
+    const fade = () => {
+      step++;
+      const t = step / steps;
+      if (from) {
+        if (typeof (from as any).setVolume === 'function') {
+          (from as any).setVolume(Math.round((1 - t) * 100));
+        } else {
+          (from as HTMLAudioElement).volume = 1 - t;
+        }
+      }
+      if (to) {
+        if (typeof (to as any).setVolume === 'function') {
+          (to as any).setVolume(Math.round(t * 100));
+        } else {
+          (to as HTMLAudioElement).volume = t;
+        }
+      }
+      if (step < steps) setTimeout(fade, duration / steps);
+    };
+    fade();
+  };
+
   const handleKaraokeModeToggle = () => {
-    setKaraokeMode((prev) => {
-      if (prev === "mic") return "speaker";
-      if (prev === "speaker") return "profile";
-      return "mic";
-    });
+    let nextMode: "mic" | "speaker" | "profile" = karaokeMode;
+    if (karaokeMode === "mic") nextMode = "speaker";
+    else if (karaokeMode === "speaker") nextMode = "profile";
+    else nextMode = "mic";
+    setKaraokeMode(nextMode);
+
+    // Play all tracks if not already playing
+    if (playerRef.current && !isPlaying) {
+      playerRef.current.playVideo();
+      setIsPlaying(true);
+    } else if (!playerRef.current) {
+      pendingAutoPlayRef.current = true;
+    }
+    if (karaokeAudioRef.current && karaokeAudioRef.current.paused) karaokeAudioRef.current.play();
+    if (vocalsAudioRef.current && vocalsAudioRef.current.paused) vocalsAudioRef.current.play();
+
+    // Crossfade logic: only one is heard at a time
+    const yt = playerRef.current;
+    const kar = karaokeAudioRef.current;
+    const voc = vocalsAudioRef.current;
+    if (nextMode === "mic") {
+      // Only YouTube
+      crossfade(kar, yt);
+      crossfade(voc, yt);
+    } else if (nextMode === "speaker") {
+      // Only karaoke
+      crossfade(yt, kar);
+      crossfade(voc, kar);
+    } else if (nextMode === "profile") {
+      // Only vocals
+      crossfade(yt, voc);
+      crossfade(kar, voc);
+    }
   };
   // Language support removed: only English
 
   // (removed duplicate declarations)
 
   const handlePlayPause = () => {
-    if (!playerRef.current) {
+    const yt = playerRef.current;
+    const kar = karaokeAudioRef.current;
+    const voc = vocalsAudioRef.current;
+    if (!yt) {
       pendingAutoPlayRef.current = true;
       return;
     }
     if (isPlaying) {
-      playerRef.current.pauseVideo();
+      yt.pauseVideo();
+      if (kar) kar.pause();
+      if (voc) voc.pause();
       setIsPlaying(false);
     } else {
-      playerRef.current.playVideo();
+      yt.playVideo();
+      if (kar) kar.play();
+      if (voc) voc.play();
+      // Set only the current mode to 100% volume, others to 0
+      if (karaokeMode === "mic") {
+        yt.setVolume(100);
+        if (kar) kar.volume = 0;
+        if (voc) voc.volume = 0;
+      } else if (karaokeMode === "speaker") {
+        yt.setVolume(0);
+        if (kar) kar.volume = 1;
+        if (voc) voc.volume = 0;
+      } else if (karaokeMode === "profile") {
+        yt.setVolume(0);
+        if (kar) kar.volume = 0;
+        if (voc) voc.volume = 1;
+      }
       setIsPlaying(true);
-      // Add to song list when play is pressed
-      //addSongToList(selectedSong);
     }
   };
 
@@ -463,7 +567,7 @@ const FooterBar = (props: any) => {
 
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
     playerRef.current = event.target;
-    event.target.setVolume(volume);
+    event.target.setVolume(0); // Mute YouTube for test
     if (pendingAutoPlayRef.current) {
       if (playDelayRef.current) clearTimeout(playDelayRef.current);
       playDelayRef.current = setTimeout(() => {
@@ -520,9 +624,10 @@ const FooterBar = (props: any) => {
 
   // Handler for seeking in the video
   const handleSeek = (event: Event, value: number | number[]) => {
-    if (!playerRef.current) return;
     const seekTo = Array.isArray(value) ? value[0] : value;
-    playerRef.current.seekTo(seekTo, true);
+    if (playerRef.current) playerRef.current.seekTo(seekTo, true);
+    if (karaokeAudioRef.current) karaokeAudioRef.current.currentTime = seekTo;
+    if (vocalsAudioRef.current) vocalsAudioRef.current.currentTime = seekTo;
     setCurrentTime(seekTo);
   };
 
@@ -533,8 +638,87 @@ const FooterBar = (props: any) => {
   };
 
 
+  // Compose audio URLs using existing videoId (public path, not src/)
+  const karaokeUrl = videoId ? `/data/cache/${videoId}_karaoke.mp3` : undefined;
+  const vocalsUrl = videoId ? `/data/cache/${videoId}_vocals.mp3` : undefined;
+
+  // Audio error state
+  const [karaokeAudioError, setKaraokeAudioError] = useState(false);
+  const [vocalsAudioError, setVocalsAudioError] = useState(false);
+
+  // Karaoke waveform feedback
+  const [karaokeLevel, setKaraokeLevel] = useState(0);
+  const karaokeMeterRef = useRef<HTMLCanvasElement | null>(null);
+  useEffect(() => {
+    if (!karaokeAudioRef.current) return;
+    let audioCtx: AudioContext | null = null;
+    let analyser: AnalyserNode | null = null;
+    let source: MediaElementAudioSourceNode | null = null;
+    let rafId: number;
+    const audio = karaokeAudioRef.current;
+    const setup = () => {
+      try {
+        audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        source = audioCtx.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        analyser.fftSize = 32;
+        const data = new Uint8Array(analyser.frequencyBinCount);
+        const draw = () => {
+          if (!analyser) return;
+          analyser.getByteFrequencyData(data);
+          // Use max value as level (convert Uint8Array to Array for Math.max)
+          const level = Math.max.apply(null, Array.from(data)) / 255;
+          setKaraokeLevel(level);
+          // Draw bar
+          const canvas = karaokeMeterRef.current;
+          if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              ctx.fillStyle = '#4caf50';
+              ctx.fillRect(0, 0, canvas.width * level, canvas.height);
+            }
+          }
+          rafId = requestAnimationFrame(draw);
+        };
+        draw();
+      } catch {}
+    };
+    audio.addEventListener('play', setup);
+    if (!audio.paused) setup();
+    return () => {
+      audio.removeEventListener('play', setup);
+      if (audioCtx) audioCtx.close();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [karaokeUrl, karaokeAudioError]);
+
   return (
-    <Box
+    <>
+      {/* Hidden audio elements for karaoke and vocals, only if file is found */}
+      {/* Force test: always play aSSKPZBbVe8_karaoke.mp3 on page load */}
+      <audio
+        ref={karaokeAudioRef}
+        src={"/data/cache/aSSKPZBbVe8_karaoke.mp3"}
+        preload="auto"
+        autoPlay
+        onError={() => setKaraokeAudioError(true)}
+      />
+      {/* Karaoke waveform meter */}
+      <div style={{ width: 120, height: 10, background: '#222', borderRadius: 4, margin: '8px 0' }}>
+        <canvas ref={karaokeMeterRef} width={120} height={10} style={{ display: 'block' }} />
+      </div>
+      {vocalsUrl && !vocalsAudioError && (
+        <audio
+          ref={vocalsAudioRef}
+          src={vocalsUrl}
+          preload="auto"
+          onError={() => setVocalsAudioError(true)}
+        />
+      )}
+      <Box
       sx={{
         position: "fixed",
         left: 0,
@@ -622,17 +806,7 @@ const FooterBar = (props: any) => {
         pendingKaraokeRowIndex={pendingKaraokeRowIndex}
         onKaraokeGenerate={handleKaraokeGenerate}
       />
-      <LyricsPopup
-        open={lyricsOpen}
-        onClose={() => setLyricsOpen(false)}
-        title={selectedSong?.title}
-        artist={selectedSong?.artist}
-        lines={lyricsLines}
-        currentTime={currentTime}
-        totalDuration={totalDuration}
-        isLoading={lyricsLoading}
-        error={lyricsError}
-      />
+
       {/* ThemeModeButton: only show on desktop at far right */}
       {!isMobile && (
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -640,6 +814,7 @@ const FooterBar = (props: any) => {
         </div>
       )}
     </Box>
+    </>
   );
 };
 
