@@ -40,6 +40,7 @@ interface FooterControlPanelProps {
   onKaraokeGenerate: () => void;
   onKaraokeModeToggle: () => void;
   karaokeAudioRef?: React.RefObject<HTMLAudioElement | null>;
+  karaokeMeterRef?: React.RefObject<HTMLCanvasElement | null>;
 }
 
 const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
@@ -71,6 +72,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
   onKaraokeGenerate,
   onKaraokeModeToggle,
   karaokeAudioRef,
+  karaokeMeterRef,
 }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: 250, maxWidth: 400 }}>
@@ -102,8 +104,19 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                 <img
                   src={thumbUrl}
                   alt={selectedSong?.title || "thumbnail"}
-                  style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", marginRight: 8 }}
+                  style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", marginRight: 8, cursor: 'pointer' }}
+                  onClick={() => {
+                    if (videoId) {
+                      window.location.href = `http://localhost:3000/watch/${videoId}`;
+                    }
+                  }}
                 />
+              )}
+              {/* Karaoke waveform meter */}
+              {karaokeMeterRef && (
+                <div style={{ width: 120, height: 10, background: '#222', borderRadius: 4, margin: '8px 0' }}>
+                  <canvas ref={karaokeMeterRef} width={120} height={10} style={{ display: 'block' }} />
+                </div>
               )}
               <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
                 {showKaraokeToast && toastMessage && (

@@ -214,10 +214,7 @@ const FooterBar = (props: any) => {
   const karaokeToastRef = useRef<NodeJS.Timeout | null>(null);
   const playDelayRef = useRef<NodeJS.Timeout | null>(null);
   const pendingAutoPlayRef = useRef(false);
-  const [lyricsOpen, setLyricsOpen] = useState(false);
-  const [lyricsLines, setLyricsLines] = useState<string[]>([]);
-  const [lyricsLoading, setLyricsLoading] = useState(false);
-  const [lyricsError, setLyricsError] = useState<string | null>(null);
+  // Lyrics/Genius state removed
   const playerRef = useRef<YouTubePlayer | null>(null);
   const dispatch = useDispatch();
   const volume = useSelector((state: any) => state.data.volume ?? 50);
@@ -244,68 +241,7 @@ const FooterBar = (props: any) => {
     };
   }, []);
 
-  useEffect(() => {
-    if (!selectedSong?.title) return;
-    const controller = new AbortController();
-    const geniusKey = process.env.REACT_APP_GENIUS_API_KEY || "";
-
-    const loadLyrics = async () => {
-      setLyricsOpen(true);
-      setLyricsLoading(true);
-      setLyricsError(null);
-      setLyricsLines([]);
-
-      if (!geniusKey) {
-        setLyricsLoading(false);
-        setLyricsError("Missing Genius API key.");
-        return;
-      }
-
-      const titleQuery = selectedSong.title || "";
-      const artistQuery = selectedSong.artist || "";
-      const searchQuery = encodeURIComponent(`${titleQuery} ${artistQuery}`.trim());
-
-      try {
-        const searchRes = await fetch(`https://api.genius.com/search?q=${searchQuery}`, {
-          headers: { Authorization: `Bearer ${geniusKey}` },
-          signal: controller.signal,
-        });
-
-        if (!searchRes.ok) throw new Error("Failed to search lyrics.");
-        const searchData = await searchRes.json();
-        const hit = searchData?.response?.hits?.[0]?.result;
-        const resolvedTitle = hit?.title || titleQuery;
-        const resolvedArtist = hit?.primary_artist?.name || artistQuery;
-
-        const lyricsRes = await fetch(
-          `https://api.lyrics.ovh/v1/${encodeURIComponent(resolvedArtist)}/${encodeURIComponent(resolvedTitle)}`,
-          { signal: controller.signal }
-        );
-
-        if (!lyricsRes.ok) throw new Error("Lyrics not available for this song.");
-        const lyricsData = await lyricsRes.json();
-        const rawLyrics = typeof lyricsData?.lyrics === "string" ? lyricsData.lyrics : "";
-        const lines = rawLyrics
-          .split(/\r?\n/)
-          .map((line: string) => line.trim())
-          .filter((line: string) => line.length > 0);
-
-        if (lines.length === 0) throw new Error("Lyrics not available for this song.");
-        setLyricsLines(lines);
-        setLyricsLoading(false);
-      } catch (err: any) {
-        if (err?.name === "AbortError") return;
-        setLyricsLoading(false);
-        setLyricsError(err?.message || "Lyrics unavailable.");
-      }
-    };
-
-    loadLyrics();
-
-    return () => {
-      controller.abort();
-    };
-  }, [selectedSong?.title, selectedSong?.artist]);
+  // Lyrics/Genius effect removed
 
   // Keep propSongList in sync with reordered songList
   useEffect(() => {
