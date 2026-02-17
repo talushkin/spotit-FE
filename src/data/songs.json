@@ -10,17 +10,8 @@
         "priority": 1,
         "createdAt": "04-05-2025",
         "songs": [
-          { "title": "קובי אפללו - בא מן השתיקה (קליפ)", "artist": "קובי אפללו", "url": "https://www.youtube.com/watch?v=aSSKPZBbVe8", "image": "https://img.youtube.com/vi/aSSKPZBbVe8/hqdefault.jpg", "duration": "4:00", "kar": true, "vocals": true, "default": true },
-          { "title": "Bohemian Rhapsody", "artist": "Queen", "url": "https://www.youtube.com/watch?v=fJ9rUzIMcZQ", "image": "https://img.youtube.com/vi/fJ9rUzIMcZQ/hqdefault.jpg", "duration": "5:55" },
-          { "title": "Stairway to Heaven", "artist": "Led Zeppelin", "url": "https://www.youtube.com/watch?v=QkF3oxziUI4", "image": "https://img.youtube.com/vi/QkF3oxziUI4/hqdefault.jpg", "duration": "8:02" },
-          { "title": "Comfortably Numb", "artist": "Pink Floyd", "url": "https://www.youtube.com/watch?v=_FrOQC-zEog", "image": "https://img.youtube.com/vi/_FrOQC-zEog/hqdefault.jpg", "duration": "6:22" },
-          { "title": "Sweet Child O' Mine", "artist": "Guns N' Roses", "url": "https://www.youtube.com/watch?v=1w7OgIMMRc4", "image": "https://img.youtube.com/vi/1w7OgIMMRc4/hqdefault.jpg", "duration": "5:56" },
-          { "title": "Smells Like Teen Spirit", "artist": "Nirvana", "url": "https://www.youtube.com/watch?v=hTWKbfoikeg", "image": "https://img.youtube.com/vi/hTWKbfoikeg/hqdefault.jpg", "duration": "5:01" },
-          { "title": "Zombie", "artist": "The Cranberries", "url": "https://www.youtube.com/watch?v=6Ejga4kJUts", "image": "https://img.youtube.com/vi/6Ejga4kJUts/hqdefault.jpg", "duration": "5:06" },
-          { "title": "Wonderwall", "artist": "Oasis", "url": "https://www.youtube.com/watch?v=6hzrDeceEKc", "image": "https://img.youtube.com/vi/6hzrDeceEKc/hqdefault.jpg", "duration": "4:18" },
-          { "title": "Numb", "artist": "Linkin Park", "url": "https://www.youtube.com/watch?v=kXYiU_JCYtU", "image": "https://img.youtube.com/vi/kXYiU_JCYtU/hqdefault.jpg", "duration": "3:07" },
-          { "title": "November Rain", "artist": "Guns N' Roses", "url": "https://www.youtube.com/watch?v=8SbUC-UaAxE", "image": "https://img.youtube.com/vi/8SbUC-UaAxE/hqdefault.jpg", "duration": "8:57" },
-          { "title": "Seven Nation Army", "artist": "The White Stripes", "url": "https://www.youtube.com/watch?v=0J2QdDbelmY", "image": "https://img.youtube.com/vi/0J2QdDbelmY/hqdefault.jpg", "duration": "3:52" }
+          { "title": "קובי אפללו - בא מן השתיקה (קליפ)", "artist": "קובי אפללו", "url": "https://www.youtube.com/watch?v=aSSKPZBbVe8", "image": "https://img.youtube.com/vi/aSSKPZBbVe8/hqdefault.jpg", "duration": "4:00"},
+
         ]
       },
       {

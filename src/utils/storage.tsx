@@ -75,6 +75,8 @@ export interface Song {
   createdAt?: string;
   genreId?: string;
   genre?: string;
+  kar?: boolean;
+  vocals?: boolean;
 }
 
 

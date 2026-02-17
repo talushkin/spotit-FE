@@ -158,13 +158,21 @@ const FooterBar = (props: any) => {
   const karaokeAudioRef = useRef<HTMLAudioElement | null>(null);
   const vocalsAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Ensure karaoke audio is unmuted and volume is 1 on mount for testing
+  // On startup, if selectedSong has karaoke and vocals, play both
   useEffect(() => {
-    if (karaokeAudioRef.current) {
-      karaokeAudioRef.current.muted = false;
-      karaokeAudioRef.current.volume = 1;
-      // Try to play again in case of browser policy
-      karaokeAudioRef.current.play().catch(() => {});
+    if (props.selectedSong && (props.selectedSong.kar === true || props.selectedSong.vocals === true)) {
+      if (karaokeAudioRef.current) {
+        karaokeAudioRef.current.muted = false;
+        karaokeAudioRef.current.volume = 1;
+        karaokeAudioRef.current.currentTime = 0;
+        karaokeAudioRef.current.play().catch(() => {});
+      }
+      if (vocalsAudioRef.current) {
+        vocalsAudioRef.current.muted = false;
+        vocalsAudioRef.current.volume = 1;
+        vocalsAudioRef.current.currentTime = 0;
+        vocalsAudioRef.current.play().catch(() => {});
+      }
     }
   }, []);
 
@@ -222,7 +230,14 @@ const FooterBar = (props: any) => {
   const dispatch = useDispatch();
   const volume = useSelector((state: any) => state.data.volume ?? 50);
   const setVolumeGlobal = (v: number) => dispatch(setVolume(v));
-  const [songList, setSongList] = useState<Song[]>(propSongList);
+  const [songList, setSongList] = useState<Song[]>([]);
+  useEffect(() => {
+    // Load default playlist on startup
+    fetch('/src/data/defaultPlaylist.json')
+      .then(res => res.json())
+      .then(data => setSongList(data))
+      .catch(() => setSongList(propSongList));
+  }, []);
   useEffect(() => {
     if (playerRef.current) {
       playerRef.current.setVolume(volume);
@@ -697,14 +712,7 @@ const FooterBar = (props: any) => {
 
   return (
     <>
-      {/* Hidden audio elements for karaoke and vocals, only if file is found */}
-      {/* Force test: always play aSSKPZBbVe8_karaoke.mp3 on page load */}
-      <audio
-        ref={karaokeAudioRef}
-        src={"/data/cache/aSSKPZBbVe8_karaoke.mp3"}
-        preload="auto"
-        onError={() => setKaraokeAudioError(true)}
-      />
+  
       {/* Karaoke waveform meter */}
       <div style={{ width: 120, height: 10, background: '#222', borderRadius: 4, margin: '8px 0' }}>
         <canvas ref={karaokeMeterRef} width={120} height={10} style={{ display: 'block' }} />
