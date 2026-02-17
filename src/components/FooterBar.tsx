@@ -703,13 +703,22 @@ const FooterBar = (props: any) => {
         ref={karaokeAudioRef}
         src={"/data/cache/aSSKPZBbVe8_karaoke.mp3"}
         preload="auto"
-        autoPlay
         onError={() => setKaraokeAudioError(true)}
       />
       {/* Karaoke waveform meter */}
       <div style={{ width: 120, height: 10, background: '#222', borderRadius: 4, margin: '8px 0' }}>
         <canvas ref={karaokeMeterRef} width={120} height={10} style={{ display: 'block' }} />
       </div>
+      {/* MP3 play button */}
+      <button
+        style={{ margin: '8px', padding: '6px 16px', fontWeight: 600, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+        onClick={() => {
+          if (karaokeAudioRef.current) {
+            karaokeAudioRef.current.currentTime = 0;
+            karaokeAudioRef.current.play();
+          }
+        }}
+      >mp3</button>
       {vocalsUrl && !vocalsAudioError && (
         <audio
           ref={vocalsAudioRef}
@@ -784,6 +793,7 @@ const FooterBar = (props: any) => {
           isCurrentKaraokeReady={karaokeReadyKeys.has(getSongKey(selectedSong as Song))}
           onKaraokeGenerate={() => handleKaraokeGenerate()}
           onKaraokeModeToggle={handleKaraokeModeToggle}
+          karaokeAudioRef={karaokeAudioRef}
         />
         {/* ThemeModeButton: only show on desktop at far right */}
       </Box>

@@ -39,6 +39,7 @@ interface FooterControlPanelProps {
   isCurrentKaraokeReady: boolean;
   onKaraokeGenerate: () => void;
   onKaraokeModeToggle: () => void;
+  karaokeAudioRef?: React.RefObject<HTMLAudioElement | null>;
 }
 
 const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
@@ -69,6 +70,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
   isCurrentKaraokeReady,
   onKaraokeGenerate,
   onKaraokeModeToggle,
+  karaokeAudioRef,
 }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: 250, maxWidth: 400 }}>
@@ -97,11 +99,13 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
           <>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: isMobile ? '100%' : undefined }}>
               {thumbUrl && (
-                <img
-                  src={thumbUrl}
-                  alt={selectedSong?.title || "thumbnail"}
-                  style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", marginRight: 8 }}
-                />
+                <>
+                  <img
+                    src={thumbUrl}
+                    alt={selectedSong?.title || "thumbnail"}
+                    style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", marginRight: 8 }}
+                  />
+                </>
               )}
               <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
                 {showKaraokeToast && toastMessage && (
