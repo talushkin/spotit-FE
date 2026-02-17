@@ -158,21 +158,13 @@ const FooterBar = (props: any) => {
   const karaokeAudioRef = useRef<HTMLAudioElement | null>(null);
   const vocalsAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // On startup, if selectedSong has karaoke and vocals, play both
+  // Ensure karaoke audio is unmuted and volume is 1 on mount for testing
   useEffect(() => {
-    if (props.selectedSong && (props.selectedSong.kar === true || props.selectedSong.vocals === true)) {
-      if (karaokeAudioRef.current) {
-        karaokeAudioRef.current.muted = false;
-        karaokeAudioRef.current.volume = 1;
-        karaokeAudioRef.current.currentTime = 0;
-        karaokeAudioRef.current.play().catch(() => {});
-      }
-      if (vocalsAudioRef.current) {
-        vocalsAudioRef.current.muted = false;
-        vocalsAudioRef.current.volume = 1;
-        vocalsAudioRef.current.currentTime = 0;
-        vocalsAudioRef.current.play().catch(() => {});
-      }
+    if (karaokeAudioRef.current) {
+      karaokeAudioRef.current.muted = false;
+      karaokeAudioRef.current.volume = 1;
+      // Try to play again in case of browser policy
+      karaokeAudioRef.current.play().catch(() => {});
     }
   }, []);
 
@@ -230,14 +222,7 @@ const FooterBar = (props: any) => {
   const dispatch = useDispatch();
   const volume = useSelector((state: any) => state.data.volume ?? 50);
   const setVolumeGlobal = (v: number) => dispatch(setVolume(v));
-  const [songList, setSongList] = useState<Song[]>([]);
-  useEffect(() => {
-    // Load default playlist on startup
-    fetch('/src/data/defaultPlaylist.json')
-      .then(res => res.json())
-      .then(data => setSongList(data))
-      .catch(() => setSongList(propSongList));
-  }, []);
+  const [songList, setSongList] = useState<Song[]>(propSongList);
   useEffect(() => {
     if (playerRef.current) {
       playerRef.current.setVolume(volume);
@@ -712,21 +697,16 @@ const FooterBar = (props: any) => {
 
   return (
     <>
-  
-      {/* Karaoke waveform meter */}
-      <div style={{ width: 120, height: 10, background: '#222', borderRadius: 4, margin: '8px 0' }}>
-        <canvas ref={karaokeMeterRef} width={120} height={10} style={{ display: 'block' }} />
-      </div>
-      {/* MP3 play button */}
-      <button
-        style={{ margin: '8px', padding: '6px 16px', fontWeight: 600, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
-        onClick={() => {
-          if (karaokeAudioRef.current) {
-            karaokeAudioRef.current.currentTime = 0;
-            karaokeAudioRef.current.play();
-          }
-        }}
-      >mp3</button>
+      {/* Hidden audio elements for karaoke and vocals, only if file is found */}
+      {/* Force test: always play aSSKPZBbVe8_karaoke.mp3 on page load */}
+      <audio
+        ref={karaokeAudioRef}
+        src={"/data/cache/aSSKPZBbVe8_karaoke.mp3"}
+        preload="auto"
+        onError={() => setKaraokeAudioError(true)}
+      />
+      {/* Karaoke waveform meter moved to FooterControlPanel */}
+      {/* Song thumbnail moved to FooterControlPanel */}
       {vocalsUrl && !vocalsAudioError && (
         <audio
           ref={vocalsAudioRef}
@@ -802,6 +782,7 @@ const FooterBar = (props: any) => {
           onKaraokeGenerate={() => handleKaraokeGenerate()}
           onKaraokeModeToggle={handleKaraokeModeToggle}
           karaokeAudioRef={karaokeAudioRef}
+          karaokeMeterRef={karaokeMeterRef}
         />
         {/* ThemeModeButton: only show on desktop at far right */}
       </Box>
