@@ -15,9 +15,11 @@ interface CaseCardProps {
   onAddSongToList?: (song: Song, location?: number) => void;
   onSelectSong?: (song: Song) => void;
   displayType?: DisplayType;
+  isMobile?: boolean;
+  showMobileActions?: boolean;
 }
 
-export default function CaseCard({ item, category, index, isDarkMode = true, onAddSongToList, onSelectSong, displayType = DisplayType.Slider }: CaseCardProps) {
+export default function CaseCard({ item, category, index, isDarkMode = true, onAddSongToList, onSelectSong, displayType = DisplayType.Slider, isMobile = false, showMobileActions = false }: CaseCardProps) {
   const navigate = useNavigate();
   // Handler for play button: select and play (do not add to list here)
 
@@ -151,6 +153,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
   // Clean the title for display and tooltip
   let cleanTitle = item.title.replace(/&quot;/g, '"');
   cleanTitle = cleanTitle.replace(/&[a-zA-Z0-9#]+;/g, '').replace(/["'`]/g, '');
+  const shouldShowMobileButtons = isMobile && showMobileActions;
 
   return (
     <Tooltip title={cleanTitle} arrow placement="top">
@@ -236,12 +239,13 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              opacity: 0,
-              transition: "opacity 0.3s, transform 0.3s",
+              opacity: shouldShowMobileButtons ? 1 : 0,
+              transition: "opacity 0.28s ease, transform 0.28s ease",
               boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
               zIndex: 2,
               textDecoration: "none",
-              pointerEvents: "none",
+              pointerEvents: shouldShowMobileButtons ? "auto" : "none",
+              transform: shouldShowMobileButtons ? "translateY(0)" : "translateY(28px)",
               border: "none",
               cursor: "pointer",
             }}
@@ -272,9 +276,10 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
               boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
               cursor: "pointer",
               zIndex: 2,
-              opacity: 0,
-              transition: "opacity 0.3s, transform 0.3s",
-              pointerEvents: "none",
+              opacity: shouldShowMobileButtons ? 1 : 0,
+              transition: "opacity 0.28s ease, transform 0.28s ease",
+              pointerEvents: shouldShowMobileButtons ? "auto" : "none",
+              transform: shouldShowMobileButtons ? "translateY(0)" : "translateY(28px)",
             }}
             tabIndex={-1}
             aria-label="Add to song list"
@@ -285,24 +290,26 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
         {/* Overlay for hover effect */}
         <style>
           {`
-            .case .case-play-btn,
-            .case .case-add-btn {
-              opacity: 0;
-              pointer-events: none;
-              transition: opacity 0.3s, transform 0.3s;
-              transform: translateY(40px);
-            }
-            .case:hover .case-play-btn,
-            .case:hover .case-add-btn {
-              opacity: 1 !important;
-              pointer-events: auto !important;
-              animation: fadeInPlayBtn 0.3s;
-              transform: translateY(0);
-            }
-            .case:not(:hover) .case-play-btn,
-            .case:not(:hover) .case-add-btn {
-              animation: fadeOutPlayBtn 0.3s;
-              transform: translateY(40px);
+            @media (hover: hover) and (pointer: fine) {
+              .case .case-play-btn,
+              .case .case-add-btn {
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s, transform 0.3s;
+                transform: translateY(40px);
+              }
+              .case:hover .case-play-btn,
+              .case:hover .case-add-btn {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                animation: fadeInPlayBtn 0.3s;
+                transform: translateY(0);
+              }
+              .case:not(:hover) .case-play-btn,
+              .case:not(:hover) .case-add-btn {
+                animation: fadeOutPlayBtn 0.3s;
+                transform: translateY(40px);
+              }
             }
             @keyframes fadeInPlayBtn {
               from { opacity: 0; transform: translateY(40px);}

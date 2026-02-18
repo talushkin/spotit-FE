@@ -20,9 +20,12 @@ const SongSlider: React.FC<SongSliderProps> = ({
 }: SongSliderProps) => {
   // Drag-to-scroll logic
   const sliderRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
   let isDragging = false;
   let startX = 0;
   let scrollLeft = 0;
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 650);
+  const [centeredIndex, setCenteredIndex] = useState<number | null>(null);
 
   // Determine displayType from selectedGenre
   const displayType: DisplayType = selectedGenre?.displayType || DisplayType.Slider;
@@ -51,6 +54,58 @@ const SongSlider: React.FC<SongSliderProps> = ({
     const walk = (x - startX) * 2.5; // scroll speed (increased)
     if (sliderRef.current) sliderRef.current.scrollLeft = scrollLeft - walk;
   };
+
+  const updateCenteredCard = () => {
+    if (!isMobile) {
+      setCenteredIndex(null);
+      return;
+    }
+
+    const viewportCenterX = window.innerWidth / 2;
+    let closestIndex = -1;
+    let closestDistance = Number.POSITIVE_INFINITY;
+
+    cardRefs.current.forEach((card, idx) => {
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const cardCenterX = rect.left + rect.width / 2;
+      const distance = Math.abs(cardCenterX - viewportCenterX);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = idx;
+      }
+    });
+
+    setCenteredIndex((prev) => (prev === closestIndex ? prev : closestIndex));
+  };
+
+  useEffect(() => {
+    const onResize = () => {
+      setIsMobile(window.innerWidth <= 650);
+      requestAnimationFrame(updateCenteredCard);
+    };
+
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, [isMobile, songs.length]);
+
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const onScroll = () => {
+      requestAnimationFrame(updateCenteredCard);
+    };
+
+    slider.addEventListener('scroll', onScroll, { passive: true });
+    requestAnimationFrame(updateCenteredCard);
+
+    return () => {
+      slider.removeEventListener('scroll', onScroll);
+    };
+  }, [songs, isMobile]);
 
   // Gradient backgrounds per displayType
   const getSliderBackground = () => {
@@ -137,6 +192,9 @@ const SongSlider: React.FC<SongSliderProps> = ({
         {songs.map((item: Song, index: number) => (
           <div
             key={index}
+            ref={(el) => {
+              cardRefs.current[index] = el;
+            }}
             style={
               displayType === "circles"
                 ? {
@@ -191,6 +249,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
               isDarkMode={isDarkMode}
               onAddSongToList={onAddSongToList}
               displayType={displayType}
+              isMobile={isMobile}
+              showMobileActions={centeredIndex === index}
             />
           </div>
         ))}

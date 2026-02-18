@@ -84,7 +84,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
           value={volume}
           onChange={(_, value) => setVolume(Array.isArray(value) ? value[0] : value)}
           sx={{
-            height: 80,
+            height: 60,
             marginBottom: 6,
             color: '#1976d2',
             '& .MuiSlider-thumb': {

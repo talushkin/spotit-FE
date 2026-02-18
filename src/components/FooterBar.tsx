@@ -213,6 +213,7 @@ const FooterBar = (props: any) => {
   const karaokeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const karaokeToastRef = useRef<NodeJS.Timeout | null>(null);
   const playDelayRef = useRef<NodeJS.Timeout | null>(null);
+  const fadeAnimationRef = useRef<number | null>(null);
   const pendingAutoPlayRef = useRef(false);
   // Lyrics/Genius state removed
   const playerRef = useRef<YouTubePlayer | null>(null);
@@ -238,6 +239,7 @@ const FooterBar = (props: any) => {
       if (karaokeTimerRef.current) clearTimeout(karaokeTimerRef.current);
       if (karaokeToastRef.current) clearTimeout(karaokeToastRef.current);
       if (playDelayRef.current) clearTimeout(playDelayRef.current);
+      if (fadeAnimationRef.current) cancelAnimationFrame(fadeAnimationRef.current);
     };
   }, []);
 
@@ -373,31 +375,73 @@ const FooterBar = (props: any) => {
     startKaraokeForIndex(targetIndex);
   };
 
-  // Crossfade helper
-  const crossfade = (from: { setVolume: (v: number) => void } | HTMLAudioElement | null, to: { setVolume: (v: number) => void } | HTMLAudioElement | null, duration = 200) => {
-    if (!from && !to) return;
-    const steps = 10;
-    let step = 0;
-    const fade = () => {
-      step++;
-      const t = step / steps;
-      if (from) {
-        if (typeof (from as any).setVolume === 'function') {
-          (from as any).setVolume(Math.round((1 - t) * 100));
-        } else {
-          (from as HTMLAudioElement).volume = 1 - t;
-        }
+  const getModeTargets = (mode: "mic" | "speaker" | "profile") => {
+    if (mode === "mic") return { yt: 100, kar: 0, voc: 0 };
+    if (mode === "speaker") return { yt: 0, kar: 1, voc: 0 };
+    return { yt: 0, kar: 0, voc: 1 };
+  };
+
+  const setModeVolumesInstant = (mode: "mic" | "speaker" | "profile") => {
+    const yt = playerRef.current;
+    const kar = karaokeAudioRef.current;
+    const voc = vocalsAudioRef.current;
+    const target = getModeTargets(mode);
+    if (yt) yt.setVolume(target.yt);
+    if (kar) kar.volume = target.kar;
+    if (voc) voc.volume = target.voc;
+  };
+
+  const fadeToMode = (mode: "mic" | "speaker" | "profile", duration = 220) => {
+    const yt = playerRef.current;
+    const kar = karaokeAudioRef.current;
+    const voc = vocalsAudioRef.current;
+    if (!yt && !kar && !voc) return;
+
+    if (fadeAnimationRef.current) cancelAnimationFrame(fadeAnimationRef.current);
+
+    const target = getModeTargets(mode);
+    const fromYt = yt?.getVolume?.() ?? 0;
+    const fromKar = kar?.volume ?? 0;
+    const fromVoc = voc?.volume ?? 0;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      if (yt) yt.setVolume(Math.round(fromYt + (target.yt - fromYt) * t));
+      if (kar) kar.volume = fromKar + (target.kar - fromKar) * t;
+      if (voc) voc.volume = fromVoc + (target.voc - fromVoc) * t;
+
+      if (t < 1) {
+        fadeAnimationRef.current = requestAnimationFrame(tick);
+      } else {
+        fadeAnimationRef.current = null;
       }
-      if (to) {
-        if (typeof (to as any).setVolume === 'function') {
-          (to as any).setVolume(Math.round(t * 100));
-        } else {
-          (to as HTMLAudioElement).volume = t;
-        }
-      }
-      if (step < steps) setTimeout(fade, duration / steps);
     };
-    fade();
+
+    fadeAnimationRef.current = requestAnimationFrame(tick);
+  };
+
+  const syncAudioToYouTube = () => {
+    const yt = playerRef.current;
+    if (!yt) return;
+    const ytTime = yt.getCurrentTime?.() || 0;
+    const threshold = 0.12;
+    const kar = karaokeAudioRef.current;
+    const voc = vocalsAudioRef.current;
+
+    if (kar) {
+      if (Math.abs((kar.currentTime || 0) - ytTime) > threshold) {
+        kar.currentTime = ytTime;
+      }
+      if (kar.paused) kar.play().catch(() => {});
+    }
+
+    if (voc) {
+      if (Math.abs((voc.currentTime || 0) - ytTime) > threshold) {
+        voc.currentTime = ytTime;
+      }
+      if (voc.paused) voc.play().catch(() => {});
+    }
   };
 
   const handleKaraokeModeToggle = () => {
@@ -407,32 +451,15 @@ const FooterBar = (props: any) => {
     else nextMode = "mic";
     setKaraokeMode(nextMode);
 
-    // Play all tracks if not already playing
-    if (playerRef.current && !isPlaying) {
-      playerRef.current.playVideo();
-      setIsPlaying(true);
-    } else if (!playerRef.current) {
+    if (playerRef.current) {
+      if (!isPlaying) {
+        playerRef.current.playVideo();
+        setIsPlaying(true);
+      }
+      syncAudioToYouTube();
+      fadeToMode(nextMode);
+    } else {
       pendingAutoPlayRef.current = true;
-    }
-    if (karaokeAudioRef.current && karaokeAudioRef.current.paused) karaokeAudioRef.current.play();
-    if (vocalsAudioRef.current && vocalsAudioRef.current.paused) vocalsAudioRef.current.play();
-
-    // Crossfade logic: only one is heard at a time
-    const yt = playerRef.current;
-    const kar = karaokeAudioRef.current;
-    const voc = vocalsAudioRef.current;
-    if (nextMode === "mic") {
-      // Only YouTube
-      crossfade(kar, yt);
-      crossfade(voc, yt);
-    } else if (nextMode === "speaker") {
-      // Only karaoke
-      crossfade(yt, kar);
-      crossfade(voc, kar);
-    } else if (nextMode === "profile") {
-      // Only vocals
-      crossfade(yt, voc);
-      crossfade(kar, voc);
     }
   };
   // Language support removed: only English
@@ -453,23 +480,12 @@ const FooterBar = (props: any) => {
       if (voc) voc.pause();
       setIsPlaying(false);
     } else {
+      if (yt) yt.setVolume(0);
+      if (kar) kar.volume = 0;
+      if (voc) voc.volume = 0;
       yt.playVideo();
-      if (kar) kar.play();
-      if (voc) voc.play();
-      // Set only the current mode to 100% volume, others to 0
-      if (karaokeMode === "mic") {
-        yt.setVolume(100);
-        if (kar) kar.volume = 0;
-        if (voc) voc.volume = 0;
-      } else if (karaokeMode === "speaker") {
-        yt.setVolume(0);
-        if (kar) kar.volume = 1;
-        if (voc) voc.volume = 0;
-      } else if (karaokeMode === "profile") {
-        yt.setVolume(0);
-        if (kar) kar.volume = 0;
-        if (voc) voc.volume = 1;
-      }
+      syncAudioToYouTube();
+      fadeToMode(karaokeMode);
       setIsPlaying(true);
     }
   };
@@ -483,6 +499,14 @@ const FooterBar = (props: any) => {
         const duration = playerRef.current?.getDuration?.() || 0;
         setCurrentTime(time);
         const idx = getCurrentSongIndex();
+        const kar = karaokeAudioRef.current;
+        const voc = vocalsAudioRef.current;
+        if (kar && !kar.paused && Math.abs((kar.currentTime || 0) - time) > 0.12) {
+          kar.currentTime = time;
+        }
+        if (voc && !voc.paused && Math.abs((voc.currentTime || 0) - time) > 0.12) {
+          voc.currentTime = time;
+        }
         // Highlight next song 20 seconds before end
         if (
           duration > 0 &&
@@ -503,11 +527,13 @@ const FooterBar = (props: any) => {
 
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
     playerRef.current = event.target;
-    event.target.setVolume(0); // Mute YouTube for test
+    setModeVolumesInstant(karaokeMode);
     if (pendingAutoPlayRef.current) {
       if (playDelayRef.current) clearTimeout(playDelayRef.current);
       playDelayRef.current = setTimeout(() => {
         event.target.playVideo();
+        syncAudioToYouTube();
+        fadeToMode(karaokeMode);
         setIsPlaying(true);
         pendingAutoPlayRef.current = false;
       }, 500);
@@ -540,6 +566,8 @@ const FooterBar = (props: any) => {
       if (playDelayRef.current) clearTimeout(playDelayRef.current);
       playDelayRef.current = setTimeout(() => {
         playerRef.current?.playVideo();
+        syncAudioToYouTube();
+        fadeToMode(karaokeMode);
         setIsPlaying(true);
         pendingAutoPlayRef.current = false;
       }, 500);
@@ -581,6 +609,14 @@ const FooterBar = (props: any) => {
   // Audio error state
   const [karaokeAudioError, setKaraokeAudioError] = useState(false);
   const [vocalsAudioError, setVocalsAudioError] = useState(false);
+
+  useEffect(() => {
+    setKaraokeAudioError(false);
+  }, [karaokeUrl]);
+
+  useEffect(() => {
+    setVocalsAudioError(false);
+  }, [vocalsUrl]);
 
   // Karaoke waveform feedback
   const [karaokeLevel, setKaraokeLevel] = useState(0);
@@ -634,13 +670,14 @@ const FooterBar = (props: any) => {
   return (
     <>
       {/* Hidden audio elements for karaoke and vocals, only if file is found */}
-      {/* Force test: always play aSSKPZBbVe8_karaoke.mp3 on page load */}
-      <audio
-        ref={karaokeAudioRef}
-        src={"/data/cache/aSSKPZBbVe8_karaoke.mp3"}
-        preload="auto"
-        onError={() => setKaraokeAudioError(true)}
-      />
+      {karaokeUrl && !karaokeAudioError && (
+        <audio
+          ref={karaokeAudioRef}
+          src={karaokeUrl}
+          preload="auto"
+          onError={() => setKaraokeAudioError(true)}
+        />
+      )}
       {/* Karaoke waveform meter moved to FooterControlPanel */}
       {/* Song thumbnail moved to FooterControlPanel */}
       {vocalsUrl && !vocalsAudioError && (
