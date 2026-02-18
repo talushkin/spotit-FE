@@ -85,27 +85,27 @@ const SongSlider: React.FC<SongSliderProps> = ({
     let closestCard: HTMLDivElement | null = null;
     let closestDistance = Number.POSITIVE_INFINITY;
 
-    cardRefs.current.forEach((card) => {
+    cardRefs.current.forEach((card: HTMLDivElement | null) => {
       if (!card) return;
       const rect = card.getBoundingClientRect();
       const cardCenterX = rect.left + rect.width / 2;
       const distance = Math.abs(cardCenterX - sliderCenterX);
       if (distance < closestDistance) {
         closestDistance = distance;
-        closestCard = card;
+        closestCard = card as HTMLDivElement;
       }
     });
 
-    if (!closestCard) return;
+    if (closestCard) {
+      const cardRect = (closestCard as HTMLDivElement).getBoundingClientRect();
+      const deltaToCenter = cardRect.left + cardRect.width / 2 - sliderCenterX;
+      const targetLeft = slider.scrollLeft + deltaToCenter;
 
-    const cardRect = closestCard.getBoundingClientRect();
-    const deltaToCenter = cardRect.left + cardRect.width / 2 - sliderCenterX;
-    const targetLeft = slider.scrollLeft + deltaToCenter;
-
-    slider.scrollTo({
-      left: Math.max(0, targetLeft),
-      behavior: 'smooth',
-    });
+      slider.scrollTo({
+        left: Math.max(0, targetLeft),
+        behavior: 'smooth',
+      });
+    }
   };
 
   const scheduleSnapToCenter = () => {
