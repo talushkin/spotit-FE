@@ -239,15 +239,16 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              opacity: shouldShowMobileButtons ? 1 : 0,
+              opacity: isMobile ? (shouldShowMobileButtons ? 1 : 0) : undefined,
               transition: "opacity 0.28s ease, transform 0.28s ease",
               boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
               zIndex: 2,
               textDecoration: "none",
-              pointerEvents: shouldShowMobileButtons ? "auto" : "none",
-              transform: shouldShowMobileButtons ? "translateY(0)" : "translateY(28px)",
+              pointerEvents: isMobile ? (shouldShowMobileButtons ? "auto" : "none") : undefined,
+              transform: isMobile ? (shouldShowMobileButtons ? "translateY(0)" : "translateY(28px)") : undefined,
               border: "none",
               cursor: "pointer",
+              willChange: "opacity, transform",
             }}
           >
             <PlayArrowIcon style={{ color: "#fff", fontSize: 32 }} />
@@ -276,10 +277,11 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
               boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
               cursor: "pointer",
               zIndex: 2,
-              opacity: shouldShowMobileButtons ? 1 : 0,
+              opacity: isMobile ? (shouldShowMobileButtons ? 1 : 0) : undefined,
               transition: "opacity 0.28s ease, transform 0.28s ease",
-              pointerEvents: shouldShowMobileButtons ? "auto" : "none",
-              transform: shouldShowMobileButtons ? "translateY(0)" : "translateY(28px)",
+              pointerEvents: isMobile ? (shouldShowMobileButtons ? "auto" : "none") : undefined,
+              transform: isMobile ? (shouldShowMobileButtons ? "translateY(0)" : "translateY(28px)") : undefined,
+              willChange: "opacity, transform",
             }}
             tabIndex={-1}
             aria-label="Add to song list"
@@ -295,29 +297,19 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
               .case .case-add-btn {
                 opacity: 0;
                 pointer-events: none;
-                transition: opacity 0.3s, transform 0.3s;
-                transform: translateY(40px);
+                transition: opacity 0.28s ease, transform 0.28s ease;
+                transform: translateY(28px);
               }
               .case:hover .case-play-btn,
               .case:hover .case-add-btn {
                 opacity: 1 !important;
                 pointer-events: auto !important;
-                animation: fadeInPlayBtn 0.3s;
                 transform: translateY(0);
               }
               .case:not(:hover) .case-play-btn,
               .case:not(:hover) .case-add-btn {
-                animation: fadeOutPlayBtn 0.3s;
-                transform: translateY(40px);
+                transform: translateY(28px);
               }
-            }
-            @keyframes fadeInPlayBtn {
-              from { opacity: 0; transform: translateY(40px);}
-              to { opacity: 1; transform: translateY(0);}
-            }
-            @keyframes fadeOutPlayBtn {
-              from { opacity: 1; transform: translateY(0);}
-              to { opacity: 0; transform: translateY(40px);}
             }
           `}
         </style>
