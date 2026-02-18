@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import type { Song } from "../utils/storage";
 import { IconButton } from "@mui/material";
+import YouTube from "react-youtube";
 
 interface FooterSongTableProps {
   isMobile: boolean;
@@ -46,6 +47,7 @@ interface SongTableRowProps {
   isKaraokeReady: boolean;
   isKaraokePending: boolean;
   onKaraokeClick: () => void;
+  resolvedDuration?: string;
 }
 
 function SongTableRow({
@@ -62,6 +64,7 @@ function SongTableRow({
   isKaraokeReady,
   isKaraokePending,
   onKaraokeClick,
+  resolvedDuration,
 }: SongTableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: idx.toString() });
   const style = {
@@ -189,7 +192,7 @@ function SongTableRow({
         {song.title}
       </td>
       <td style={{ width: 60, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
-        {song.duration || ""}
+        {song.duration || resolvedDuration || ""}
       </td>
     </tr>
   );
@@ -215,6 +218,58 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
   onKaraokeGenerate,
 }) => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [resolvedDurations, setResolvedDurations] = useState<Record<string, string>>({});
+
+  const getSongKey = (song: Song) => `${song.title || ""}::${song.artist || ""}`;
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const getVideoId = (url?: string) => {
+    if (!url) return "";
+    if (url.includes("youtube.com")) {
+      return url.split("v=")[1]?.split("&")[0] || "";
+    }
+    if (url.includes("youtu.be")) {
+      return url.split("/").pop()?.split("?")[0] || "";
+    }
+    return "";
+  };
+
+  const nextDurationProbe = useMemo(() => {
+    for (const song of songList) {
+      const key = getSongKey(song);
+      if (song.duration) continue;
+      if (resolvedDurations[key]) continue;
+      const videoId = getVideoId(song.url);
+      if (videoId) {
+        return { key, videoId };
+      }
+    }
+    return null;
+  }, [songList, resolvedDurations]);
+
+  const handleProbeReady = (probeKey: string, event: { target: any }) => {
+    let attempts = 0;
+    const readDuration = () => {
+      const seconds = event.target.getDuration?.() || 0;
+      if (seconds > 0) {
+        setResolvedDurations((prev) => ({
+          ...prev,
+          [probeKey]: formatTime(seconds),
+        }));
+        return;
+      }
+      if (attempts < 12) {
+        attempts += 1;
+        setTimeout(readDuration, 180);
+      }
+    };
+    readDuration();
+  };
 
   // Remove song handler
   function handleRemoveSong(removeIdx: number) {
@@ -246,6 +301,19 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
       }}
     >
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSongDragEnd}>
+        {nextDurationProbe && (
+          <div style={{ position: "absolute", left: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
+            <YouTube
+              videoId={nextDurationProbe.videoId}
+              opts={{
+                width: "1",
+                height: "1",
+                playerVars: { controls: 0, autoplay: 0, modestbranding: 1, mute: 1 },
+              }}
+              onReady={(event) => handleProbeReady(nextDurationProbe.key, event)}
+            />
+          </div>
+        )}
         <SortableContext items={songList.map((_, i) => i.toString())} strategy={verticalListSortingStrategy}>
           <table style={{ width: "100%", maxWidth: "90vw", tableLayout: "fixed", borderCollapse: "collapse", background: "transparent" }}>
             <thead>
@@ -333,6 +401,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   isKaraokeReady={karaokeReadyKeys.has(`${song.title || ""}::${song.artist || ""}`)}
                   isKaraokePending={isKaraokeLoading && pendingKaraokeRowIndex === idx}
                   onKaraokeClick={() => onKaraokeGenerate(idx)}
+                  resolvedDuration={resolvedDurations[getSongKey(song)]}
                 />
               ))}
 

@@ -381,14 +381,17 @@ const FooterBar = (props: any) => {
     return { yt: 0, kar: 0, voc: 1 };
   };
 
+  const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
+  const clamp100 = (value: number) => Math.max(0, Math.min(100, value));
+
   const setModeVolumesInstant = (mode: "mic" | "speaker" | "profile") => {
     const yt = playerRef.current;
     const kar = karaokeAudioRef.current;
     const voc = vocalsAudioRef.current;
     const target = getModeTargets(mode);
-    if (yt) yt.setVolume(target.yt);
-    if (kar) kar.volume = target.kar;
-    if (voc) voc.volume = target.voc;
+    if (yt) yt.setVolume(clamp100(target.yt));
+    if (kar) kar.volume = clamp01(target.kar);
+    if (voc) voc.volume = clamp01(target.voc);
   };
 
   const fadeToMode = (mode: "mic" | "speaker" | "profile", duration = 220) => {
@@ -400,16 +403,17 @@ const FooterBar = (props: any) => {
     if (fadeAnimationRef.current) cancelAnimationFrame(fadeAnimationRef.current);
 
     const target = getModeTargets(mode);
-    const fromYt = yt?.getVolume?.() ?? 0;
-    const fromKar = kar?.volume ?? 0;
-    const fromVoc = voc?.volume ?? 0;
+    const fromYt = clamp100(yt?.getVolume?.() ?? 0);
+    const fromKar = clamp01(kar?.volume ?? 0);
+    const fromVoc = clamp01(voc?.volume ?? 0);
     const start = performance.now();
 
     const tick = (now: number) => {
-      const t = Math.min((now - start) / duration, 1);
-      if (yt) yt.setVolume(Math.round(fromYt + (target.yt - fromYt) * t));
-      if (kar) kar.volume = fromKar + (target.kar - fromKar) * t;
-      if (voc) voc.volume = fromVoc + (target.voc - fromVoc) * t;
+      const rawT = (now - start) / duration;
+      const t = Math.max(0, Math.min(rawT, 1));
+      if (yt) yt.setVolume(clamp100(Math.round(fromYt + (target.yt - fromYt) * t)));
+      if (kar) kar.volume = clamp01(fromKar + (target.kar - fromKar) * t);
+      if (voc) voc.volume = clamp01(fromVoc + (target.voc - fromVoc) * t);
 
       if (t < 1) {
         fadeAnimationRef.current = requestAnimationFrame(tick);
