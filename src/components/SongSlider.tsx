@@ -21,6 +21,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
   // Drag-to-scroll logic
   const sliderRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const snapTimeoutRef = useRef<number | null>(null);
+  const isTouchingRef = useRef(false);
   let isDragging = false;
   let startX = 0;
   let scrollLeft = 0;
@@ -79,6 +81,50 @@ const SongSlider: React.FC<SongSliderProps> = ({
     setCenteredIndex((prev) => (prev === closestIndex ? prev : closestIndex));
   };
 
+  const snapNearestCardToCenter = () => {
+    if (!isMobile) return;
+    const slider = sliderRef.current;
+    if (!slider || cardRefs.current.length === 0) return;
+
+    const sliderRect = slider.getBoundingClientRect();
+    const sliderCenterX = sliderRect.left + sliderRect.width / 2;
+    let closestCard: HTMLDivElement | null = null;
+    let closestDistance = Number.POSITIVE_INFINITY;
+
+    cardRefs.current.forEach((card) => {
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const cardCenterX = rect.left + rect.width / 2;
+      const distance = Math.abs(cardCenterX - sliderCenterX);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestCard = card;
+      }
+    });
+
+    if (!closestCard) return;
+
+    const cardRect = closestCard.getBoundingClientRect();
+    const deltaToCenter = cardRect.left + cardRect.width / 2 - sliderCenterX;
+    const targetLeft = slider.scrollLeft + deltaToCenter;
+
+    slider.scrollTo({
+      left: Math.max(0, targetLeft),
+      behavior: 'smooth',
+    });
+  };
+
+  const scheduleSnapToCenter = () => {
+    if (snapTimeoutRef.current !== null) {
+      window.clearTimeout(snapTimeoutRef.current);
+    }
+    snapTimeoutRef.current = window.setTimeout(() => {
+      if (!isTouchingRef.current) {
+        snapNearestCardToCenter();
+      }
+    }, 120);
+  };
+
   useEffect(() => {
     const onResize = () => {
       setIsMobile(window.innerWidth <= 650);
@@ -97,6 +143,9 @@ const SongSlider: React.FC<SongSliderProps> = ({
 
     const onScroll = () => {
       requestAnimationFrame(updateCenteredCard);
+      if (isMobile) {
+        scheduleSnapToCenter();
+      }
     };
 
     slider.addEventListener('scroll', onScroll, { passive: true });
@@ -104,8 +153,24 @@ const SongSlider: React.FC<SongSliderProps> = ({
 
     return () => {
       slider.removeEventListener('scroll', onScroll);
+      if (snapTimeoutRef.current !== null) {
+        window.clearTimeout(snapTimeoutRef.current);
+      }
     };
   }, [songs, isMobile]);
+
+  const handleTouchStart = () => {
+    isTouchingRef.current = true;
+    if (snapTimeoutRef.current !== null) {
+      window.clearTimeout(snapTimeoutRef.current);
+      snapTimeoutRef.current = null;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    isTouchingRef.current = false;
+    scheduleSnapToCenter();
+  };
 
   // Gradient backgrounds per displayType
   const getSliderBackground = () => {
@@ -160,6 +225,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
           overflowX: 'auto',
           overflowY: 'hidden',
           scrollBehavior: 'smooth',
+          scrollSnapType: isMobile ? 'x mandatory' : 'none',
           maxWidth: '100vw',
           cursor: 'grab',
           userSelect: 'none',
@@ -177,6 +243,9 @@ const SongSlider: React.FC<SongSliderProps> = ({
         onMouseLeave={onMouseLeave}
         onMouseUp={onMouseUp}
         onMouseMove={onMouseMove}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
         {/* Custom scrollbar for horizontal slider */}
         <style>{`
@@ -202,6 +271,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
                     width: 120,
                     height: 140,
                     flex: '0 0 auto',
+                  scrollSnapAlign: isMobile ? 'center' : 'none',
+                  scrollSnapStop: isMobile ? 'always' : 'normal',
                     cursor: 'pointer',
                     margin: '0 10px',
                     display: 'flex',
@@ -213,6 +284,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
                     minWidth: window.innerWidth <= 650 ? 160 : 180,
                     width: window.innerWidth <= 650 ? 160 : 180,
                     flex: '0 0 auto',
+                    scrollSnapAlign: isMobile ? 'center' : 'none',
+                    scrollSnapStop: isMobile ? 'always' : 'normal',
                     cursor: 'pointer',
                     margin: '0 10px',
                     display: 'flex',
