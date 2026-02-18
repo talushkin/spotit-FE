@@ -94,7 +94,6 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
             ml: 1,
           }}
         />
-        <span style={{ fontSize: 12, color: '#1976d2', marginLeft: 5 ,marginTop: -45 }}>{volume}</span>
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {videoId && (
@@ -107,7 +106,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                   style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", marginRight: 8, cursor: 'pointer' }}
                   onClick={() => {
                     if (videoId) {
-                      window.location.href = `http://localhost:3000/watch/${videoId}`;
+                      window.location.href = `/watch/${videoId}`;
                     }
                   }}
                 />
