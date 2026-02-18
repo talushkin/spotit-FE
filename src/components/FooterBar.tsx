@@ -158,16 +158,6 @@ const FooterBar = (props: any) => {
   const karaokeAudioRef = useRef<HTMLAudioElement | null>(null);
   const vocalsAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Ensure karaoke audio is unmuted and volume is 1 on mount for testing
-  useEffect(() => {
-    if (karaokeAudioRef.current) {
-      karaokeAudioRef.current.muted = false;
-      karaokeAudioRef.current.volume = 1;
-      // Try to play again in case of browser policy
-      karaokeAudioRef.current.play().catch(() => {});
-    }
-  }, []);
-
   // Destructure props and fallback for legacy prop names
   const {
     isDarkMode,
@@ -448,6 +438,34 @@ const FooterBar = (props: any) => {
     }
   };
 
+  const ensureAuxTracksPlaying = () => {
+    if (!isPlaying) return;
+    const yt = playerRef.current;
+    if (!yt) return;
+    const ytTime = yt.getCurrentTime?.() || 0;
+    const threshold = 0.12;
+
+    const kar = karaokeAudioRef.current;
+    if (kar) {
+      if (Math.abs((kar.currentTime || 0) - ytTime) > threshold) {
+        kar.currentTime = ytTime;
+      }
+      if (kar.paused) {
+        kar.play().catch(() => {});
+      }
+    }
+
+    const voc = vocalsAudioRef.current;
+    if (voc) {
+      if (Math.abs((voc.currentTime || 0) - ytTime) > threshold) {
+        voc.currentTime = ytTime;
+      }
+      if (voc.paused) {
+        voc.play().catch(() => {});
+      }
+    }
+  };
+
   const handleKaraokeModeToggle = () => {
     let nextMode: "mic" | "speaker" | "profile" = karaokeMode;
     if (karaokeMode === "mic") nextMode = "speaker";
@@ -505,12 +523,13 @@ const FooterBar = (props: any) => {
         const idx = getCurrentSongIndex();
         const kar = karaokeAudioRef.current;
         const voc = vocalsAudioRef.current;
-        if (kar && !kar.paused && Math.abs((kar.currentTime || 0) - time) > 0.12) {
+        if (kar && Math.abs((kar.currentTime || 0) - time) > 0.12) {
           kar.currentTime = time;
         }
-        if (voc && !voc.paused && Math.abs((voc.currentTime || 0) - time) > 0.12) {
+        if (voc && Math.abs((voc.currentTime || 0) - time) > 0.12) {
           voc.currentTime = time;
         }
+        ensureAuxTracksPlaying();
         // Highlight next song 20 seconds before end
         if (
           duration > 0 &&
@@ -615,6 +634,10 @@ const FooterBar = (props: any) => {
   const [vocalsAudioError, setVocalsAudioError] = useState(false);
 
   useEffect(() => {
+    setModeVolumesInstant(karaokeMode);
+  }, [karaokeMode, karaokeUrl, vocalsUrl]);
+
+  useEffect(() => {
     setKaraokeAudioError(false);
   }, [karaokeUrl]);
 
@@ -679,6 +702,10 @@ const FooterBar = (props: any) => {
           ref={karaokeAudioRef}
           src={karaokeUrl}
           preload="auto"
+          onCanPlay={() => {
+            setModeVolumesInstant(karaokeMode);
+            ensureAuxTracksPlaying();
+          }}
           onError={() => setKaraokeAudioError(true)}
         />
       )}
@@ -689,6 +716,10 @@ const FooterBar = (props: any) => {
           ref={vocalsAudioRef}
           src={vocalsUrl}
           preload="auto"
+          onCanPlay={() => {
+            setModeVolumesInstant(karaokeMode);
+            ensureAuxTracksPlaying();
+          }}
           onError={() => setVocalsAudioError(true)}
         />
       )}
