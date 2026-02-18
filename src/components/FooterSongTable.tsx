@@ -98,7 +98,11 @@ function SongTableRow({
   return (
     <tr
       ref={setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        scrollSnapAlign: "start",
+        scrollSnapStop: "normal"
+      }}
       {...attributes}
       {...listeners}
       onMouseEnter={() => setHoveredRow(idx)}
@@ -295,6 +299,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
         borderRadius: 8,
         background: "transparent",
         marginTop: -12,
+        scrollSnapType: "y mandatory",
         ...(typeof window !== "undefined" && window.innerWidth > 650
           ? { marginLeft: 24 }
           : {})
@@ -350,6 +355,9 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   padding: "2px 8px",
                   color: isDarkMode ? "#bbb" : "#333",
                   fontWeight: 700,
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
                   backdropFilter: isDarkMode ? undefined : "blur(2px)",
                   backgroundColor: isDarkMode ? "#181818f0" : "#fff8"
                 }}>#</th>

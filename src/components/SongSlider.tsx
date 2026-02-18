@@ -58,11 +58,6 @@ const SongSlider: React.FC<SongSliderProps> = ({
   };
 
   const updateCenteredCard = () => {
-    if (!isMobile) {
-      setCenteredIndex(null);
-      return;
-    }
-
     const viewportCenterX = window.innerWidth / 2;
     let closestIndex = -1;
     let closestDistance = Number.POSITIVE_INFINITY;
@@ -82,7 +77,6 @@ const SongSlider: React.FC<SongSliderProps> = ({
   };
 
   const snapNearestCardToCenter = () => {
-    if (!isMobile) return;
     const slider = sliderRef.current;
     if (!slider || cardRefs.current.length === 0) return;
 
@@ -143,9 +137,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
 
     const onScroll = () => {
       requestAnimationFrame(updateCenteredCard);
-      if (isMobile) {
-        scheduleSnapToCenter();
-      }
+      scheduleSnapToCenter();
     };
 
     slider.addEventListener('scroll', onScroll, { passive: true });
@@ -225,11 +217,11 @@ const SongSlider: React.FC<SongSliderProps> = ({
           overflowX: 'auto',
           overflowY: 'hidden',
           scrollBehavior: 'smooth',
-          scrollSnapType: isMobile ? 'x mandatory' : 'none',
+          scrollSnapType: 'x mandatory',
           maxWidth: '100vw',
           cursor: 'grab',
           userSelect: 'none',
-          gap: '10px',
+          gap: '16px',
           WebkitOverflowScrolling: 'touch',
           msOverflowStyle: 'none',
           borderRadius: '16px',
@@ -271,8 +263,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
                     width: 120,
                     height: 140,
                     flex: '0 0 auto',
-                  scrollSnapAlign: isMobile ? 'center' : 'none',
-                  scrollSnapStop: isMobile ? 'always' : 'normal',
+                  scrollSnapAlign: 'center',
+                  scrollSnapStop: 'always',
                     cursor: 'pointer',
                     margin: '0 10px',
                     display: 'flex',
@@ -284,8 +276,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
                     minWidth: window.innerWidth <= 650 ? 160 : 180,
                     width: window.innerWidth <= 650 ? 160 : 180,
                     flex: '0 0 auto',
-                    scrollSnapAlign: isMobile ? 'center' : 'none',
-                    scrollSnapStop: isMobile ? 'always' : 'normal',
+                    scrollSnapAlign: 'center',
+                    scrollSnapStop: 'always',
                     cursor: 'pointer',
                     margin: '0 10px',
                     display: 'flex',
