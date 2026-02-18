@@ -94,6 +94,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
             ml: 1,
           }}
         />
+        <span style={{ fontSize: 12, color: '#1976d2', marginLeft: 5 ,marginTop: -45 }}>{volume}</span>
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {videoId && (
@@ -110,12 +111,6 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                     }
                   }}
                 />
-              )}
-              {/* Karaoke waveform meter */}
-              {karaokeMeterRef && (
-                <div style={{ width: 120, height: 10, background: '#222', borderRadius: 4, margin: '8px 0' }}>
-                  <canvas ref={karaokeMeterRef} width={120} height={10} style={{ display: 'block' }} />
-                </div>
               )}
               <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
                 {showKaraokeToast && toastMessage && (
