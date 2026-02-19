@@ -79,6 +79,10 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
     !!karaokeReady ||
     !!(selectedSong && (selectedSong.kar === true || selectedSong.vocals === true));
 
+  if (!songList.length) {
+    return null;
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: 250, maxWidth: 400 }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 1, marginTop: -40 }}>

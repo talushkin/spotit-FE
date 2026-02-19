@@ -224,6 +224,20 @@ const FooterBar = (props: any) => {
   }, [propSongList]);
 
   useEffect(() => {
+    if (!songList.length) return;
+    if (!selectedSong) {
+      setSelectedSong(songList[0]);
+      return;
+    }
+    const existsInList = songList.some(
+      (song) => song.title === selectedSong.title && song.artist === selectedSong.artist
+    );
+    if (!existsInList) {
+      setSelectedSong(songList[0]);
+    }
+  }, [songList, selectedSong, setSelectedSong]);
+
+  useEffect(() => {
     pendingKaraokeRowRef.current = pendingKaraokeRowIndex;
   }, [pendingKaraokeRowIndex]);
 
@@ -839,26 +853,28 @@ const FooterBar = (props: any) => {
         />
         {/* ThemeModeButton: only show on desktop at far right */}
       </Box>
-      <FooterSongTable
-        isMobile={isMobile}
-        songList={songList}
-        setSongList={setSongList}
-        sensors={sensors}
-        handleSongDragEnd={handleSongDragEnd}
-        SortableSongRow={SortableSongRow}
-        selectedSong={selectedSong}
-        nextSongToHighlight={nextSongToHighlight}
-        currentSongIndex={currentSongIndex}
-        onSongTitleSelect={handleSongTitleSelect}
-        setSelectedSong={setSelectedSong}
-        isDarkMode={isDarkMode}
-        isKaraokeLoading={isKaraokeLoading}
-        activeKaraokeRowIndex={activeKaraokeRowIndex}
-        karaokeReadyKeys={karaokeReadyKeys}
-        pendingKaraokeRowIndex={pendingKaraokeRowIndex}
-        onKaraokeGenerate={handleKaraokeGenerate}
-        onClearPlaylist={handleClearPlaylist}
-      />
+      {songList.length > 0 && (
+        <FooterSongTable
+          isMobile={isMobile}
+          songList={songList}
+          setSongList={setSongList}
+          sensors={sensors}
+          handleSongDragEnd={handleSongDragEnd}
+          SortableSongRow={SortableSongRow}
+          selectedSong={selectedSong}
+          nextSongToHighlight={nextSongToHighlight}
+          currentSongIndex={currentSongIndex}
+          onSongTitleSelect={handleSongTitleSelect}
+          setSelectedSong={setSelectedSong}
+          isDarkMode={isDarkMode}
+          isKaraokeLoading={isKaraokeLoading}
+          activeKaraokeRowIndex={activeKaraokeRowIndex}
+          karaokeReadyKeys={karaokeReadyKeys}
+          pendingKaraokeRowIndex={pendingKaraokeRowIndex}
+          onKaraokeGenerate={handleKaraokeGenerate}
+          onClearPlaylist={handleClearPlaylist}
+        />
+      )}
 
       {/* ThemeModeButton: only show on desktop at far right */}
       {!isMobile && (

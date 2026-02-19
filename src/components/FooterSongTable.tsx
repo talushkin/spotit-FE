@@ -50,6 +50,7 @@ interface SongTableRowProps {
   onKaraokeClick: () => void;
   resolvedDuration?: string;
   playedAtText?: string;
+  showPlayedColumn: boolean;
 }
 
 function SongTableRow({
@@ -68,6 +69,7 @@ function SongTableRow({
   onKaraokeClick,
   resolvedDuration,
   playedAtText,
+  showPlayedColumn,
 }: SongTableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: idx.toString() });
   const style = {
@@ -201,9 +203,12 @@ function SongTableRow({
       <td style={{ width: 60, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
         {song.duration || resolvedDuration || ""}
       </td>
-      <td style={{ width: 165, textAlign: "left", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-        {playedAtText || "-"}
-      </td>
+      {showPlayedColumn && (
+        <td style={{ width: 165, textAlign: "left", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {playedAtText || "-"}
+        </td>
+      )}
+      <td style={{ width: 34, padding: "2px 4px" }}></td>
     </tr>
   );
 }
@@ -230,6 +235,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
 }) => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [resolvedDurations, setResolvedDurations] = useState<Record<string, string>>({});
+  const showPlayedColumn = !isMobile;
 
   const getSongKey = (song: Song) => `${song.title || ""}::${song.artist || ""}`;
 
@@ -319,24 +325,6 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
           : {})
       }}
     >
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 6 }}>
-        <button
-          type="button"
-          onClick={onClearPlaylist}
-          style={{
-            border: "none",
-            borderRadius: 8,
-            padding: "6px 10px",
-            cursor: "pointer",
-            background: isDarkMode ? "#2a2a2a" : "#efefef",
-            color: isDarkMode ? "#fff" : "#222",
-            fontWeight: 600,
-          }}
-          title="Clear current playlist"
-        >
-          Clear Playlist
-        </button>
-      </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSongDragEnd}>
         {nextDurationProbe && (
           <div style={{ position: "absolute", left: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
@@ -418,10 +406,25 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   backdropFilter: isDarkMode ? undefined : "blur(2px)",
                   backgroundColor: isDarkMode ? "#181818f0" : "#fff8"
                 }}>Time</th>
+                {showPlayedColumn && (
+                  <th style={{
+                    width: 165,
+                    textAlign: "left",
+                    padding: "2px 8px",
+                    color: isDarkMode ? "#bbb" : "#333",
+                    fontWeight: 700,
+                    background: "#fff0",
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 2,
+                    backdropFilter: isDarkMode ? undefined : "blur(2px)",
+                    backgroundColor: isDarkMode ? "#181818f0" : "#fff8"
+                  }}>Played</th>
+                )}
                 <th style={{
-                  width: 165,
-                  textAlign: "left",
-                  padding: "2px 8px",
+                  width: 34,
+                  textAlign: "center",
+                  padding: "2px 4px",
                   color: isDarkMode ? "#bbb" : "#333",
                   fontWeight: 700,
                   background: "#fff0",
@@ -430,7 +433,20 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   zIndex: 2,
                   backdropFilter: isDarkMode ? undefined : "blur(2px)",
                   backgroundColor: isDarkMode ? "#181818f0" : "#fff8"
-                }}>Played</th>
+                }}>
+                  <IconButton
+                    size="small"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      onClearPlaylist();
+                    }}
+                    title="Clear playlist"
+                    sx={{ color: isDarkMode ? "#ff9b9b" : "#b3261e", padding: "2px" }}
+                  >
+                    <DeleteIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -456,6 +472,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   onKaraokeClick={() => onKaraokeGenerate(idx)}
                   resolvedDuration={resolvedDurations[getSongKey(song)]}
                   playedAtText={formatPlayedAt(song.playedAt)}
+                  showPlayedColumn={showPlayedColumn}
                 />
               ))}
 
