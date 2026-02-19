@@ -5,6 +5,7 @@ import SearchBar from "./SearchBar";
 import { fetchPlaylistsByTitle } from "../store/dataSlice";
 import type { ThunkDispatch } from '@reduxjs/toolkit';
 import type { AnyAction } from 'redux';
+import type { AuthUser } from "./AuthGate";
 
 
 
@@ -22,6 +23,9 @@ interface HeaderBarProps {
   songList?: Song[]; // Optional prop for song list
   setSongList?: (songs: Song[]) => void; // Optional setter for song list
   onAddSongToList?: (song: Song, location?: number) => void; // Optional function to add song to list
+  authUser: AuthUser;
+  onLogout: () => void;
+  onSettings: () => void;
 }
 
 export default function HeaderBar({
@@ -35,7 +39,10 @@ export default function HeaderBar({
   isDarkMode,
   songList = [],
   setSongList = () => {}, // Default to no-op if not provided
-  onAddSongToList
+  onAddSongToList,
+  authUser,
+  onLogout,
+  onSettings
 }: HeaderBarProps) {
   // Use correct dispatch type for thunks
   const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
@@ -54,8 +61,17 @@ export default function HeaderBar({
 
   // Track if search is active (focus or has value)
   const [searchActive, setSearchActive] = useState(false);
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   // Determine if mobile
   const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 650 : false;
+
+  useEffect(() => {
+    if (!avatarMenuOpen) return;
+
+    const closeMenu = () => setAvatarMenuOpen(false);
+    window.addEventListener("click", closeMenu);
+    return () => window.removeEventListener("click", closeMenu);
+  }, [avatarMenuOpen]);
 
   return (
     <>
@@ -101,6 +117,105 @@ export default function HeaderBar({
                 </svg>
               </span>
               <div className="SiteName">Spot.it</div>
+              <div style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  title={authUser.email}
+                  aria-label={authUser.name}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setAvatarMenuOpen((open) => !open);
+                  }}
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    border: "2px solid #4c4c4c",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: isDarkMode ? "#151515" : "#f3f3f3",
+                    color: isDarkMode ? "#fff" : "#000",
+                    fontWeight: 700,
+                    fontSize: 14,
+                    flexShrink: 0,
+                    padding: 0,
+                    cursor: "pointer",
+                  }}
+                >
+                  {authUser.picture ? (
+                    <img
+                      src={authUser.picture}
+                      alt={authUser.name}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    authUser.name
+                      .split(" ")
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .map((part) => part[0]?.toUpperCase())
+                      .join("")
+                  )}
+                </button>
+                {avatarMenuOpen && (
+                  <div
+                    onClick={(event) => event.stopPropagation()}
+                    style={{
+                      position: "absolute",
+                      top: 46,
+                      right: 0,
+                      minWidth: 150,
+                      borderRadius: 10,
+                      border: `1px solid ${isDarkMode ? "#2f2f2f" : "#d9d9d9"}`,
+                      background: isDarkMode ? "#151515" : "#fff",
+                      boxShadow: "0 6px 24px rgba(0,0,0,0.18)",
+                      zIndex: 2500,
+                      padding: 6,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAvatarMenuOpen(false);
+                        onSettings();
+                      }}
+                      style={{
+                        width: "100%",
+                        border: "none",
+                        background: "transparent",
+                        color: isDarkMode ? "#fff" : "#111",
+                        textAlign: "left",
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Settings
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAvatarMenuOpen(false);
+                        onLogout();
+                      }}
+                      style={{
+                        width: "100%",
+                        border: "none",
+                        background: "transparent",
+                        color: isDarkMode ? "#fff" : "#111",
+                        textAlign: "left",
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
               {desktop && (
                 <div style={{ minWidth: 0, flex: '0 0 auto', marginLeft: 16 }}>
                   <SearchBar

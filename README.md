@@ -22,3 +22,9 @@ Spot.it is a modern, full-featured web application for discovering, searching, a
   - User playlist and search history management
 - Real-time updates and robust error handling.
 
+## Environment setup
+
+For Google login on startup, add this variable in your local environment:
+
+- REACT_APP_GOOGLE_CLIENT_ID=your_google_oauth_web_client_id
+

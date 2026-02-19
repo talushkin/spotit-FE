@@ -7,6 +7,7 @@ import { lightTheme, darkTheme } from "../components/themes";
 import GlobalStyle from "../components/GlobalStyle";
 import FooterBar from "../components/FooterBar";
 import type { Genre, Song, SiteData } from "../utils/storage";
+import type { AuthUser } from "../components/AuthGate";
 
 
 interface HomePageProps {
@@ -19,6 +20,9 @@ interface HomePageProps {
   songList: Song[];
   setSongList: (songs: Song[]) => void;
   onAddSongToList: (song: Song, location?: number) => void;
+  authUser: AuthUser;
+  onLogout: () => void;
+  onSettings: () => void;
 }
 
 function HomePage(props: HomePageProps) {
@@ -77,6 +81,9 @@ function HomePage(props: HomePageProps) {
           songList={songList}
           setSongList={setSongList}
           onAddSongToList={onAddSongToList}
+          authUser={props.authUser}
+          onLogout={props.onLogout}
+          onSettings={props.onSettings}
         />
         <div className="container-fluid" style={{ paddingBottom: 0 }}>
           <div className="row">

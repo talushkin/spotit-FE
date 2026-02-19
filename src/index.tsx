@@ -19,6 +19,7 @@ import { Provider } from "react-redux";
 import * as storage from "./utils/storage";
 import store from "./store/store";
 import type { Song, Genre } from "./utils/storage"; // adjust path as needed
+import AuthGate, { AuthUser, clearRefreshTokenCookie, getAuthUserFromRefreshTokenCookie } from "./components/AuthGate";
 
 const rootElement = document.getElementById("root") as HTMLElement;
 const root = ReactDOM.createRoot(rootElement);
@@ -29,9 +30,11 @@ const root = ReactDOM.createRoot(rootElement);
 function App() {
   const dispatch = useDispatch();
   const [songs, setSongs] = useState<any>(null);
+  const [authInitialized, setAuthInitialized] = useState(false);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [selectedGenre, setSelectedGenre] = useState<Genre | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true); // Set initial theme to dark
   // Song list state (array of songs)
   const [songList, setSongList] = useState<any[]>([
@@ -41,6 +44,19 @@ function App() {
   const params = useParams();
 
   useEffect(() => {
+    const user = getAuthUserFromRefreshTokenCookie();
+    if (user) {
+      setAuthUser(user);
+    }
+    setAuthInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    if (!authInitialized || !authUser) {
+      setSongs(null);
+      return;
+    }
+
     const fetchData = async () => {
       setLoading(true);
       const data = await storage.loadData(false);
@@ -80,7 +96,7 @@ function App() {
       setLoading(false);
     };
     fetchData();
-  }, [params.category, params.title]);
+  }, [authInitialized, authUser, params.category, params.title]);
 
   // useEffect(() => {
   //   document.title = "spotIt";
@@ -119,8 +135,56 @@ function App() {
     });
   };
 
+  const handleLogout = () => {
+    clearRefreshTokenCookie();
+    setAuthUser(null);
+    setSongs(null);
+    setSongList([]);
+    setSelectedSong(null);
+  };
+
+  const handleSettings = () => {
+    window.alert("Settings menu selected.");
+  };
+
   return (
     <>
+      {!authInitialized && (
+        <Box
+          sx={{
+            width: "100vw",
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "fixed",
+            left: 0,
+            top: 0,
+            zIndex: 2000,
+            background: isDarkMode ? "#333" : "#fffce8",
+          }}
+        >
+          <CircularProgress size={64} />
+        </Box>
+      )}
+
+      {authInitialized && !authUser && (
+        <AuthGate
+          onAuthSuccess={(user) => {
+            setAuthUser(user);
+          }}
+          onSkip={() => {
+            setAuthUser({
+              id: "guest",
+              name: "Unidentified",
+              firstName: "Unidentified",
+              lastName: "",
+              email: "unidentified@spotit.local",
+            });
+          }}
+        />
+      )}
+
       {loading && (
         <Box
           sx={{
@@ -140,7 +204,7 @@ function App() {
         </Box>
       )}
 
-      {!loading && songs && (
+      {authInitialized && authUser && !loading && songs && (
         <Routes>
           <Route
             path="/"
@@ -155,6 +219,9 @@ function App() {
                 songList={songList}
                 setSongList={setSongList}
                 onAddSongToList={handleAddSongToList}
+                authUser={authUser}
+                onLogout={handleLogout}
+                onSettings={handleSettings}
               />
             }
           />
