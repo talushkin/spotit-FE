@@ -16,6 +16,7 @@ interface AuthGateProps {
 
 const REFRESH_TOKEN_COOKIE = "spotit_refresh_token";
 const REFRESH_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24;
+const FALLBACK_GOOGLE_CLIENT_ID = "389614995184-fue3q9nk37vtoivvtn87m9c4oatpkp17.apps.googleusercontent.com";
 
 function decodeJwtPayload(token: string): Record<string, any> | null {
   try {
@@ -99,11 +100,16 @@ export function getAuthUserFromRefreshTokenCookie(): AuthUser | null {
 }
 
 export default function AuthGate({ onAuthSuccess, onSkip }: AuthGateProps) {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [scriptReady, setScriptReady] = useState(false);
   const [error, setError] = useState<string>("");
 
-  const clientId = useMemo(() => process.env.REACT_APP_GOOGLE_CLIENT_ID || "", []);
+  const clientId = useMemo(
+    () =>
+      process.env.REACT_APP_GOOGLE_CLIENT_ID ||
+      (window as any).__SPOTIT_GOOGLE_CLIENT_ID ||
+      FALLBACK_GOOGLE_CLIENT_ID,
+    []
+  );
 
   useEffect(() => {
     const existing = document.querySelector(
@@ -168,11 +174,11 @@ export default function AuthGate({ onAuthSuccess, onSkip }: AuthGateProps) {
     googleApi.accounts.id.renderButton(buttonContainer, {
       theme: "outline",
       size: "large",
-      text: mode === "signin" ? "signin_with" : "signup_with",
+      text: "signin_with",
       shape: "pill",
       width: 260,
     });
-  }, [scriptReady, clientId, mode, onAuthSuccess]);
+  }, [scriptReady, clientId, onAuthSuccess]);
 
   return (
     <div
@@ -197,40 +203,7 @@ export default function AuthGate({ onAuthSuccess, onSkip }: AuthGateProps) {
         }}
       >
         <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Spot.it</div>
-        <div style={{ color: "#b4b4b4", marginBottom: 20 }}>
-          {mode === "signin" ? "Sign in to continue" : "Create your account to continue"}
-        </div>
-
-        <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
-          <button
-            onClick={() => setMode("signin")}
-            style={{
-              flex: 1,
-              borderRadius: 999,
-              padding: "10px 12px",
-              border: mode === "signin" ? "1px solid #fff" : "1px solid #3a3a3a",
-              background: mode === "signin" ? "#272727" : "transparent",
-              color: "#fff",
-              cursor: "pointer",
-            }}
-          >
-            Sign in
-          </button>
-          <button
-            onClick={() => setMode("signup")}
-            style={{
-              flex: 1,
-              borderRadius: 999,
-              padding: "10px 12px",
-              border: mode === "signup" ? "1px solid #fff" : "1px solid #3a3a3a",
-              background: mode === "signup" ? "#272727" : "transparent",
-              color: "#fff",
-              cursor: "pointer",
-            }}
-          >
-            Sign up
-          </button>
-        </div>
+        <div style={{ color: "#b4b4b4", marginBottom: 20 }}>Sign in to continue</div>
 
         <div id="google-signin-button" style={{ minHeight: 44 }} />
 
