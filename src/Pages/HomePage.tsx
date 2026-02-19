@@ -116,6 +116,7 @@ function HomePage(props: HomePageProps) {
           setSelectedSong={setSelectedSong}
           setSongList={setSongList}
           songList={songList}
+          authUser={props.authUser}
           hidden={footerHidden}
           onShowFooter={() => setFooterHidden(false)}
         />

@@ -129,10 +129,6 @@ function App() {
       id: authUser.id,
       email: authUser.email,
     });
-    storage.appendUserPlaylistHistory(songList as Song[], {
-      id: authUser.id,
-      email: authUser.email,
-    });
   }, [songList, authUser, playlistHydrated]);
   
 

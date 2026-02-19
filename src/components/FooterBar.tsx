@@ -36,6 +36,8 @@ import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import type { Song } from "../utils/storage";
+import { addPlayedSongToHistory } from "../utils/storage";
+import { saveUserPlaylistToLocalStorage } from "../utils/storage";
 
 interface FooterBarProps {
   isDarkMode: boolean;
@@ -170,7 +172,8 @@ const FooterBar = (props: any) => {
     setSongList: setAppSongList,
     currentSongIndex,
     hidden,
-    onShowFooter
+    onShowFooter,
+    authUser
   } = props;
 
   const isMobile = useIsMobile();
@@ -281,6 +284,10 @@ const FooterBar = (props: any) => {
         setAppSongList(next);
       }
       return next;
+    });
+    addPlayedSongToHistory(updatedSong, {
+      id: authUser?.id,
+      email: authUser?.email,
     });
     setSelectedSong(updatedSong);
   };
@@ -643,6 +650,25 @@ const FooterBar = (props: any) => {
     pendingAutoPlayRef.current = true;
   };
 
+  const handleClearPlaylist = () => {
+    setSongList([]);
+    if (typeof setAppSongList === "function") {
+      setAppSongList([]);
+    }
+    setSelectedSong(null);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setTotalDuration(0);
+    setNextSongToHighlight(null);
+    if (playerRef.current) {
+      playerRef.current.pauseVideo();
+    }
+    saveUserPlaylistToLocalStorage([], {
+      id: authUser?.id,
+      email: authUser?.email,
+    });
+  };
+
 
   // Compose audio URLs using existing videoId (public path, not src/)
   const karaokeUrl = videoId ? `/data/cache/${videoId}_karaoke.mp3` : undefined;
@@ -831,6 +857,7 @@ const FooterBar = (props: any) => {
         karaokeReadyKeys={karaokeReadyKeys}
         pendingKaraokeRowIndex={pendingKaraokeRowIndex}
         onKaraokeGenerate={handleKaraokeGenerate}
+        onClearPlaylist={handleClearPlaylist}
       />
 
       {/* ThemeModeButton: only show on desktop at far right */}

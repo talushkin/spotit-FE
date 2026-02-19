@@ -6,7 +6,7 @@ import { fetchPlaylistsByTitle } from "../store/dataSlice";
 import type { ThunkDispatch } from '@reduxjs/toolkit';
 import type { AnyAction } from 'redux';
 import type { AuthUser } from "./AuthGate";
-import { loadUserPlaylistHistory, type PlaylistHistoryEntry } from "../utils/storage";
+import { loadPlayedSongsHistory, type PlayedSongHistoryEntry } from "../utils/storage";
 
 
 
@@ -67,8 +67,9 @@ export default function HeaderBar({
   // Track if search is active (focus or has value)
   const [searchActive, setSearchActive] = useState(false);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
-  const [playlistPopupOpen, setPlaylistPopupOpen] = useState(false);
-  const [playlistHistory, setPlaylistHistory] = useState<PlaylistHistoryEntry[]>([]);
+  const [currentPlaylistPopupOpen, setCurrentPlaylistPopupOpen] = useState(false);
+  const [playlistHistoryPopupOpen, setPlaylistHistoryPopupOpen] = useState(false);
+  const [playedSongsHistory, setPlayedSongsHistory] = useState<PlayedSongHistoryEntry[]>([]);
   // Determine if mobile
   const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 650 : false;
 
@@ -212,9 +213,7 @@ export default function HeaderBar({
                     <button
                       type="button"
                       onClick={() => {
-                        const history = loadUserPlaylistHistory({ id: authUser.id, email: authUser.email });
-                        setPlaylistHistory(history);
-                        setPlaylistPopupOpen(true);
+                        setCurrentPlaylistPopupOpen(true);
                         setAvatarMenuOpen(false);
                       }}
                       style={{
@@ -229,6 +228,27 @@ export default function HeaderBar({
                       }}
                     >
                       Current Playlist
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const history = loadPlayedSongsHistory({ id: authUser.id, email: authUser.email });
+                        setPlayedSongsHistory(history);
+                        setPlaylistHistoryPopupOpen(true);
+                        setAvatarMenuOpen(false);
+                      }}
+                      style={{
+                        width: "100%",
+                        border: "none",
+                        background: "transparent",
+                        color: isDarkMode ? "#fff" : "#111",
+                        textAlign: "left",
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Playlist History
                     </button>
                     <button
                       type="button"
@@ -340,9 +360,9 @@ export default function HeaderBar({
             />
           )}
         </div>
-            {playlistPopupOpen && (
+            {currentPlaylistPopupOpen && (
               <div
-                onClick={() => setPlaylistPopupOpen(false)}
+                onClick={() => setCurrentPlaylistPopupOpen(false)}
                 style={{
                   position: "fixed",
                   inset: 0,
@@ -382,7 +402,7 @@ export default function HeaderBar({
                     <div style={{ fontWeight: 700 }}>Current Playlist History</div>
                     <button
                       type="button"
-                      onClick={() => setPlaylistPopupOpen(false)}
+                      onClick={() => setCurrentPlaylistPopupOpen(false)}
                       style={{
                         border: "none",
                         background: "transparent",
@@ -397,56 +417,124 @@ export default function HeaderBar({
                   </div>
 
                   <div style={{ padding: 16 }}>
-                    {playlistHistory.length === 0 ? (
+                      {songList.length === 0 ? (
                       <div style={{ color: isDarkMode ? "#b0b0b0" : "#666" }}>
-                        No playlist history yet.
+                          Current playlist is empty.
                       </div>
                     ) : (
-                      playlistHistory.map((entry, index) => (
-                        <div
-                          key={entry.id}
-                          style={{
-                            border: `1px solid ${isDarkMode ? "#2f2f2f" : "#ececec"}`,
-                            borderRadius: 10,
-                            padding: 12,
-                            marginBottom: 10,
-                          }}
-                        >
-                          <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                            {index + 1}. Played at: {formatPlayedAt(entry.playedAt)}
-                          </div>
-                          <div style={{ color: isDarkMode ? "#c2c2c2" : "#555", marginBottom: 10 }}>
-                            {entry.songs.length} song{entry.songs.length === 1 ? "" : "s"}
-                          </div>
-                          <div style={{ overflowX: "auto" }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 420 }}>
-                              <thead>
-                                <tr>
-                                  <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>#</th>
-                                  <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Song</th>
-                                  <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Artist</th>
-                                  <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Played At</th>
+                        <div style={{ overflowX: "auto" }}>
+                          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 420 }}>
+                            <thead>
+                              <tr>
+                                <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>#</th>
+                                <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Song</th>
+                                <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Artist</th>
+                                <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Played At</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {songList.map((song, songIndex) => (
+                                <tr key={`current_${songIndex}_${song.title || ""}`}>
+                                  <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{songIndex + 1}</td>
+                                  <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{song.title || "Untitled"}</td>
+                                  <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{song.artist || "-"}</td>
+                                  <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{song.playedAt ? formatPlayedAt(song.playedAt) : "-"}</td>
                                 </tr>
-                              </thead>
-                              <tbody>
-                                {entry.songs.map((song, songIndex) => (
-                                  <tr key={`${entry.id}_${songIndex}`}>
-                                    <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{songIndex + 1}</td>
-                                    <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{song.title || "Untitled"}</td>
-                                    <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{song.artist || "-"}</td>
-                                    <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{formatPlayedAt(entry.playedAt)}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
-                      ))
                     )}
                   </div>
                 </div>
               </div>
             )}
+              {playlistHistoryPopupOpen && (
+                <div
+                  onClick={() => setPlaylistHistoryPopupOpen(false)}
+                  style={{
+                    position: "fixed",
+                    inset: 0,
+                    background: "rgba(0,0,0,0.45)",
+                    zIndex: 3000,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 16,
+                  }}
+                >
+                  <div
+                    onClick={(event) => event.stopPropagation()}
+                    style={{
+                      width: "min(860px, 96vw)",
+                      maxHeight: "80vh",
+                      overflowY: "auto",
+                      borderRadius: 12,
+                      border: `1px solid ${isDarkMode ? "#2f2f2f" : "#d9d9d9"}`,
+                      background: isDarkMode ? "#151515" : "#fff",
+                      color: isDarkMode ? "#fff" : "#111",
+                      boxShadow: "0 8px 30px rgba(0,0,0,0.35)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "12px 16px",
+                        borderBottom: `1px solid ${isDarkMode ? "#2a2a2a" : "#ececec"}`,
+                        position: "sticky",
+                        top: 0,
+                        background: isDarkMode ? "#151515" : "#fff",
+                      }}
+                    >
+                      <div style={{ fontWeight: 700 }}>Playlist History</div>
+                      <button
+                        type="button"
+                        onClick={() => setPlaylistHistoryPopupOpen(false)}
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          color: isDarkMode ? "#fff" : "#111",
+                          cursor: "pointer",
+                          fontSize: 18,
+                          lineHeight: 1,
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <div style={{ padding: 16 }}>
+                      {playedSongsHistory.length === 0 ? (
+                        <div style={{ color: isDarkMode ? "#b0b0b0" : "#666" }}>No played songs yet.</div>
+                      ) : (
+                        <div style={{ overflowX: "auto" }}>
+                          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 420 }}>
+                            <thead>
+                              <tr>
+                                <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>#</th>
+                                <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Song</th>
+                                <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Artist</th>
+                                <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Played At</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {playedSongsHistory.map((entry, index) => (
+                                <tr key={entry.id}>
+                                  <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{index + 1}</td>
+                                  <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{entry.song?.title || "Untitled"}</td>
+                                  <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{entry.song?.artist || "-"}</td>
+                                  <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{formatPlayedAt(entry.playedAt)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
       </div>
     </>
   );

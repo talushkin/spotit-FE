@@ -25,6 +25,7 @@ interface FooterSongTableProps {
   karaokeReadyKeys: Set<string>;
   pendingKaraokeRowIndex: number | null;
   onKaraokeGenerate: (rowIndex: number) => void;
+  onClearPlaylist: () => void;
 }
 
 
@@ -48,6 +49,7 @@ interface SongTableRowProps {
   isKaraokePending: boolean;
   onKaraokeClick: () => void;
   resolvedDuration?: string;
+  playedAtText?: string;
 }
 
 function SongTableRow({
@@ -65,6 +67,7 @@ function SongTableRow({
   isKaraokePending,
   onKaraokeClick,
   resolvedDuration,
+  playedAtText,
 }: SongTableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: idx.toString() });
   const style = {
@@ -198,6 +201,9 @@ function SongTableRow({
       <td style={{ width: 60, textAlign: "right", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400 }}>
         {song.duration || resolvedDuration || ""}
       </td>
+      <td style={{ width: 165, textAlign: "left", padding: "2px 8px", color: isSelected ? (isDarkMode ? "#fff" : "#024803") : (isDarkMode ? "#bbb" : "#333"), fontWeight: isSelected ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {playedAtText || "-"}
+      </td>
     </tr>
   );
 }
@@ -220,11 +226,19 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
   karaokeReadyKeys,
   pendingKaraokeRowIndex,
   onKaraokeGenerate,
+  onClearPlaylist,
 }) => {
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [resolvedDurations, setResolvedDurations] = useState<Record<string, string>>({});
 
   const getSongKey = (song: Song) => `${song.title || ""}::${song.artist || ""}`;
+
+  const formatPlayedAt = (value?: string) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString();
+  };
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -305,6 +319,24 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
           : {})
       }}
     >
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 6 }}>
+        <button
+          type="button"
+          onClick={onClearPlaylist}
+          style={{
+            border: "none",
+            borderRadius: 8,
+            padding: "6px 10px",
+            cursor: "pointer",
+            background: isDarkMode ? "#2a2a2a" : "#efefef",
+            color: isDarkMode ? "#fff" : "#222",
+            fontWeight: 600,
+          }}
+          title="Clear current playlist"
+        >
+          Clear Playlist
+        </button>
+      </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSongDragEnd}>
         {nextDurationProbe && (
           <div style={{ position: "absolute", left: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" }}>
@@ -386,6 +418,19 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   backdropFilter: isDarkMode ? undefined : "blur(2px)",
                   backgroundColor: isDarkMode ? "#181818f0" : "#fff8"
                 }}>Time</th>
+                <th style={{
+                  width: 165,
+                  textAlign: "left",
+                  padding: "2px 8px",
+                  color: isDarkMode ? "#bbb" : "#333",
+                  fontWeight: 700,
+                  background: "#fff0",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backdropFilter: isDarkMode ? undefined : "blur(2px)",
+                  backgroundColor: isDarkMode ? "#181818f0" : "#fff8"
+                }}>Played</th>
               </tr>
             </thead>
             <tbody>
@@ -410,6 +455,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
                   isKaraokePending={isKaraokeLoading && pendingKaraokeRowIndex === idx}
                   onKaraokeClick={() => onKaraokeGenerate(idx)}
                   resolvedDuration={resolvedDurations[getSongKey(song)]}
+                  playedAtText={formatPlayedAt(song.playedAt)}
                 />
               ))}
 

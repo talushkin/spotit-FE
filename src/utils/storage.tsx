@@ -97,6 +97,12 @@ export interface PlaylistHistoryEntry {
   songs: Song[];
 }
 
+export interface PlayedSongHistoryEntry {
+  id: string;
+  playedAt: string;
+  song: Song;
+}
+
 const getUserPlaylistStorageKey = (user?: PlaylistUser) => {
   const identity = user?.id || user?.email || "guest";
   return `spotit.playlist.${identity}`;
@@ -109,6 +115,12 @@ const getUserPlaylistHistoryStorageKey = (user?: PlaylistUser) => {
 };
 
 const LAST_PLAYLIST_HISTORY_STORAGE_KEY = "spotit.playlist.history.last";
+const getUserPlayedSongsHistoryStorageKey = (user?: PlaylistUser) => {
+  const identity = user?.id || user?.email || "guest";
+  return `spotit.playedSongs.history.${identity}`;
+};
+
+const LAST_PLAYED_SONGS_HISTORY_STORAGE_KEY = "spotit.playedSongs.history.last";
 
 export const saveUserPlaylistToLocalStorage = (songs: Song[], user?: PlaylistUser) => {
   if (typeof window === "undefined") return;
@@ -212,6 +224,68 @@ export const loadUserPlaylistHistory = (user?: PlaylistUser): PlaylistHistoryEnt
   const primary = parseHistory(localStorage.getItem(getUserPlaylistHistoryStorageKey(user)));
   if (primary.length > 0) return primary;
   return parseHistory(localStorage.getItem(LAST_PLAYLIST_HISTORY_STORAGE_KEY));
+};
+
+export const addPlayedSongToHistory = (song: Song, user?: PlaylistUser) => {
+  if (typeof window === "undefined") return;
+  if (!song || !song.title) return;
+
+  const playedAt = song.playedAt || new Date().toISOString();
+  const entry: PlayedSongHistoryEntry = {
+    id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    playedAt,
+    song: { ...song, playedAt },
+  };
+
+  const parseHistory = (raw: string | null): PlayedSongHistoryEntry[] => {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const key = getUserPlayedSongsHistoryStorageKey(user);
+  const current = parseHistory(localStorage.getItem(key));
+  const next = [entry, ...current].slice(0, 200);
+  const serialized = JSON.stringify(next);
+  localStorage.setItem(key, serialized);
+  localStorage.setItem(LAST_PLAYED_SONGS_HISTORY_STORAGE_KEY, serialized);
+};
+
+export const loadPlayedSongsHistory = (user?: PlaylistUser): PlayedSongHistoryEntry[] => {
+  if (typeof window === "undefined") return [];
+
+  const parseHistory = (raw: string | null): PlayedSongHistoryEntry[] => {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter((item) => item?.song && item?.playedAt)
+        .sort((a, b) => new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime());
+    } catch {
+      return [];
+    }
+  };
+
+  const primary = parseHistory(localStorage.getItem(getUserPlayedSongsHistoryStorageKey(user)));
+  if (primary.length > 0) return primary;
+  return parseHistory(localStorage.getItem(LAST_PLAYED_SONGS_HISTORY_STORAGE_KEY));
+};
+
+export const clearPlayedSongsHistory = (user?: PlaylistUser) => {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(getUserPlayedSongsHistoryStorageKey(user));
+  localStorage.removeItem(LAST_PLAYED_SONGS_HISTORY_STORAGE_KEY);
+};
+
+export const clearPlaylistHistory = (user?: PlaylistUser) => {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(getUserPlaylistHistoryStorageKey(user));
+  localStorage.removeItem(LAST_PLAYLIST_HISTORY_STORAGE_KEY);
 };
 
 
