@@ -77,7 +77,142 @@ export interface Song {
   genre?: string;
   kar?: boolean;
   vocals?: boolean;
+  playedAt?: string;
 }
+
+interface PlaylistUser {
+  id?: string;
+  email?: string;
+}
+
+interface PlaylistSnapshot {
+  savedAt: string;
+  playedAt?: string;
+  songs: Song[];
+}
+
+export interface PlaylistHistoryEntry {
+  id: string;
+  playedAt: string;
+  songs: Song[];
+}
+
+const getUserPlaylistStorageKey = (user?: PlaylistUser) => {
+  const identity = user?.id || user?.email || "guest";
+  return `spotit.playlist.${identity}`;
+};
+
+const LAST_PLAYLIST_STORAGE_KEY = "spotit.playlist.last";
+const getUserPlaylistHistoryStorageKey = (user?: PlaylistUser) => {
+  const identity = user?.id || user?.email || "guest";
+  return `spotit.playlist.history.${identity}`;
+};
+
+const LAST_PLAYLIST_HISTORY_STORAGE_KEY = "spotit.playlist.history.last";
+
+export const saveUserPlaylistToLocalStorage = (songs: Song[], user?: PlaylistUser) => {
+  if (typeof window === "undefined") return;
+  const nowIso = new Date().toISOString();
+  const payload: PlaylistSnapshot = {
+    savedAt: nowIso,
+    playedAt: nowIso,
+    songs: Array.isArray(songs) ? songs : [],
+  };
+  localStorage.setItem(getUserPlaylistStorageKey(user), JSON.stringify(payload));
+  localStorage.setItem(LAST_PLAYLIST_STORAGE_KEY, JSON.stringify(payload));
+};
+
+export const loadUserPlaylistFromLocalStorage = (user?: PlaylistUser): Song[] => {
+  if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(getUserPlaylistStorageKey(user));
+  const fallbackRaw = localStorage.getItem(LAST_PLAYLIST_STORAGE_KEY);
+  if (!raw && !fallbackRaw) return [];
+  try {
+    const parsed = JSON.parse(raw || fallbackRaw || "[]") as PlaylistSnapshot | Song[];
+    if (Array.isArray(parsed)) return parsed;
+    if (parsed && Array.isArray(parsed.songs)) return parsed.songs;
+    return [];
+  } catch {
+    try {
+      const fallbackParsed = JSON.parse(fallbackRaw || "[]") as PlaylistSnapshot | Song[];
+      if (Array.isArray(fallbackParsed)) return fallbackParsed;
+      if (fallbackParsed && Array.isArray((fallbackParsed as PlaylistSnapshot).songs)) {
+        return (fallbackParsed as PlaylistSnapshot).songs;
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  }
+};
+
+export const hasSavedUserPlaylist = (user?: PlaylistUser): boolean => {
+  if (typeof window === "undefined") return false;
+  const primary = localStorage.getItem(getUserPlaylistStorageKey(user));
+  const fallback = localStorage.getItem(LAST_PLAYLIST_STORAGE_KEY);
+  return !!(primary || fallback);
+};
+
+export const exportPlaylistJsonFile = (songs: Song[], user?: PlaylistUser) => {
+  if (typeof window === "undefined") return;
+  const identity = user?.id || user?.email || "guest";
+  const safeIdentity = identity.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const payload = {
+    savedAt: new Date().toISOString(),
+    user: {
+      id: user?.id || null,
+      email: user?.email || null,
+    },
+    songs: Array.isArray(songs) ? songs : [],
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `playlist.${safeIdentity}.json`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+};
+
+export const appendUserPlaylistHistory = (songs: Song[], user?: PlaylistUser) => {
+  if (typeof window === "undefined") return;
+  if (!Array.isArray(songs) || songs.length === 0) return;
+
+  const entry: PlaylistHistoryEntry = {
+    id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    playedAt: new Date().toISOString(),
+    songs,
+  };
+  const key = getUserPlaylistHistoryStorageKey(user);
+  const next = [entry];
+  const serialized = JSON.stringify(next);
+  localStorage.setItem(key, serialized);
+  localStorage.setItem(LAST_PLAYLIST_HISTORY_STORAGE_KEY, serialized);
+};
+
+export const loadUserPlaylistHistory = (user?: PlaylistUser): PlaylistHistoryEntry[] => {
+  if (typeof window === "undefined") return [];
+
+  const parseHistory = (raw: string | null): PlaylistHistoryEntry[] => {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter((item) => item && Array.isArray(item.songs) && item.playedAt)
+        .sort((a, b) => new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime());
+    } catch {
+      return [];
+    }
+  };
+
+  const primary = parseHistory(localStorage.getItem(getUserPlaylistHistoryStorageKey(user)));
+  if (primary.length > 0) return primary;
+  return parseHistory(localStorage.getItem(LAST_PLAYLIST_HISTORY_STORAGE_KEY));
+};
 
 
 

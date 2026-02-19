@@ -39,6 +39,7 @@ function App() {
   // Song list state (array of songs)
   const [songList, setSongList] = useState<any[]>([
   ]);
+  const [playlistHydrated, setPlaylistHydrated] = useState(false);
 
   const navigate = useNavigate();
   const params = useParams();
@@ -59,6 +60,7 @@ function App() {
 
     const fetchData = async () => {
       setLoading(true);
+      setPlaylistHydrated(false);
       const data = await storage.loadData(false);
       setSongs(data);
       // Support both { site: { genres: Genre[] } } and { site: { site: { genres: Genre[] } } }
@@ -83,8 +85,19 @@ function App() {
           }
         }
         const initialSong = defaultSong || initialGenre.songs[0] || null;
-        setSelectedSong(initialSong);
-        setSongList(initialSong ? [initialSong] : []);
+        const playlistUser = {
+          id: authUser.id,
+          email: authUser.email,
+        };
+        const hasSavedPlaylist = storage.hasSavedUserPlaylist(playlistUser);
+        const savedPlaylist = storage.loadUserPlaylistFromLocalStorage(playlistUser);
+        if (hasSavedPlaylist) {
+          setSongList(savedPlaylist);
+          setSelectedSong(savedPlaylist[0] || null);
+        } else {
+          setSelectedSong(initialSong);
+          setSongList(initialSong ? [initialSong] : []);
+        }
         // Set search options to all songs from all genres in Redux
         const allSongs = genres.flatMap((g) => g.songs || []);
         //dispatch(setSearchOptions(allSongs));
@@ -93,6 +106,7 @@ function App() {
         setSongList([]);
       }
 
+      setPlaylistHydrated(true);
       setLoading(false);
     };
     fetchData();
@@ -108,6 +122,18 @@ function App() {
   useEffect(() => {
     console.log('songList updated:', songList.map((s: any, i: number) => ({ index: i, ...s })));
   }, [songList]);
+
+  useEffect(() => {
+    if (!authUser || !playlistHydrated) return;
+    storage.saveUserPlaylistToLocalStorage(songList as Song[], {
+      id: authUser.id,
+      email: authUser.email,
+    });
+    storage.appendUserPlaylistHistory(songList as Song[], {
+      id: authUser.id,
+      email: authUser.email,
+    });
+  }, [songList, authUser, playlistHydrated]);
   
 
   // Handler to add a song to the song list (to be passed to CaseCard)
@@ -145,6 +171,24 @@ function App() {
 
   const handleSettings = () => {
     window.alert("Settings menu selected.");
+  };
+
+  const handleSavePlaylist = () => {
+    if (!authUser) return;
+    storage.saveUserPlaylistToLocalStorage(songList as Song[], {
+      id: authUser.id,
+      email: authUser.email,
+    });
+    window.alert("Playlist saved.");
+  };
+
+  const handleExportPlaylist = () => {
+    if (!authUser) return;
+    storage.exportPlaylistJsonFile(songList as Song[], {
+      id: authUser.id,
+      email: authUser.email,
+    });
+    window.alert("Playlist exported. Move the downloaded file to public/data if you want it bundled in app assets.");
   };
 
   return (
@@ -222,6 +266,8 @@ function App() {
                 authUser={authUser}
                 onLogout={handleLogout}
                 onSettings={handleSettings}
+                onSavePlaylist={handleSavePlaylist}
+                onExportPlaylist={handleExportPlaylist}
               />
             }
           />

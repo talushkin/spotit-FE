@@ -74,6 +74,11 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
   karaokeAudioRef,
   karaokeMeterRef,
 }) => {
+  const hasKaraokeTracks =
+    !!isCurrentKaraokeReady ||
+    !!karaokeReady ||
+    !!(selectedSong && (selectedSong.kar === true || selectedSong.vocals === true));
+
   return (
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: 250, maxWidth: 400 }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 1, marginTop: -40 }}>
@@ -112,6 +117,12 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                   }}
                 />
               )}
+              <IconButton onClick={handlePrevSong} color="primary" disabled={getCurrentSongIndex() <= 0}>
+                <SkipPreviousIcon />
+              </IconButton>
+              <IconButton onClick={handlePlayPause} color="primary">
+                {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+              </IconButton>
               <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
                 {showKaraokeToast && toastMessage && (
                   <div
@@ -133,40 +144,28 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                     {toastMessage}
                   </div>
                 )}
-                <IconButton
-                  onClick={onKaraokeGenerate}
-                  color="primary"
-                  disabled={isCurrentKaraokeReady}
-                  sx={
-                    isCurrentKaraokeReady
-                      ? {
-                          color: "#1976d2",
-                          opacity: 1,
-                          "&.Mui-disabled": { color: "#1976d2" },
-                        }
-                      : undefined
-                  }
-                >
-                  {isKaraokeLoading ? (
-                    <CachedIcon sx={{ animation: "karaokeSpin 1s linear infinite" }} />
-                  ) : (
-                    <PersonIcon />
-                  )}
-                </IconButton>
+                {hasKaraokeTracks ? (
+                  <IconButton
+                    onClick={onKaraokeModeToggle}
+                    sx={{ color: isDarkMode ? "#fff" : "#111" }}
+                  >
+                    {karaokeMode === "mic" && <MicIcon />}
+                    {karaokeMode === "speaker" && <VolumeUpIcon />}
+                    {karaokeMode === "profile" && <PersonIcon />}
+                  </IconButton>
+                ) : (
+                  <IconButton
+                    onClick={onKaraokeGenerate}
+                    sx={{ color: isDarkMode ? "#fff" : "#111" }}
+                  >
+                    {isKaraokeLoading ? (
+                      <CachedIcon sx={{ animation: "karaokeSpin 1s linear infinite" }} />
+                    ) : (
+                      <PersonIcon />
+                    )}
+                  </IconButton>
+                )}
               </div>
-              <IconButton onClick={handlePrevSong} color="primary" disabled={getCurrentSongIndex() <= 0}>
-                <SkipPreviousIcon />
-              </IconButton>
-              <IconButton onClick={handlePlayPause} color="primary">
-                {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-              </IconButton>
-              {(karaokeReady || (selectedSong && (selectedSong.kar === true || selectedSong.vocals === true))) && (
-                <IconButton onClick={onKaraokeModeToggle} color="primary">
-                  {karaokeMode === "mic" && <MicIcon />}
-                  {karaokeMode === "speaker" && <VolumeUpIcon />}
-                  {karaokeMode === "profile" && <PersonIcon />}
-                </IconButton>
-              )}
               <IconButton onClick={handleNextSong} color="primary" disabled={getCurrentSongIndex() === songList.length - 1 || songList.length === 0}>
                 <SkipNextIcon />
               </IconButton>

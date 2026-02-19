@@ -23,6 +23,8 @@ interface HomePageProps {
   authUser: AuthUser;
   onLogout: () => void;
   onSettings: () => void;
+  onSavePlaylist: () => void;
+  onExportPlaylist: () => void;
 }
 
 function HomePage(props: HomePageProps) {
@@ -84,6 +86,8 @@ function HomePage(props: HomePageProps) {
           authUser={props.authUser}
           onLogout={props.onLogout}
           onSettings={props.onSettings}
+          onSavePlaylist={props.onSavePlaylist}
+          onExportPlaylist={props.onExportPlaylist}
         />
         <div className="container-fluid" style={{ paddingBottom: 0 }}>
           <div className="row">

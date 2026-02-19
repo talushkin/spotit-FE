@@ -6,6 +6,7 @@ import { fetchPlaylistsByTitle } from "../store/dataSlice";
 import type { ThunkDispatch } from '@reduxjs/toolkit';
 import type { AnyAction } from 'redux';
 import type { AuthUser } from "./AuthGate";
+import { loadUserPlaylistHistory, type PlaylistHistoryEntry } from "../utils/storage";
 
 
 
@@ -26,6 +27,8 @@ interface HeaderBarProps {
   authUser: AuthUser;
   onLogout: () => void;
   onSettings: () => void;
+  onSavePlaylist: () => void;
+  onExportPlaylist: () => void;
 }
 
 export default function HeaderBar({
@@ -42,7 +45,9 @@ export default function HeaderBar({
   onAddSongToList,
   authUser,
   onLogout,
-  onSettings
+  onSettings,
+  onSavePlaylist,
+  onExportPlaylist
 }: HeaderBarProps) {
   // Use correct dispatch type for thunks
   const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
@@ -62,6 +67,8 @@ export default function HeaderBar({
   // Track if search is active (focus or has value)
   const [searchActive, setSearchActive] = useState(false);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const [playlistPopupOpen, setPlaylistPopupOpen] = useState(false);
+  const [playlistHistory, setPlaylistHistory] = useState<PlaylistHistoryEntry[]>([]);
   // Determine if mobile
   const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 650 : false;
 
@@ -72,6 +79,12 @@ export default function HeaderBar({
     window.addEventListener("click", closeMenu);
     return () => window.removeEventListener("click", closeMenu);
   }, [avatarMenuOpen]);
+
+  const formatPlayedAt = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString();
+  };
 
   return (
     <>
@@ -199,6 +212,65 @@ export default function HeaderBar({
                     <button
                       type="button"
                       onClick={() => {
+                        const history = loadUserPlaylistHistory({ id: authUser.id, email: authUser.email });
+                        setPlaylistHistory(history);
+                        setPlaylistPopupOpen(true);
+                        setAvatarMenuOpen(false);
+                      }}
+                      style={{
+                        width: "100%",
+                        border: "none",
+                        background: "transparent",
+                        color: isDarkMode ? "#fff" : "#111",
+                        textAlign: "left",
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Current Playlist
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAvatarMenuOpen(false);
+                        onSavePlaylist();
+                      }}
+                      style={{
+                        width: "100%",
+                        border: "none",
+                        background: "transparent",
+                        color: isDarkMode ? "#fff" : "#111",
+                        textAlign: "left",
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Save Playlist
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAvatarMenuOpen(false);
+                        onExportPlaylist();
+                      }}
+                      style={{
+                        width: "100%",
+                        border: "none",
+                        background: "transparent",
+                        color: isDarkMode ? "#fff" : "#111",
+                        textAlign: "left",
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Export Playlist JSON
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
                         setAvatarMenuOpen(false);
                         onSettings();
                       }}
@@ -268,6 +340,113 @@ export default function HeaderBar({
             />
           )}
         </div>
+            {playlistPopupOpen && (
+              <div
+                onClick={() => setPlaylistPopupOpen(false)}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  background: "rgba(0,0,0,0.45)",
+                  zIndex: 3000,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 16,
+                }}
+              >
+                <div
+                  onClick={(event) => event.stopPropagation()}
+                  style={{
+                    width: "min(860px, 96vw)",
+                    maxHeight: "80vh",
+                    overflowY: "auto",
+                    borderRadius: 12,
+                    border: `1px solid ${isDarkMode ? "#2f2f2f" : "#d9d9d9"}`,
+                    background: isDarkMode ? "#151515" : "#fff",
+                    color: isDarkMode ? "#fff" : "#111",
+                    boxShadow: "0 8px 30px rgba(0,0,0,0.35)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "12px 16px",
+                      borderBottom: `1px solid ${isDarkMode ? "#2a2a2a" : "#ececec"}`,
+                      position: "sticky",
+                      top: 0,
+                      background: isDarkMode ? "#151515" : "#fff",
+                    }}
+                  >
+                    <div style={{ fontWeight: 700 }}>Current Playlist History</div>
+                    <button
+                      type="button"
+                      onClick={() => setPlaylistPopupOpen(false)}
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                        color: isDarkMode ? "#fff" : "#111",
+                        cursor: "pointer",
+                        fontSize: 18,
+                        lineHeight: 1,
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div style={{ padding: 16 }}>
+                    {playlistHistory.length === 0 ? (
+                      <div style={{ color: isDarkMode ? "#b0b0b0" : "#666" }}>
+                        No playlist history yet.
+                      </div>
+                    ) : (
+                      playlistHistory.map((entry, index) => (
+                        <div
+                          key={entry.id}
+                          style={{
+                            border: `1px solid ${isDarkMode ? "#2f2f2f" : "#ececec"}`,
+                            borderRadius: 10,
+                            padding: 12,
+                            marginBottom: 10,
+                          }}
+                        >
+                          <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                            {index + 1}. Played at: {formatPlayedAt(entry.playedAt)}
+                          </div>
+                          <div style={{ color: isDarkMode ? "#c2c2c2" : "#555", marginBottom: 10 }}>
+                            {entry.songs.length} song{entry.songs.length === 1 ? "" : "s"}
+                          </div>
+                          <div style={{ overflowX: "auto" }}>
+                            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 420 }}>
+                              <thead>
+                                <tr>
+                                  <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>#</th>
+                                  <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Song</th>
+                                  <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Artist</th>
+                                  <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#333" : "#e5e5e5"}` }}>Played At</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {entry.songs.map((song, songIndex) => (
+                                  <tr key={`${entry.id}_${songIndex}`}>
+                                    <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{songIndex + 1}</td>
+                                    <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{song.title || "Untitled"}</td>
+                                    <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{song.artist || "-"}</td>
+                                    <td style={{ padding: "6px 8px", borderBottom: `1px solid ${isDarkMode ? "#262626" : "#f1f1f1"}` }}>{formatPlayedAt(entry.playedAt)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
       </div>
     </>
   );

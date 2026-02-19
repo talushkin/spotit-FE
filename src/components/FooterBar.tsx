@@ -266,12 +266,31 @@ const FooterBar = (props: any) => {
     );
   };
 
+  const markSongPlayed = (song: Song | null) => {
+    if (!song) return;
+    const playedAt = new Date().toISOString();
+    const updatedSong = { ...song, playedAt };
+
+    setSongList((prev) => {
+      const next = prev.map((item) =>
+        item.title === song.title && item.artist === song.artist
+          ? { ...item, playedAt }
+          : item
+      );
+      if (typeof setAppSongList === "function") {
+        setAppSongList(next);
+      }
+      return next;
+    });
+    setSelectedSong(updatedSong);
+  };
+
   const handleNextSong = () => {
     const idx = getCurrentSongIndex();
     if (idx >= 0 && idx < songList.length - 1) {
       const nextSong = songList[idx + 1];
       console.log('Next song:', nextSong);
-      setSelectedSong(nextSong);
+      markSongPlayed(nextSong);
       setCurrentTime(0);
       // setTimeout(() => {
       //   if (playerRef.current) {
@@ -288,7 +307,7 @@ const FooterBar = (props: any) => {
     const idx = getCurrentSongIndex();
     if (idx > 0) {
       const prevSong = songList[idx - 1];
-      setSelectedSong(prevSong);
+      markSongPlayed(prevSong);
       setCurrentTime(0);
       setTimeout(() => {
         if (playerRef.current) {
@@ -619,7 +638,7 @@ const FooterBar = (props: any) => {
   };
 
   const handleSongTitleSelect = (song: Song) => {
-    setSelectedSong(song);
+    markSongPlayed(song);
     setIsPlaying(false);
     pendingAutoPlayRef.current = true;
   };
