@@ -92,8 +92,15 @@ function App() {
         const hasSavedPlaylist = storage.hasSavedUserPlaylist(playlistUser);
         const savedPlaylist = storage.loadUserPlaylistFromLocalStorage(playlistUser);
         if (hasSavedPlaylist) {
+          const lastPlayedSong = savedPlaylist.reduce<Song | null>((latest, song) => {
+            if (!song?.playedAt) return latest;
+            if (!latest?.playedAt) return song;
+            return new Date(song.playedAt).getTime() > new Date(latest.playedAt).getTime()
+              ? song
+              : latest;
+          }, null);
           setSongList(savedPlaylist);
-          setSelectedSong(savedPlaylist[0] || null);
+          setSelectedSong(lastPlayedSong || savedPlaylist[0] || null);
         } else {
           setSelectedSong(initialSong);
           setSongList(initialSong ? [initialSong] : []);

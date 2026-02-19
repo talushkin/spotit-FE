@@ -45,6 +45,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
 
   // Determine displayType from selectedGenre
   const displayType: DisplayType = selectedGenre?.displayType || DisplayType.Slider;
+  const standardCardWidth = displayType === "circles" ? 120 : (window.innerWidth <= 650 ? 160 : 180);
+  const standardCardHeight = displayType === "circles" ? 140 : 210;
 
   const stopMomentum = () => {
     if (momentumRafRef.current !== null) {
@@ -247,50 +249,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
     if (isMobile) scheduleSnapToCenter();
   };
 
-  // Gradient backgrounds per displayType
-  const getSliderBackground = () => {
-    // Special case: search results slider (genre === 'Search Results')
-    if (selectedGenre?.genre === 'Search Results') {
-      return '#001a3a'; // Full dark blue
-    }
-    if (displayType === "circles") {
-      return isDarkMode
-        ? "linear-gradient(90deg, #3a3a3a 0%, #222 100%)"
-        : "linear-gradient(90deg, #f7e8ff 0%, #fffce8 100%)";
-    }
-    if (displayType === "radio") {
-      return isDarkMode
-        ? "linear-gradient(90deg, #2b3a55 0%, #222 100%)"
-        : "linear-gradient(90deg, #e0f7fa 0%, #fffce8 100%)";
-    }
-    if (displayType === "slider") {
-      return isDarkMode
-        ? "linear-gradient(90deg, #232526 0%, #333 100%)"
-        : "linear-gradient(90deg, #f5f7fa 0%, #fffce8 100%)";
-    }
-    // Default fallback
-    return isDarkMode
-      ? "linear-gradient(90deg, #232526 0%, #333 100%)"
-      : "linear-gradient(90deg, #f5f7fa 0%, #fffce8 100%)";
-  };
-
   return (
     <div style={{ marginBottom: '0.5rem' }}>
-      {/* Genre title */}
-      {selectedGenre?.genre && (
-        <div
-          style={{
-            fontWeight: 600,
-            fontSize: '1.3rem',
-            marginBottom: '0px',
-            color: isDarkMode ? 'white' : '#222',
-            textAlign: 'left',
-            marginLeft: '0.5rem',
-          }}
-        >
-          {selectedGenre.genre}
-        </div>
-      )}
       <div
         id="song-slider"
         ref={sliderRef}
@@ -313,7 +273,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
           padding: '0.5rem 0',
           scrollbarColor: isDarkMode ? '#444 #000' : '#ccc #f5f5f5',
           scrollbarWidth: 'thin',
-          background: getSliderBackground(),
+          background: genreCardColor,
         }}
         onMouseDown={onMouseDown}
         onMouseLeave={onMouseLeave}
@@ -339,9 +299,9 @@ const SongSlider: React.FC<SongSliderProps> = ({
           style={
             displayType === "circles"
               ? {
-                  minWidth: 120,
-                  width: 120,
-                  height: 140,
+                  minWidth: standardCardWidth,
+                  width: standardCardWidth,
+                  height: standardCardHeight,
                   flex: '0 0 auto',
                   cursor: 'default',
                   margin: '0 10px',
@@ -351,8 +311,9 @@ const SongSlider: React.FC<SongSliderProps> = ({
                   justifyContent: 'center',
                 }
               : {
-                  minWidth: window.innerWidth <= 650 ? 160 : 180,
-                  width: window.innerWidth <= 650 ? 160 : 180,
+                  minWidth: standardCardWidth,
+                  width: standardCardWidth,
+                  height: standardCardHeight,
                   flex: '0 0 auto',
                   cursor: 'default',
                   margin: '0 10px',
@@ -365,8 +326,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
         >
           <div
             style={{
-              width: displayType === "circles" ? 120 : (window.innerWidth <= 650 ? 160 : 180),
-              height: displayType === "circles" ? 120 : 210,
+              width: standardCardWidth,
+              height: standardCardHeight,
               borderRadius: 16,
               background: genreCardColor,
               display: "flex",
@@ -392,9 +353,9 @@ const SongSlider: React.FC<SongSliderProps> = ({
             style={
               displayType === "circles"
                 ? {
-                    minWidth: 120,
-                    width: 120,
-                    height: 140,
+                    minWidth: standardCardWidth,
+                    width: standardCardWidth,
+                    height: standardCardHeight,
                     flex: '0 0 auto',
                     scrollSnapAlign: isMobile ? 'center' : undefined,
                     scrollSnapStop: isMobile ? 'normal' : undefined,
@@ -403,11 +364,12 @@ const SongSlider: React.FC<SongSliderProps> = ({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'center',
                   }
                 : {
-                    minWidth: window.innerWidth <= 650 ? 160 : 180,
-                    width: window.innerWidth <= 650 ? 160 : 180,
+                    minWidth: standardCardWidth,
+                    width: standardCardWidth,
+                    height: standardCardHeight,
                     flex: '0 0 auto',
                     scrollSnapAlign: isMobile ? 'center' : undefined,
                     scrollSnapStop: isMobile ? 'normal' : undefined,
@@ -416,7 +378,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'center',
                   }
             }
           >
