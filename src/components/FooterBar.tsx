@@ -214,10 +214,32 @@ const FooterBar = (props: any) => {
   const volume = useSelector((state: any) => state.data.volume ?? 50);
   const setVolumeGlobal = (v: number) => dispatch(setVolume(v));
   const [songList, setSongList] = useState<Song[]>(propSongList);
-  useEffect(() => {
-    if (playerRef.current) {
-      playerRef.current.setVolume(volume);
+
+  const safeSetYouTubeVolume = (player: YouTubePlayer | null, nextVolume: number) => {
+    if (!player) return;
+    try {
+      const iframe = player.getIframe?.();
+      if (!iframe || !iframe.src) return;
+      player.setVolume(nextVolume);
+    } catch {
+      return;
     }
+  };
+
+  const safeGetYouTubeVolume = (player: YouTubePlayer | null, fallback = 0) => {
+    if (!player) return fallback;
+    try {
+      const iframe = player.getIframe?.();
+      if (!iframe || !iframe.src) return fallback;
+      const current = player.getVolume?.();
+      return typeof current === "number" ? current : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  useEffect(() => {
+    safeSetYouTubeVolume(playerRef.current, volume);
   }, [volume]);
   useEffect(() => {
     setSongList(propSongList);
@@ -419,7 +441,7 @@ const FooterBar = (props: any) => {
     const kar = karaokeAudioRef.current;
     const voc = vocalsAudioRef.current;
     const target = getModeTargets(mode);
-    if (yt) yt.setVolume(clamp100(target.yt));
+    safeSetYouTubeVolume(yt, clamp100(target.yt));
     if (kar) kar.volume = clamp01(target.kar);
     if (voc) voc.volume = clamp01(target.voc);
   };
@@ -433,7 +455,7 @@ const FooterBar = (props: any) => {
     if (fadeAnimationRef.current) cancelAnimationFrame(fadeAnimationRef.current);
 
     const target = getModeTargets(mode);
-    const fromYt = clamp100(yt?.getVolume?.() ?? 0);
+    const fromYt = clamp100(safeGetYouTubeVolume(yt, 0));
     const fromKar = clamp01(kar?.volume ?? 0);
     const fromVoc = clamp01(voc?.volume ?? 0);
     const start = performance.now();
@@ -441,7 +463,7 @@ const FooterBar = (props: any) => {
     const tick = (now: number) => {
       const rawT = (now - start) / duration;
       const t = Math.max(0, Math.min(rawT, 1));
-      if (yt) yt.setVolume(clamp100(Math.round(fromYt + (target.yt - fromYt) * t)));
+      safeSetYouTubeVolume(yt, clamp100(Math.round(fromYt + (target.yt - fromYt) * t)));
       if (kar) kar.volume = clamp01(fromKar + (target.kar - fromKar) * t);
       if (voc) voc.volume = clamp01(fromVoc + (target.voc - fromVoc) * t);
 
@@ -542,7 +564,7 @@ const FooterBar = (props: any) => {
       if (voc) voc.pause();
       setIsPlaying(false);
     } else {
-      if (yt) yt.setVolume(0);
+      safeSetYouTubeVolume(yt, 0);
       if (kar) kar.volume = 0;
       if (voc) voc.volume = 0;
       yt.playVideo();
@@ -618,6 +640,12 @@ const FooterBar = (props: any) => {
     return "";
   };
   const videoId = useMemo(() => getVideoId(selectedSong?.url), [selectedSong?.url]);
+
+  useEffect(() => {
+    if (!videoId) {
+      playerRef.current = null;
+    }
+  }, [videoId]);
 
   // When video changes, update total duration
   React.useEffect(() => {
