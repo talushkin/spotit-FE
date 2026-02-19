@@ -17,9 +17,10 @@ interface CaseCardProps {
   displayType?: DisplayType;
   isMobile?: boolean;
   showMobileActions?: boolean;
+  bgColor?: string;
 }
 
-export default function CaseCard({ item, category, index, isDarkMode = true, onAddSongToList, onSelectSong, displayType = DisplayType.Slider, isMobile = false, showMobileActions = false }: CaseCardProps) {
+export default function CaseCard({ item, category, index, isDarkMode = true, onAddSongToList, onSelectSong, displayType = DisplayType.Slider, isMobile = false, showMobileActions = false, bgColor }: CaseCardProps) {
   const navigate = useNavigate();
   // Handler for play button: select and play (do not add to list here)
 
@@ -112,7 +113,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
         className="case circle-case"
         onMouseDown={onMouseDown}
         style={{
-          backgroundColor: isDarkMode ? "#333" : "#fffce8",
+          backgroundColor: bgColor || (isDarkMode ? "#333" : "#fffce8"),
           border: isDarkMode ? "1px solid rgb(71, 69, 69)" : "1px solid rgb(234, 227, 227)",
           borderRadius: "50%",
           width: 120,
@@ -161,7 +162,7 @@ export default function CaseCard({ item, category, index, isDarkMode = true, onA
         className="case"
         onMouseDown={onMouseDown}
         style={{
-          backgroundColor: isDarkMode ? "#333" : "#fffce8",
+          backgroundColor: bgColor || (isDarkMode ? "#333" : "#fffce8"),
           border: isDarkMode
             ? "1px solid rgb(71, 69, 69)"
             : "1px solid rgb(234, 227, 227)",

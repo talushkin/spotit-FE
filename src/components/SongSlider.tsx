@@ -43,6 +43,17 @@ const SongSlider: React.FC<SongSliderProps> = ({
     return palette[seed % palette.length];
   }, [genreLabel]);
 
+  const caseCardBgColor = React.useMemo(() => {
+    const hex = genreCardColor.replace('#', '');
+    if (hex.length !== 6) return genreCardColor;
+    const toDark = (value: string) => Math.max(0, Math.floor(parseInt(value, 16) * 0.8));
+    const r = toDark(hex.slice(0, 2));
+    const g = toDark(hex.slice(2, 4));
+    const b = toDark(hex.slice(4, 6));
+    const toHex = (value: number) => value.toString(16).padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }, [genreCardColor]);
+
   // Determine displayType from selectedGenre
   const displayType: DisplayType = selectedGenre?.displayType || DisplayType.Slider;
   const standardCardWidth = displayType === "circles" ? 120 : (window.innerWidth <= 650 ? 160 : 180);
@@ -335,7 +346,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
               justifyContent: "center",
               textAlign: "center",
               padding: "10px",
-              color: "#fff",
+              color: "#1f1f1f",
               fontWeight: 800,
               fontSize: displayType === "circles" ? "0.95rem" : "1.1rem",
               boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
@@ -411,6 +422,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
               displayType={displayType}
               isMobile={isMobile}
               showMobileActions={centeredIndex === index}
+              bgColor={caseCardBgColor}
             />
           </div>
         ))}
