@@ -208,6 +208,12 @@ const FooterBar = (props: any) => {
   const playDelayRef = useRef<NodeJS.Timeout | null>(null);
   const fadeAnimationRef = useRef<number | null>(null);
   const pendingAutoPlayRef = useRef(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recorderChunksRef = useRef<BlobPart[]>([]);
+  const recorderAudioContextRef = useRef<AudioContext | null>(null);
+  const recorderMicStreamRef = useRef<MediaStream | null>(null);
+  const [isLiveRecording, setIsLiveRecording] = useState(false);
+  const [recordingStatus, setRecordingStatus] = useState<string | null>(null);
   // Lyrics/Genius state removed
   const playerRef = useRef<YouTubePlayer | null>(null);
   const dispatch = useDispatch();
@@ -320,8 +326,133 @@ const FooterBar = (props: any) => {
       if (karaokeToastRef.current) clearTimeout(karaokeToastRef.current);
       if (playDelayRef.current) clearTimeout(playDelayRef.current);
       if (fadeAnimationRef.current) cancelAnimationFrame(fadeAnimationRef.current);
+      if (recorderRef.current && recorderRef.current.state !== "inactive") {
+        recorderRef.current.stop();
+      }
+      if (recorderMicStreamRef.current) {
+        recorderMicStreamRef.current.getTracks().forEach((track) => track.stop());
+        recorderMicStreamRef.current = null;
+      }
+      if (recorderAudioContextRef.current) {
+        recorderAudioContextRef.current.close();
+        recorderAudioContextRef.current = null;
+      }
     };
   }, []);
+
+  const isBluetoothOutputConnected = async () => {
+    if (!navigator.mediaDevices?.enumerateDevices) return false;
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const btRegex = /(bluetooth|airpods|buds|earbuds|headset|headphones|bt)/i;
+    return devices.some((device) => device.kind === "audiooutput" && btRegex.test(device.label || ""));
+  };
+
+  const stopLiveRecording = () => {
+    const recorder = recorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      recorder.stop();
+    }
+    if (recorderMicStreamRef.current) {
+      recorderMicStreamRef.current.getTracks().forEach((track) => track.stop());
+      recorderMicStreamRef.current = null;
+    }
+    if (recorderAudioContextRef.current) {
+      recorderAudioContextRef.current.close();
+      recorderAudioContextRef.current = null;
+    }
+    setIsLiveRecording(false);
+    setRecordingStatus("Recording stopped");
+  };
+
+  const startLiveRecording = async () => {
+    try {
+      if (!karaokeAudioRef.current || karaokeAudioError) {
+        window.alert("Karaoke track is not ready. Please enable KAR track first.");
+        return;
+      }
+
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+        window.alert("Live recording is not supported in this browser.");
+        return;
+      }
+
+      const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recorderMicStreamRef.current = micStream;
+
+      const btConnected = await isBluetoothOutputConnected();
+      if (!btConnected) {
+        micStream.getTracks().forEach((track) => track.stop());
+        recorderMicStreamRef.current = null;
+        window.alert("Bluetooth headphones were not detected. Connect BT headphones and try again.");
+        return;
+      }
+
+      const proceed = window.confirm("Bluetooth output detected. Make sure audio is routed to BT headphones. Press OK to start KAR+MIC recording.");
+      if (!proceed) {
+        micStream.getTracks().forEach((track) => track.stop());
+        recorderMicStreamRef.current = null;
+        return;
+      }
+
+      const audioContext = new AudioContext();
+      recorderAudioContextRef.current = audioContext;
+      const destination = audioContext.createMediaStreamDestination();
+
+      const karaokeSource = audioContext.createMediaElementSource(karaokeAudioRef.current);
+      const micSource = audioContext.createMediaStreamSource(micStream);
+      karaokeSource.connect(destination);
+      micSource.connect(destination);
+
+      const preferredMime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : "audio/webm";
+      const recorder = new MediaRecorder(destination.stream, { mimeType: preferredMime });
+      recorderRef.current = recorder;
+      recorderChunksRef.current = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          recorderChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(recorderChunksRef.current, { type: preferredMime });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `kar-mic-${Date.now()}.webm`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      };
+
+      recorder.start(250);
+      setIsLiveRecording(true);
+      setRecordingStatus("Recording KAR+MIC...");
+    } catch (error) {
+      if (recorderMicStreamRef.current) {
+        recorderMicStreamRef.current.getTracks().forEach((track) => track.stop());
+        recorderMicStreamRef.current = null;
+      }
+      if (recorderAudioContextRef.current) {
+        recorderAudioContextRef.current.close();
+        recorderAudioContextRef.current = null;
+      }
+      setIsLiveRecording(false);
+      setRecordingStatus(null);
+      window.alert("Could not start KAR+MIC live recording.");
+    }
+  };
+
+  const handleLiveRecordingToggle = async () => {
+    if (isLiveRecording) {
+      stopLiveRecording();
+      return;
+    }
+    await startLiveRecording();
+  };
 
   // Lyrics/Genius effect removed
 
@@ -923,6 +1054,9 @@ const FooterBar = (props: any) => {
           onKaraokeModeToggle={handleKaraokeModeToggle}
           karaokeAudioRef={karaokeAudioRef}
           karaokeMeterRef={karaokeMeterRef}
+          isLiveRecording={isLiveRecording}
+          onLiveRecordingToggle={handleLiveRecordingToggle}
+          recordingStatus={recordingStatus}
         />
         {/* ThemeModeButton: only show on desktop at far right */}
       </Box>

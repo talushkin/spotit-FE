@@ -32,6 +32,16 @@ const SongSlider: React.FC<SongSliderProps> = ({
   const momentumRafRef = useRef<number | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 650);
   const [centeredIndex, setCenteredIndex] = useState<number | null>(null);
+  const genreLabel = selectedGenre?.genre || "Playlist";
+
+  const genreCardColor = React.useMemo(() => {
+    const palette = [
+      "#EF5350", "#AB47BC", "#5C6BC0", "#42A5F5", "#26A69A",
+      "#66BB6A", "#D4E157", "#FFA726", "#8D6E63", "#78909C"
+    ];
+    const seed = (genreLabel || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+    return palette[seed % palette.length];
+  }, [genreLabel]);
 
   // Determine displayType from selectedGenre
   const displayType: DisplayType = selectedGenre?.displayType || DisplayType.Slider;
@@ -325,6 +335,54 @@ const SongSlider: React.FC<SongSliderProps> = ({
             border-radius: 3px;
           }
         `}</style>
+        <div
+          style={
+            displayType === "circles"
+              ? {
+                  minWidth: 120,
+                  width: 120,
+                  height: 140,
+                  flex: '0 0 auto',
+                  cursor: 'default',
+                  margin: '0 10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }
+              : {
+                  minWidth: window.innerWidth <= 650 ? 160 : 180,
+                  width: window.innerWidth <= 650 ? 160 : 180,
+                  flex: '0 0 auto',
+                  cursor: 'default',
+                  margin: '0 10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }
+          }
+        >
+          <div
+            style={{
+              width: displayType === "circles" ? 120 : (window.innerWidth <= 650 ? 160 : 180),
+              height: displayType === "circles" ? 120 : 210,
+              borderRadius: 16,
+              background: genreCardColor,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              padding: "10px",
+              color: "#fff",
+              fontWeight: 800,
+              fontSize: displayType === "circles" ? "0.95rem" : "1.1rem",
+              boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
+            }}
+          >
+            {genreLabel}
+          </div>
+        </div>
         {songs.map((item: Song, index: number) => (
           <div
             key={index}

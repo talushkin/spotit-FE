@@ -9,6 +9,8 @@ import MicIcon from "@mui/icons-material/Mic";
 import CachedIcon from "@mui/icons-material/Cached";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import PersonIcon from "@mui/icons-material/Person";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
+import StopCircleIcon from "@mui/icons-material/StopCircle";
 import type { Song } from "../utils/storage";
 
 interface FooterControlPanelProps {
@@ -41,6 +43,9 @@ interface FooterControlPanelProps {
   onKaraokeModeToggle: () => void;
   karaokeAudioRef?: React.RefObject<HTMLAudioElement | null>;
   karaokeMeterRef?: React.RefObject<HTMLCanvasElement | null>;
+  isLiveRecording: boolean;
+  onLiveRecordingToggle: () => void;
+  recordingStatus: string | null;
 }
 
 const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
@@ -73,6 +78,9 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
   onKaraokeModeToggle,
   karaokeAudioRef,
   karaokeMeterRef,
+  isLiveRecording,
+  onLiveRecordingToggle,
+  recordingStatus,
 }) => {
   const hasKaraokeTracks =
     !!isCurrentKaraokeReady ||
@@ -173,6 +181,13 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
               <IconButton onClick={handleNextSong} color="primary" disabled={getCurrentSongIndex() === songList.length - 1 || songList.length === 0}>
                 <SkipNextIcon />
               </IconButton>
+              <IconButton
+                onClick={onLiveRecordingToggle}
+                title={isLiveRecording ? "Stop KAR+MIC recording" : "Start KAR+MIC recording"}
+                sx={{ color: "#ef5350" }}
+              >
+                {isLiveRecording ? <StopCircleIcon /> : <FiberManualRecordIcon />}
+              </IconButton>
             </div>
             <YouTube
               videoId={videoId}
@@ -203,6 +218,11 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                 </span>
               )}
               <div style={{ marginTop:-10, width: 240, marginLeft: "auto", marginRight: "auto" }}>
+                {recordingStatus && (
+                  <div style={{ fontSize: 11, color: isLiveRecording ? "#ef5350" : (isDarkMode ? "#bbb" : "#444"), marginBottom: 2 }}>
+                    {recordingStatus}
+                  </div>
+                )}
                 <Slider
                   min={0}
                   max={totalDuration || 1}
