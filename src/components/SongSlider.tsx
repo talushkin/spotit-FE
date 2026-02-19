@@ -26,35 +26,95 @@ const SongSlider: React.FC<SongSliderProps> = ({
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
   const scrollLeftRef = useRef(0);
+  const dragVelocityRef = useRef(0);
+  const lastDragTimeRef = useRef(0);
+  const lastScrollLeftRef = useRef(0);
+  const momentumRafRef = useRef<number | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 650);
   const [centeredIndex, setCenteredIndex] = useState<number | null>(null);
 
   // Determine displayType from selectedGenre
   const displayType: DisplayType = selectedGenre?.displayType || DisplayType.Slider;
 
+  const stopMomentum = () => {
+    if (momentumRafRef.current !== null) {
+      cancelAnimationFrame(momentumRafRef.current);
+      momentumRafRef.current = null;
+    }
+  };
+
+  const startMomentum = () => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+    let velocity = dragVelocityRef.current;
+    if (Math.abs(velocity) < 0.02) return;
+
+    stopMomentum();
+    let previousTs = performance.now();
+    const friction = 0.93;
+
+    const step = (ts: number) => {
+      const currentSlider = sliderRef.current;
+      if (!currentSlider) {
+        stopMomentum();
+        return;
+      }
+      const delta = Math.max(1, ts - previousTs);
+      previousTs = ts;
+      currentSlider.scrollLeft += velocity * delta;
+      velocity *= friction;
+
+      if (Math.abs(velocity) < 0.02) {
+        stopMomentum();
+        if (isMobile) scheduleSnapToCenter();
+        return;
+      }
+
+      momentumRafRef.current = requestAnimationFrame(step);
+    };
+
+    momentumRafRef.current = requestAnimationFrame(step);
+  };
+
   const onMouseDown = (e: React.MouseEvent) => {
     // Ignore interactive controls so card buttons still work
     const target = e.target as HTMLElement;
     if (target.closest('button, a, input, textarea, select, [role="button"]')) return;
+    stopMomentum();
     isDraggingRef.current = true;
     startXRef.current = e.pageX - (sliderRef.current?.offsetLeft || 0);
     scrollLeftRef.current = sliderRef.current?.scrollLeft || 0;
+    dragVelocityRef.current = 0;
+    lastDragTimeRef.current = performance.now();
+    lastScrollLeftRef.current = sliderRef.current?.scrollLeft || 0;
     document.body.style.cursor = 'grabbing';
   };
   const onMouseLeave = () => {
     isDraggingRef.current = false;
     document.body.style.cursor = '';
+    startMomentum();
   };
   const onMouseUp = () => {
     isDraggingRef.current = false;
     document.body.style.cursor = '';
+    startMomentum();
   };
   const onMouseMove = (e: React.MouseEvent) => {
     if (!isDraggingRef.current) return;
     e.preventDefault();
+    const slider = sliderRef.current;
+    if (!slider) return;
     const x = e.pageX - (sliderRef.current?.offsetLeft || 0);
     const walk = (x - startXRef.current) * (isMobile ? 2.8 : 2.2);
-    if (sliderRef.current) sliderRef.current.scrollLeft = scrollLeftRef.current - walk;
+    const nextScrollLeft = scrollLeftRef.current - walk;
+    slider.scrollLeft = nextScrollLeft;
+
+    const now = performance.now();
+    const dt = Math.max(1, now - lastDragTimeRef.current);
+    const ds = nextScrollLeft - lastScrollLeftRef.current;
+    dragVelocityRef.current = ds / dt;
+    lastDragTimeRef.current = now;
+    lastScrollLeftRef.current = nextScrollLeft;
   };
 
   const updateCenteredCard = () => {
@@ -135,6 +195,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
     window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('resize', onResize);
+      stopMomentum();
     };
   }, [isMobile, songs.length]);
 

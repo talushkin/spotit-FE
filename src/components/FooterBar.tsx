@@ -215,11 +215,19 @@ const FooterBar = (props: any) => {
   const setVolumeGlobal = (v: number) => dispatch(setVolume(v));
   const [songList, setSongList] = useState<Song[]>(propSongList);
 
-  const safeSetYouTubeVolume = (player: YouTubePlayer | null, nextVolume: number) => {
-    if (!player) return;
+  const isYouTubePlayerReady = (player: YouTubePlayer | null) => {
+    if (!player) return false;
     try {
       const iframe = player.getIframe?.();
-      if (!iframe || !iframe.src) return;
+      return !!(iframe && iframe.src);
+    } catch {
+      return false;
+    }
+  };
+
+  const safeSetYouTubeVolume = (player: YouTubePlayer | null, nextVolume: number) => {
+    if (!isYouTubePlayerReady(player)) return;
+    try {
       player.setVolume(nextVolume);
     } catch {
       return;
@@ -227,14 +235,57 @@ const FooterBar = (props: any) => {
   };
 
   const safeGetYouTubeVolume = (player: YouTubePlayer | null, fallback = 0) => {
-    if (!player) return fallback;
+    if (!isYouTubePlayerReady(player)) return fallback;
     try {
-      const iframe = player.getIframe?.();
-      if (!iframe || !iframe.src) return fallback;
       const current = player.getVolume?.();
       return typeof current === "number" ? current : fallback;
     } catch {
       return fallback;
+    }
+  };
+
+  const safePlayYouTube = (player: YouTubePlayer | null) => {
+    if (!isYouTubePlayerReady(player)) return;
+    try {
+      player.playVideo?.();
+    } catch {
+      return;
+    }
+  };
+
+  const safePauseYouTube = (player: YouTubePlayer | null) => {
+    if (!isYouTubePlayerReady(player)) return;
+    try {
+      player.pauseVideo?.();
+    } catch {
+      return;
+    }
+  };
+
+  const safeSeekYouTube = (player: YouTubePlayer | null, seconds: number) => {
+    if (!isYouTubePlayerReady(player)) return;
+    try {
+      player.seekTo?.(seconds, true);
+    } catch {
+      return;
+    }
+  };
+
+  const safeGetYouTubeCurrentTime = (player: YouTubePlayer | null) => {
+    if (!isYouTubePlayerReady(player)) return 0;
+    try {
+      return player.getCurrentTime?.() || 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  const safeGetYouTubeDuration = (player: YouTubePlayer | null) => {
+    if (!isYouTubePlayerReady(player)) return 0;
+    try {
+      return player.getDuration?.() || 0;
+    } catch {
+      return 0;
     }
   };
 
@@ -353,11 +404,9 @@ const FooterBar = (props: any) => {
       markSongPlayed(prevSong);
       setCurrentTime(0);
       setTimeout(() => {
-        if (playerRef.current) {
-          playerRef.current.seekTo(0, true);
-          const duration = playerRef.current.getDuration?.() || 0;
-          setTotalDuration(duration);
-        }
+        safeSeekYouTube(playerRef.current, 0);
+        const duration = safeGetYouTubeDuration(playerRef.current);
+        setTotalDuration(duration);
         setIsPlaying(true);
       }, 200);
     }
@@ -537,7 +586,7 @@ const FooterBar = (props: any) => {
 
     if (playerRef.current) {
       if (!isPlaying) {
-        playerRef.current.playVideo();
+        safePlayYouTube(playerRef.current);
         setIsPlaying(true);
       }
       syncAudioToYouTube();
@@ -559,7 +608,7 @@ const FooterBar = (props: any) => {
       return;
     }
     if (isPlaying) {
-      yt.pauseVideo();
+      safePauseYouTube(yt);
       if (kar) kar.pause();
       if (voc) voc.pause();
       setIsPlaying(false);
@@ -567,7 +616,7 @@ const FooterBar = (props: any) => {
       safeSetYouTubeVolume(yt, 0);
       if (kar) kar.volume = 0;
       if (voc) voc.volume = 0;
-      yt.playVideo();
+      safePlayYouTube(yt);
       syncAudioToYouTube();
       fadeToMode(karaokeMode);
       setIsPlaying(true);
@@ -579,8 +628,8 @@ const FooterBar = (props: any) => {
     let intervalId: NodeJS.Timeout | undefined;
     if (isPlaying && playerRef.current) {
       intervalId = setInterval(() => {
-        const time = playerRef.current?.getCurrentTime?.() || 0;
-        const duration = playerRef.current?.getDuration?.() || 0;
+        const time = safeGetYouTubeCurrentTime(playerRef.current);
+        const duration = safeGetYouTubeDuration(playerRef.current);
         setCurrentTime(time);
         const idx = getCurrentSongIndex();
         const kar = karaokeAudioRef.current;
@@ -616,7 +665,7 @@ const FooterBar = (props: any) => {
     if (pendingAutoPlayRef.current) {
       if (playDelayRef.current) clearTimeout(playDelayRef.current);
       playDelayRef.current = setTimeout(() => {
-        event.target.playVideo();
+        safePlayYouTube(event.target);
         syncAudioToYouTube();
         fadeToMode(karaokeMode);
         setIsPlaying(true);
@@ -624,7 +673,7 @@ const FooterBar = (props: any) => {
       }, 500);
     }
     // Set total duration
-    const duration = event.target.getDuration?.() || 0;
+    const duration = safeGetYouTubeDuration(event.target);
     setTotalDuration(duration);
   };
 
@@ -649,14 +698,12 @@ const FooterBar = (props: any) => {
 
   // When video changes, update total duration
   React.useEffect(() => {
-    if (playerRef.current) {
-      const duration = playerRef.current.getDuration?.() || 0;
-      setTotalDuration(duration);
-    }
+    const duration = safeGetYouTubeDuration(playerRef.current);
+    setTotalDuration(duration);
     if (pendingAutoPlayRef.current && playerRef.current) {
       if (playDelayRef.current) clearTimeout(playDelayRef.current);
       playDelayRef.current = setTimeout(() => {
-        playerRef.current?.playVideo();
+        safePlayYouTube(playerRef.current);
         syncAudioToYouTube();
         fadeToMode(karaokeMode);
         setIsPlaying(true);
@@ -680,7 +727,7 @@ const FooterBar = (props: any) => {
   // Handler for seeking in the video
   const handleSeek = (event: Event, value: number | number[]) => {
     const seekTo = Array.isArray(value) ? value[0] : value;
-    if (playerRef.current) playerRef.current.seekTo(seekTo, true);
+    safeSeekYouTube(playerRef.current, seekTo);
     if (karaokeAudioRef.current) karaokeAudioRef.current.currentTime = seekTo;
     if (vocalsAudioRef.current) vocalsAudioRef.current.currentTime = seekTo;
     setCurrentTime(seekTo);
@@ -702,9 +749,7 @@ const FooterBar = (props: any) => {
     setCurrentTime(0);
     setTotalDuration(0);
     setNextSongToHighlight(null);
-    if (playerRef.current) {
-      playerRef.current.pauseVideo();
-    }
+    safePauseYouTube(playerRef.current);
     saveUserPlaylistToLocalStorage([], {
       id: authUser?.id,
       email: authUser?.email,

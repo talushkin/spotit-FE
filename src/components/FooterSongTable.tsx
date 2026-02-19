@@ -105,7 +105,7 @@ function SongTableRow({
       ref={setNodeRef}
       style={{
         ...style,
-        scrollSnapAlign: "start",
+        scrollSnapAlign: "none",
         scrollSnapStop: "normal"
       }}
       {...attributes}
@@ -319,7 +319,7 @@ const FooterSongTable: React.FC<FooterSongTableProps> = ({
         borderRadius: 8,
         background: "transparent",
         marginTop: -12,
-        scrollSnapType: "y mandatory",
+        scrollSnapType: "none",
         ...(typeof window !== "undefined" && window.innerWidth > 650
           ? { marginLeft: 24 }
           : {})
