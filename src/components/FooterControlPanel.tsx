@@ -46,6 +46,7 @@ interface FooterControlPanelProps {
   isLiveRecording: boolean;
   onLiveRecordingToggle: () => void;
   recordingStatus: string | null;
+  recordedAudioUrl: string | null;
 }
 
 const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
@@ -81,6 +82,7 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
   isLiveRecording,
   onLiveRecordingToggle,
   recordingStatus,
+  recordedAudioUrl,
 }) => {
   const hasKaraokeTracks =
     !!isCurrentKaraokeReady ||
@@ -222,6 +224,14 @@ const FooterControlPanel: React.FC<FooterControlPanelProps> = ({
                   <div style={{ fontSize: 11, color: isLiveRecording ? "#ef5350" : (isDarkMode ? "#bbb" : "#444"), marginBottom: 2 }}>
                     {recordingStatus}
                   </div>
+                )}
+                {recordedAudioUrl && (
+                  <audio
+                    src={recordedAudioUrl}
+                    controls
+                    autoPlay
+                    style={{ width: "100%", marginBottom: 4 }}
+                  />
                 )}
                 <Slider
                   min={0}

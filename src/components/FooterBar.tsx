@@ -214,6 +214,7 @@ const FooterBar = (props: any) => {
   const recorderMicStreamRef = useRef<MediaStream | null>(null);
   const [isLiveRecording, setIsLiveRecording] = useState(false);
   const [recordingStatus, setRecordingStatus] = useState<string | null>(null);
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
   // Lyrics/Genius state removed
   const playerRef = useRef<YouTubePlayer | null>(null);
   const dispatch = useDispatch();
@@ -337,61 +338,11 @@ const FooterBar = (props: any) => {
         recorderAudioContextRef.current.close();
         recorderAudioContextRef.current = null;
       }
-    };
-  }, []);
-
-  const btRegex = /(bluetooth|airpods|air pods|buds|earbuds|headset|headphones|wireless|a2dp|hands[- ]?free|sony|bose|jabra|beats)/i;
-
-  const detectBluetoothOutputState = async (): Promise<{
-    state: "connected" | "unknown" | "not-connected";
-    btDeviceName: string | null;
-    outputNames: string[];
-  }> => {
-    if (!navigator.mediaDevices?.enumerateDevices) {
-      return { state: "unknown", btDeviceName: null, outputNames: [] };
-    }
-
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const audioOutputs = devices.filter((device) => device.kind === "audiooutput");
-    const outputNames = audioOutputs.map((device) => (device.label || "").trim()).filter(Boolean);
-    if (!audioOutputs.length) return { state: "unknown", btDeviceName: null, outputNames };
-
-    const hasHiddenLabels = audioOutputs.some((device) => !(device.label || "").trim());
-    if (hasHiddenLabels) return { state: "unknown", btDeviceName: null, outputNames };
-
-    const btDevice = audioOutputs.find((device) => btRegex.test((device.label || "").toLowerCase()));
-    if (btDevice) {
-      return {
-        state: "connected",
-        btDeviceName: (btDevice.label || "").trim() || null,
-        outputNames,
-      };
-    }
-
-    return { state: "not-connected", btDeviceName: null, outputNames };
-  };
-
-  const trySelectBluetoothOutput = async (): Promise<{ connected: boolean; deviceName: string | null }> => {
-    const mediaDevicesAny = navigator.mediaDevices as any;
-    if (typeof mediaDevicesAny.selectAudioOutput !== "function") return { connected: false, deviceName: null };
-    try {
-      const chosen = await mediaDevicesAny.selectAudioOutput();
-      const chosenLabel = (chosen?.label || "").trim();
-      const chosenLabelLower = chosenLabel.toLowerCase();
-      if (btRegex.test(chosenLabelLower)) return { connected: true, deviceName: chosenLabel || null };
-
-      const deviceId = chosen?.deviceId || "";
-      if (deviceId && deviceId !== "default" && deviceId !== "communications") {
-        const confirmNonNamedBt = window.confirm(
-          `Audio output selected${chosenLabel ? `: ${chosenLabel}` : ""}, but BT name check is uncertain. Is this your Bluetooth headphones output?`
-        );
-        return { connected: confirmNonNamedBt, deviceName: chosenLabel || null };
+      if (recordedAudioUrl) {
+        URL.revokeObjectURL(recordedAudioUrl);
       }
-      return { connected: false, deviceName: chosenLabel || null };
-    } catch {
-      return { connected: false, deviceName: null };
-    }
-  };
+    };
+  }, [recordedAudioUrl]);
 
   const stopLiveRecording = () => {
     const recorder = recorderRef.current;
@@ -407,7 +358,7 @@ const FooterBar = (props: any) => {
       recorderAudioContextRef.current = null;
     }
     setIsLiveRecording(false);
-    setRecordingStatus("Recording stopped");
+    setRecordingStatus("Recording stopped. Preparing playback...");
   };
 
   const startLiveRecording = async () => {
@@ -424,45 +375,6 @@ const FooterBar = (props: any) => {
 
       const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       recorderMicStreamRef.current = micStream;
-
-      const detection = await detectBluetoothOutputState();
-      let btState = detection.state;
-      let btConnected = btState === "connected";
-      let btDeviceName = detection.btDeviceName;
-
-      if (!btConnected && btState !== "connected") {
-        const selectedOutput = await trySelectBluetoothOutput();
-        btConnected = selectedOutput.connected;
-        if (selectedOutput.deviceName) btDeviceName = selectedOutput.deviceName;
-      }
-
-      if (!btConnected && btState === "unknown") {
-        const outputSummary = detection.outputNames.length
-          ? `\nDetected outputs: ${detection.outputNames.join(", ")}`
-          : "\nNo output device names available.";
-        btConnected = window.confirm(
-          `Bluetooth could not be auto-detected (browser may hide device names).${outputSummary}\nConfirm BT headphones are connected and active to continue.`
-        );
-      }
-
-      if (!btConnected) {
-        micStream.getTracks().forEach((track) => track.stop());
-        recorderMicStreamRef.current = null;
-        const outputSummary = detection.outputNames.length
-          ? `Detected outputs: ${detection.outputNames.join(", ")}`
-          : "No output device names available.";
-        window.alert(`Bluetooth headphones were not detected. Connect BT headphones and try again.\n${outputSummary}`);
-        return;
-      }
-
-      const proceed = window.confirm(
-        `Bluetooth output detected${btDeviceName ? `: ${btDeviceName}` : ""}. Make sure audio is routed to BT headphones. Press OK to start KAR+MIC recording.`
-      );
-      if (!proceed) {
-        micStream.getTracks().forEach((track) => track.stop());
-        recorderMicStreamRef.current = null;
-        return;
-      }
 
       const audioContext = new AudioContext();
       recorderAudioContextRef.current = audioContext;
@@ -489,13 +401,13 @@ const FooterBar = (props: any) => {
       recorder.onstop = () => {
         const blob = new Blob(recorderChunksRef.current, { type: preferredMime });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `kar-mic-${Date.now()}.webm`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        setRecordedAudioUrl((previousUrl) => {
+          if (previousUrl) {
+            URL.revokeObjectURL(previousUrl);
+          }
+          return url;
+        });
+        setRecordingStatus("Recording stopped. Playing latest take.");
       };
 
       recorder.start(250);
@@ -1127,6 +1039,7 @@ const FooterBar = (props: any) => {
           isLiveRecording={isLiveRecording}
           onLiveRecordingToggle={handleLiveRecordingToggle}
           recordingStatus={recordingStatus}
+          recordedAudioUrl={recordedAudioUrl}
         />
         {/* ThemeModeButton: only show on desktop at far right */}
       </Box>
