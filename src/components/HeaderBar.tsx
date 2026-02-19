@@ -6,7 +6,13 @@ import { fetchPlaylistsByTitle } from "../store/dataSlice";
 import type { ThunkDispatch } from '@reduxjs/toolkit';
 import type { AnyAction } from 'redux';
 import type { AuthUser } from "./AuthGate";
-import { loadPlayedSongsHistory, type PlayedSongHistoryEntry } from "../utils/storage";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import {
+  loadPlayedSongsHistory,
+  clearPlayedSongsHistory,
+  saveUserPlaylistToLocalStorage,
+  type PlayedSongHistoryEntry
+} from "../utils/storage";
 
 
 
@@ -85,6 +91,25 @@ export default function HeaderBar({
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return value;
     return date.toLocaleString();
+  };
+
+  const handleClearCurrentPlaylist = () => {
+    setSongList([]);
+    setSelectedSong(null as any);
+    saveUserPlaylistToLocalStorage([], {
+      id: authUser.id,
+      email: authUser.email,
+    });
+    setAvatarMenuOpen(false);
+  };
+
+  const handleClearPlaylistHistory = () => {
+    clearPlayedSongsHistory({
+      id: authUser.id,
+      email: authUser.email,
+    });
+    setPlayedSongsHistory([]);
+    setAvatarMenuOpen(false);
   };
 
   return (
@@ -210,46 +235,86 @@ export default function HeaderBar({
                         {authUser.email}
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCurrentPlaylistPopupOpen(true);
-                        setAvatarMenuOpen(false);
-                      }}
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        background: "transparent",
-                        color: isDarkMode ? "#fff" : "#111",
-                        textAlign: "left",
-                        padding: "10px 12px",
-                        borderRadius: 8,
-                        cursor: "pointer",
-                      }}
-                    >
-                      Current Playlist
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const history = loadPlayedSongsHistory({ id: authUser.id, email: authUser.email });
-                        setPlayedSongsHistory(history);
-                        setPlaylistHistoryPopupOpen(true);
-                        setAvatarMenuOpen(false);
-                      }}
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        background: "transparent",
-                        color: isDarkMode ? "#fff" : "#111",
-                        textAlign: "left",
-                        padding: "10px 12px",
-                        borderRadius: 8,
-                        cursor: "pointer",
-                      }}
-                    >
-                      Playlist History
-                    </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "2px 4px" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurrentPlaylistPopupOpen(true);
+                          setAvatarMenuOpen(false);
+                        }}
+                        style={{
+                          flex: 1,
+                          border: "none",
+                          background: "transparent",
+                          color: isDarkMode ? "#fff" : "#111",
+                          textAlign: "left",
+                          padding: "8px 8px",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Current Playlist
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleClearCurrentPlaylist}
+                        title="Delete current playlist"
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          color: isDarkMode ? "#ff9b9b" : "#b3261e",
+                          padding: 6,
+                          borderRadius: 8,
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </button>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "2px 4px" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const history = loadPlayedSongsHistory({ id: authUser.id, email: authUser.email });
+                          setPlayedSongsHistory(history);
+                          setPlaylistHistoryPopupOpen(true);
+                          setAvatarMenuOpen(false);
+                        }}
+                        style={{
+                          flex: 1,
+                          border: "none",
+                          background: "transparent",
+                          color: isDarkMode ? "#fff" : "#111",
+                          textAlign: "left",
+                          padding: "8px 8px",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Playlist History
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleClearPlaylistHistory}
+                        title="Delete playlist history"
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          color: isDarkMode ? "#ff9b9b" : "#b3261e",
+                          padding: 6,
+                          borderRadius: 8,
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <DeleteOutlineIcon fontSize="small" />
+                      </button>
+                    </div>
                     <button
                       type="button"
                       onClick={() => {

@@ -103,20 +103,46 @@ export interface PlayedSongHistoryEntry {
   song: Song;
 }
 
+const normalizeEmail = (email?: string) => (email || "").trim().toLowerCase();
+
+const getUserIdentity = (user?: PlaylistUser) => {
+  const normalizedEmail = normalizeEmail(user?.email);
+  return normalizedEmail || user?.id || "guest";
+};
+
+const getLegacyUserIdentity = (user?: PlaylistUser) => {
+  return user?.id || "guest";
+};
+
 const getUserPlaylistStorageKey = (user?: PlaylistUser) => {
-  const identity = user?.id || user?.email || "guest";
+  const identity = getUserIdentity(user);
+  return `spotit.playlist.${identity}`;
+};
+
+const getLegacyUserPlaylistStorageKey = (user?: PlaylistUser) => {
+  const identity = getLegacyUserIdentity(user);
   return `spotit.playlist.${identity}`;
 };
 
 const LAST_PLAYLIST_STORAGE_KEY = "spotit.playlist.last";
 const getUserPlaylistHistoryStorageKey = (user?: PlaylistUser) => {
-  const identity = user?.id || user?.email || "guest";
+  const identity = getUserIdentity(user);
+  return `spotit.playlist.history.${identity}`;
+};
+
+const getLegacyUserPlaylistHistoryStorageKey = (user?: PlaylistUser) => {
+  const identity = getLegacyUserIdentity(user);
   return `spotit.playlist.history.${identity}`;
 };
 
 const LAST_PLAYLIST_HISTORY_STORAGE_KEY = "spotit.playlist.history.last";
 const getUserPlayedSongsHistoryStorageKey = (user?: PlaylistUser) => {
-  const identity = user?.id || user?.email || "guest";
+  const identity = getUserIdentity(user);
+  return `spotit.playedSongs.history.${identity}`;
+};
+
+const getLegacyUserPlayedSongsHistoryStorageKey = (user?: PlaylistUser) => {
+  const identity = getLegacyUserIdentity(user);
   return `spotit.playedSongs.history.${identity}`;
 };
 
@@ -136,7 +162,9 @@ export const saveUserPlaylistToLocalStorage = (songs: Song[], user?: PlaylistUse
 
 export const loadUserPlaylistFromLocalStorage = (user?: PlaylistUser): Song[] => {
   if (typeof window === "undefined") return [];
-  const raw = localStorage.getItem(getUserPlaylistStorageKey(user));
+  const raw =
+    localStorage.getItem(getUserPlaylistStorageKey(user)) ||
+    localStorage.getItem(getLegacyUserPlaylistStorageKey(user));
   const fallbackRaw = localStorage.getItem(LAST_PLAYLIST_STORAGE_KEY);
   if (!raw && !fallbackRaw) return [];
   try {
@@ -160,14 +188,16 @@ export const loadUserPlaylistFromLocalStorage = (user?: PlaylistUser): Song[] =>
 
 export const hasSavedUserPlaylist = (user?: PlaylistUser): boolean => {
   if (typeof window === "undefined") return false;
-  const primary = localStorage.getItem(getUserPlaylistStorageKey(user));
+  const primary =
+    localStorage.getItem(getUserPlaylistStorageKey(user)) ||
+    localStorage.getItem(getLegacyUserPlaylistStorageKey(user));
   const fallback = localStorage.getItem(LAST_PLAYLIST_STORAGE_KEY);
   return !!(primary || fallback);
 };
 
 export const exportPlaylistJsonFile = (songs: Song[], user?: PlaylistUser) => {
   if (typeof window === "undefined") return;
-  const identity = user?.id || user?.email || "guest";
+  const identity = getUserIdentity(user);
   const safeIdentity = identity.replace(/[^a-zA-Z0-9._-]/g, "_");
   const payload = {
     savedAt: new Date().toISOString(),
@@ -221,7 +251,10 @@ export const loadUserPlaylistHistory = (user?: PlaylistUser): PlaylistHistoryEnt
     }
   };
 
-  const primary = parseHistory(localStorage.getItem(getUserPlaylistHistoryStorageKey(user)));
+  const primary = parseHistory(
+    localStorage.getItem(getUserPlaylistHistoryStorageKey(user)) ||
+    localStorage.getItem(getLegacyUserPlaylistHistoryStorageKey(user))
+  );
   if (primary.length > 0) return primary;
   return parseHistory(localStorage.getItem(LAST_PLAYLIST_HISTORY_STORAGE_KEY));
 };
@@ -271,7 +304,10 @@ export const loadPlayedSongsHistory = (user?: PlaylistUser): PlayedSongHistoryEn
     }
   };
 
-  const primary = parseHistory(localStorage.getItem(getUserPlayedSongsHistoryStorageKey(user)));
+  const primary = parseHistory(
+    localStorage.getItem(getUserPlayedSongsHistoryStorageKey(user)) ||
+    localStorage.getItem(getLegacyUserPlayedSongsHistoryStorageKey(user))
+  );
   if (primary.length > 0) return primary;
   return parseHistory(localStorage.getItem(LAST_PLAYED_SONGS_HISTORY_STORAGE_KEY));
 };
