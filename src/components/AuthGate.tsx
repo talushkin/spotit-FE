@@ -200,6 +200,10 @@ export default function AuthGate({ onAuthSuccess, onSkip }: AuthGateProps) {
           padding: 24,
           background: "#171717",
           border: "1px solid #2c2c2c",
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
         <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Spot.it</div>
