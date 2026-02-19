@@ -44,12 +44,10 @@ const SongSlider: React.FC<SongSliderProps> = ({
   const onMouseLeave = () => {
     isDraggingRef.current = false;
     document.body.style.cursor = '';
-    scheduleSnapToCenter();
   };
   const onMouseUp = () => {
     isDraggingRef.current = false;
     document.body.style.cursor = '';
-    scheduleSnapToCenter();
   };
   const onMouseMove = (e: React.MouseEvent) => {
     if (!isDraggingRef.current) return;
@@ -111,6 +109,13 @@ const SongSlider: React.FC<SongSliderProps> = ({
   };
 
   const scheduleSnapToCenter = () => {
+    if (!isMobile) {
+      if (snapTimeoutRef.current !== null) {
+        window.clearTimeout(snapTimeoutRef.current);
+        snapTimeoutRef.current = null;
+      }
+      return;
+    }
     if (snapTimeoutRef.current !== null) {
       window.clearTimeout(snapTimeoutRef.current);
     }
@@ -138,6 +143,7 @@ const SongSlider: React.FC<SongSliderProps> = ({
     if (!slider) return;
 
     const onScroll = () => {
+      if (!isMobile) return;
       requestAnimationFrame(updateCenteredCard);
       scheduleSnapToCenter();
     };
@@ -163,11 +169,11 @@ const SongSlider: React.FC<SongSliderProps> = ({
 
   const handleTouchEnd = () => {
     isTouchingRef.current = false;
-    scheduleSnapToCenter();
+    if (isMobile) scheduleSnapToCenter();
   };
 
   const handleWheel = () => {
-    scheduleSnapToCenter();
+    if (isMobile) scheduleSnapToCenter();
   };
 
   // Gradient backgrounds per displayType
@@ -223,11 +229,11 @@ const SongSlider: React.FC<SongSliderProps> = ({
           overflowX: 'auto',
           overflowY: 'hidden',
           scrollBehavior: 'auto',
-          scrollSnapType: 'x proximity',
+          scrollSnapType: isMobile ? 'x proximity' : undefined,
           maxWidth: '100vw',
           cursor: 'grab',
           userSelect: 'none',
-          gap: '16px',
+          gap: '30px',
           touchAction: 'pan-x',
           WebkitOverflowScrolling: 'touch',
           msOverflowStyle: 'none',
@@ -271,8 +277,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
                     width: 120,
                     height: 140,
                     flex: '0 0 auto',
-                  scrollSnapAlign: 'center',
-                    scrollSnapStop: 'normal',
+                    scrollSnapAlign: isMobile ? 'center' : undefined,
+                    scrollSnapStop: isMobile ? 'normal' : undefined,
                     cursor: 'pointer',
                     margin: '0 10px',
                     display: 'flex',
@@ -284,8 +290,8 @@ const SongSlider: React.FC<SongSliderProps> = ({
                     minWidth: window.innerWidth <= 650 ? 160 : 180,
                     width: window.innerWidth <= 650 ? 160 : 180,
                     flex: '0 0 auto',
-                    scrollSnapAlign: 'center',
-                    scrollSnapStop: 'normal',
+                    scrollSnapAlign: isMobile ? 'center' : undefined,
+                    scrollSnapStop: isMobile ? 'normal' : undefined,
                     cursor: 'pointer',
                     margin: '0 10px',
                     display: 'flex',
