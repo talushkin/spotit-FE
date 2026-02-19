@@ -166,7 +166,7 @@ export default function HeaderBar({
                       position: "absolute",
                       top: 46,
                       right: 0,
-                      minWidth: 150,
+                      minWidth: 240,
                       borderRadius: 10,
                       border: `1px solid ${isDarkMode ? "#2f2f2f" : "#d9d9d9"}`,
                       background: isDarkMode ? "#151515" : "#fff",
@@ -175,6 +175,27 @@ export default function HeaderBar({
                       padding: 6,
                     }}
                   >
+                    <div
+                      style={{
+                        padding: "8px 12px 10px",
+                        borderBottom: `1px solid ${isDarkMode ? "#2a2a2a" : "#ececec"}`,
+                        marginBottom: 4,
+                      }}
+                    >
+                      <div style={{ color: isDarkMode ? "#fff" : "#111", fontWeight: 700, fontSize: 14 }}>
+                        {[authUser.firstName, authUser.lastName].filter(Boolean).join(" ") || "-"}
+                      </div>
+                      <div
+                        style={{
+                          color: isDarkMode ? "#a9a9a9" : "#666",
+                          fontSize: 12,
+                          marginTop: 4,
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {authUser.email}
+                      </div>
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
