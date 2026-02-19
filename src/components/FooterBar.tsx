@@ -340,11 +340,57 @@ const FooterBar = (props: any) => {
     };
   }, []);
 
-  const isBluetoothOutputConnected = async () => {
-    if (!navigator.mediaDevices?.enumerateDevices) return false;
+  const btRegex = /(bluetooth|airpods|air pods|buds|earbuds|headset|headphones|wireless|a2dp|hands[- ]?free|sony|bose|jabra|beats)/i;
+
+  const detectBluetoothOutputState = async (): Promise<{
+    state: "connected" | "unknown" | "not-connected";
+    btDeviceName: string | null;
+    outputNames: string[];
+  }> => {
+    if (!navigator.mediaDevices?.enumerateDevices) {
+      return { state: "unknown", btDeviceName: null, outputNames: [] };
+    }
+
     const devices = await navigator.mediaDevices.enumerateDevices();
-    const btRegex = /(bluetooth|airpods|buds|earbuds|headset|headphones|bt)/i;
-    return devices.some((device) => device.kind === "audiooutput" && btRegex.test(device.label || ""));
+    const audioOutputs = devices.filter((device) => device.kind === "audiooutput");
+    const outputNames = audioOutputs.map((device) => (device.label || "").trim()).filter(Boolean);
+    if (!audioOutputs.length) return { state: "unknown", btDeviceName: null, outputNames };
+
+    const hasHiddenLabels = audioOutputs.some((device) => !(device.label || "").trim());
+    if (hasHiddenLabels) return { state: "unknown", btDeviceName: null, outputNames };
+
+    const btDevice = audioOutputs.find((device) => btRegex.test((device.label || "").toLowerCase()));
+    if (btDevice) {
+      return {
+        state: "connected",
+        btDeviceName: (btDevice.label || "").trim() || null,
+        outputNames,
+      };
+    }
+
+    return { state: "not-connected", btDeviceName: null, outputNames };
+  };
+
+  const trySelectBluetoothOutput = async (): Promise<{ connected: boolean; deviceName: string | null }> => {
+    const mediaDevicesAny = navigator.mediaDevices as any;
+    if (typeof mediaDevicesAny.selectAudioOutput !== "function") return { connected: false, deviceName: null };
+    try {
+      const chosen = await mediaDevicesAny.selectAudioOutput();
+      const chosenLabel = (chosen?.label || "").trim();
+      const chosenLabelLower = chosenLabel.toLowerCase();
+      if (btRegex.test(chosenLabelLower)) return { connected: true, deviceName: chosenLabel || null };
+
+      const deviceId = chosen?.deviceId || "";
+      if (deviceId && deviceId !== "default" && deviceId !== "communications") {
+        const confirmNonNamedBt = window.confirm(
+          `Audio output selected${chosenLabel ? `: ${chosenLabel}` : ""}, but BT name check is uncertain. Is this your Bluetooth headphones output?`
+        );
+        return { connected: confirmNonNamedBt, deviceName: chosenLabel || null };
+      }
+      return { connected: false, deviceName: chosenLabel || null };
+    } catch {
+      return { connected: false, deviceName: null };
+    }
   };
 
   const stopLiveRecording = () => {
@@ -379,15 +425,39 @@ const FooterBar = (props: any) => {
       const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       recorderMicStreamRef.current = micStream;
 
-      const btConnected = await isBluetoothOutputConnected();
+      const detection = await detectBluetoothOutputState();
+      let btState = detection.state;
+      let btConnected = btState === "connected";
+      let btDeviceName = detection.btDeviceName;
+
+      if (!btConnected && btState !== "connected") {
+        const selectedOutput = await trySelectBluetoothOutput();
+        btConnected = selectedOutput.connected;
+        if (selectedOutput.deviceName) btDeviceName = selectedOutput.deviceName;
+      }
+
+      if (!btConnected && btState === "unknown") {
+        const outputSummary = detection.outputNames.length
+          ? `\nDetected outputs: ${detection.outputNames.join(", ")}`
+          : "\nNo output device names available.";
+        btConnected = window.confirm(
+          `Bluetooth could not be auto-detected (browser may hide device names).${outputSummary}\nConfirm BT headphones are connected and active to continue.`
+        );
+      }
+
       if (!btConnected) {
         micStream.getTracks().forEach((track) => track.stop());
         recorderMicStreamRef.current = null;
-        window.alert("Bluetooth headphones were not detected. Connect BT headphones and try again.");
+        const outputSummary = detection.outputNames.length
+          ? `Detected outputs: ${detection.outputNames.join(", ")}`
+          : "No output device names available.";
+        window.alert(`Bluetooth headphones were not detected. Connect BT headphones and try again.\n${outputSummary}`);
         return;
       }
 
-      const proceed = window.confirm("Bluetooth output detected. Make sure audio is routed to BT headphones. Press OK to start KAR+MIC recording.");
+      const proceed = window.confirm(
+        `Bluetooth output detected${btDeviceName ? `: ${btDeviceName}` : ""}. Make sure audio is routed to BT headphones. Press OK to start KAR+MIC recording.`
+      );
       if (!proceed) {
         micStream.getTracks().forEach((track) => track.stop());
         recorderMicStreamRef.current = null;
