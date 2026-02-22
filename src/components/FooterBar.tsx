@@ -38,6 +38,7 @@ import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import type { Song } from "../utils/storage";
 import { addPlayedSongToHistory } from "../utils/storage";
 import { saveUserPlaylistToLocalStorage } from "../utils/storage";
+import { queueVideoIdToDrive } from "../utils/driveBridge";
 
 interface FooterBarProps {
   isDarkMode: boolean;
@@ -572,7 +573,15 @@ const FooterBar = (props: any) => {
     }, 2000);
   };
 
-  const handleKaraokeGenerate = (rowIndex?: number) => {
+  const handleKaraokeGenerate = async (rowIndex?: number) => {
+    if (videoId) {
+      try {
+        await queueVideoIdToDrive(videoId);
+      } catch (error) {
+        console.error("Failed to queue videoId via bridge:", error);
+      }
+    }
+
     const currentIndex = getCurrentSongIndex();
     const targetIndex = typeof rowIndex === "number" ? rowIndex : currentIndex;
     const targetSong = songList[targetIndex] || selectedSong || null;
